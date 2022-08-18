@@ -1,0 +1,84 @@
+{% extends 'account/layouts/base_form_page.html' %}
+
+{% load static %}
+{% load account socialaccount %}
+
+{% block title %}
+  Войти
+{% endblock %}
+
+{% block account_form_block %}
+  <div class="row">
+    <div class="col-lg-6 d-none d-lg-block bg-login-image"></div>
+    <div class="col-lg-6">
+      <div class="p-5">
+        <div class="text-center">
+          <h1 class="h4 text-gray-900 mb-4">Добро пожаловать!</h1>
+        </div>
+
+        {% get_providers as socialaccount_providers %}
+
+        <form class="user login" method="POST" action="{% url 'account_login' %}">
+          {% csrf_token %}
+
+          <div class="form-group">
+            {{ form.login }}
+          </div>
+          <div class="form-group">
+            {{ form.password }}
+          </div>
+          <div class="form-group">
+            <div class="custom-control custom-checkbox small">
+              {{ form.remember }}
+              <label class="custom-control-label" for="{{ form.remember.auto_id }}">Запомнить меня</label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            {% if form.errors %}
+              {% for field in form %}
+                {% for error in field.errors %}
+                  <div class="text-danger">
+                    <strong>{{ error|escape }}</strong>
+                  </div>
+                {% endfor %}
+              {% endfor %}
+              {% for error in form.non_field_errors %}
+                <div class="text-danger">
+                  <strong>{{ error|escape }}</strong>
+                </div>
+              {% endfor %}
+              <br>
+            {% endif %}
+          </div>
+
+
+          <button type="submit" class="btn btn-primary btn-user btn-block">
+            Войти
+          </button>
+
+          {#                 {% if socialaccount_providers %}#}
+          <hr>
+          <button type="submit" class="btn btn-google btn-user btn-block">
+            <i class="fab fa-google fa-fw"></i> Войти с Google
+          </button>
+          <button type="submit" class="btn btn-facebook btn-user btn-block">
+            <i class="fab fa-facebook-f fa-fw"></i> Войти с Facebook
+          </button>
+          {#                  {% endif %}#}
+
+        </form>
+        <hr>
+        <div class="text-center">
+          <a class="small" href="{% url 'account_reset_password' %}">Забыли пароль?</a>
+        </div>
+        <div class="text-center">
+          <a class="small" href="{% url 'account_signup' %}">
+            Создать аккаунт!
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+{% endblock %}

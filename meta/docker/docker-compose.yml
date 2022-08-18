@@ -1,0 +1,115 @@
+version: '3.7'
+
+##################
+### WARNING!!! ###
+##################
+### This is NOT a real (ready-to-deploy) compose file!
+### This is a template, that will be preprocessed by CI system before it will become a "real" compose file, that will be deployed.
+### Even some commens here are preprocessor directives (like {dev,prod}-only, and even count of #'s there matters)
+##################
+
+x-defaults: &defaults
+  secrets:
+    - %PROJECT%.pg.%DJANGO_ENV%.passwd.secret
+    - %PROJECT%.slack.dsn.secret
+    - %PROJECT%.telegram.bot.token.secret
+  environment:
+    PROJECT: %PROJECT%
+    DJANGO_ENV: %DJANGO_ENV%
+    DB_NAME: %PROJECT%
+    DB_USER: %PROJECT%
+    DB_HOST: %STACK%-db
+    DB_PASSWD_SECRET_NAME: pg.%DJANGO_ENV%.passwd
+    EMAIL_HOST_USER: rublacklist.net@gmail.com
+## prod-only {
+    EMAIL_HOST: dcapi.net
+## } prod-only
+## dev-only {
+#    EMAIL_HOST: changeme.localhost
+## } dev-only
+    EMAIL_PORT: 587
+    REDIS_HOST: %STACK%-redis
+  networks:
+    default:
+    int:
+  deploy:
+    replicas: 1
+    placement:
+      constraints:
+        - node.labels.dc == NTX
+
+x-app: &app
+  secrets:
+## prod-only {
+    - %PROJECT%.email.passwd.secret
+## } prod-only
+    - %PROJECT%.django.key.secret
+    - %PROJECT%.sentry.%DJANGO_ENV%.dsn.secret
+    - %PROJECT%.pg.%DJANGO_ENV%.passwd.secret
+    - %PROJECT%.slack.dsn.secret
+    - %PROJECT%.telegram.bot.token.secret
+  volumes:
+    - "dri_uploads:/app/public/uploads"
+
+services:
+  %STACK%-app:
+    <<: *defaults
+    <<: *app
+    image: %IMAGE_APP%
+    hostname: %STACK%-app
+    command: start.app
+  %STACK%-celery-beat:
+    <<: *defaults
+    <<: *app
+    image: %IMAGE_APP%
+    hostname: %STACK%-celery-beat
+    command: start.celery.beat
+  %STACK%-celery-workers:
+    <<: *defaults
+    <<: *app
+    image: %IMAGE_APP%
+    hostname: %STACK%-celery-workers
+    command: start.celery.workers
+  %STACK%-db:
+    <<: *defaults
+    hostname: %STACK%-db
+    image: %IMAGE_PGSQL%
+    command: start
+    volumes:
+      - "db:/var/lib/postgresql"
+  %STACK%-redis:
+    <<: *defaults
+    hostname: %STACK%-redis
+    image: %IMAGE_REDIS%
+    volumes:
+      - "redis-data:/var/lib/redis"
+volumes:
+  db:
+  redis-data:
+  dri_uploads:
+    external: true
+
+networks:
+  default:
+    external: true
+    name: bridge
+    attachable: true
+  int:
+    external: true
+    name: int
+    attachable: true
+secrets:
+## prod-only {
+  %PROJECT%.email.passwd.secret:
+    external: true
+## } prod-only
+  %PROJECT%.slack.dsn.secret:
+    external: true
+  %PROJECT%.telegram.bot.token.secret:
+    external: true
+  %PROJECT%.django.key.secret:
+    external: true
+  %PROJECT%.sentry.%DJANGO_ENV%.dsn.secret:
+    external: true
+  %PROJECT%.pg.%DJANGO_ENV%.passwd.secret:
+    external: true

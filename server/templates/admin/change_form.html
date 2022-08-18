@@ -1,0 +1,12 @@
+{% extends 'admin/change_form.html' %}
+{% load static %}
+
+{% block admin_change_form_document_ready %}
+  {{ block.super }}
+
+  <link href="{% static 'core/css/select2.min.css' %}" rel="stylesheet"/>
+  <script type="text/javascript" src="{% static 'core/js/jquery.min.js' %}"></script>
+  <script type="text/javascript" src="{% static 'core/js/select2.min.js' %}"></script>
+  <script type="text/javascript">
+  </script>
+{% endblock %}

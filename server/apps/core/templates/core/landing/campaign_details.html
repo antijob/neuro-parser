@@ -1,0 +1,292 @@
+{% extends 'core/landing/layout.html' %}
+{% load  static %}
+{% block content %}
+  <style data-media-url="{% get_media_prefix %}">
+  html {
+    scroll-behavior: smooth;
+  }
+
+  section {
+    padding-top: 0;
+  }
+  .container {
+    font-family: Inter, sans-serif;
+  }
+  .narrow {
+    max-width: 930px !important;
+  }
+  .summary-section,
+  .form-section {
+    background-color:{{ campaign.background_color }};
+    color:{{ campaign.text_color }};
+  }
+
+  {% if campaign.picture and campaign.is_background %}
+    .summary-section {
+      background-image: url({{ campaign.picture.url }});
+      background-position: center center;
+      background-repeat: no-repeat;
+      background-size: cover;
+    }
+  {% endif %}
+
+  .top-picture {
+    max-height: 400px;
+  }
+
+  .summary-section h1 {
+    font-size: 5em;
+    font-weight: 800;
+    color:{{ campaign.text_color }};
+  }
+
+  .summary-section .lead {
+    max-width: 926px;
+    font-size: 22px;
+    font-weight: 400;
+    color:{{ campaign.text_color }};
+  }
+
+  .summary-section .spacer {
+    height: 300px;
+  }
+
+  .summary-section .buttons .btn {
+    width: 300px;
+    margin-bottom: 10px;
+    padding: auto;
+    background-color: rgba(0,0,0,0) !important;
+    color: {{ campaign.text_color }} !important;
+    border: 2px solid {{ campaign.text_color }}
+  }
+
+  .summary-section .buttons .btn-inverted {
+    color: {{ campaign.background_color }} !important;
+    background-color: {{ campaign.text_color }} !important;
+  }
+
+  .explanation-section .container {
+    padding: 0 91px 48px;
+    margin: 48px auto 0px;
+  }
+
+  .explanation-section .emphasized {
+    padding-top: 109px;
+    margin-bottom: 109px;
+  }
+
+  @media screen and (max-width: 900px) {
+    .summary-section h1 {
+      font-size: 3em;
+    }
+
+    .summary-section .lead {
+      max-width: 926px;
+      font-size: 18px;
+    }
+
+    .explanation-section .container {
+      padding: 0 16px 36px;
+      margin: 48px auto 0px;
+    }
+
+    .explanation-section .emphasized {
+      padding-top: 36px;
+      margin-bottom: 48px;
+    }
+  }
+
+  .explanation-section .emphasized {
+    border: 4px solid #000;
+    border-radius: 8px;
+  }
+
+  .form-section label {
+    color: {{ campaign.text_color }} !important;
+  }
+  .summary-section button,
+  .form-section button {
+    background-color:{{ campaign.text_color }} !important;
+    color: {{campaign.background_color}} !important;
+    border-color:{{ campaign.text_color }};
+  }
+
+  .form-section h2 {
+    font-size: 36px;
+  }
+
+  .stage h4 a {
+    color: #000;
+  }
+
+  </style>
+
+
+<section class="summary-section pt-5">
+  {% if campaign.is_background %}
+    <div class="spacer"> </div>
+  {% endif %}
+  <div class="container narrow text-center">
+    {% if campaign.picture and not campaign.is_background %}
+      <img src="{{ campaign.picture.url }}" class="img-fluid mb-3 top-picture">
+    {% endif %}
+    <h1 class="mb-4 text-center">
+      {{ campaign.name }}
+    </h1>
+    <div class="lead text-center mx-auto">
+      {{ campaign.description|safe }}
+    </div>
+    <div class="buttons">
+      <a class="btn btn-inverted" href="#form">Присоединиться</a>
+      {% if campaign.ordered_stages %}
+        <a class="btn ml-lg-3" href="#stages">События кампании</a>
+      {% endif %}
+
+      {% if campaign.chart_field %}
+        <a class="btn ml-lg-3" href="map/">Посмотреть карту кампании</a>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+  {% if campaign.ordered_explanations %}
+  <section class="explanation-section py-lg-5">
+  {% for explanation in campaign.ordered_explanations %}
+    <div class="container narrow
+                {% if explanation.emphasized %}emphasized{% endif %}"
+         data-aos="zoom-in"
+    >
+      <h2>{{ explanation.title }}</h2>
+      <div>{{ explanation.text|linebreaks }}</div>
+    </div>
+  {% endfor %}
+  </section>
+  {% endif %}
+
+  {% if campaign.ordered_stages %}
+  <section id="stages" class="stages bg-grey pt-5">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col col-lg-10 col-xl-8">
+          <h2 class="my-4">События кампании</h2>
+          <div data-aos="fade-left">
+            <div data-flickity='{ "autoPlay": true, "wrapAround": false }' class="mb-5">
+              {% for stage in campaign.ordered_stages %}
+                <div class="stage carousel-cell mx-3">
+                  <div class="card card-body">
+                    <h4>
+                      <a href="/stage/{{ stage.pk }}/" target="_blank">
+                        {{ stage.title }}
+                      </a>
+                    </h4>
+                    <span>{{ stage.summary }}</span>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
+  <section
+    id="form"
+    class="form-section py-5"
+  >
+    <div class="container narrow form my-5 pb-5">
+      <div class="row justify-content-center">
+        <form id="user-incident"
+              method="post"
+              class="col-lg-8 align-self-center"
+              enctype="multipart/form-data"
+         >
+          {% csrf_token %}
+          <h2 class="my-4 text-center"
+              style="color:{{ campaign.text_color }}"
+          >
+            {{ campaign.form_title|default:"Сообщите нам о фактах нарушений"}}
+          </h2>
+
+          <p>{{ campaign.form_description }}</p>
+
+
+          {% if form.errors %}
+            <div>{{form.errors}}</div>
+          {% endif %}
+
+          {% if campaign.description_required %}
+          <div class="form-group">
+            <label for="{{ form.description.id_for_label }}" class="formbuilder-text-label">Описание</label>
+            {{ form.description }}
+          </div>
+          {% endif %}
+
+          {% if campaign.applicant_region_required %}
+          <div class="form-group">
+            <label for="{{ form.region.id_for_label }}" class="formbuilder-text-label">Регион</label>
+            {{ form.region }}
+          </div>
+          {% endif %}
+
+          {% if campaign.applicant_messenger_required %}
+          <div class="form-group">
+            <label for="{{ form.applicant_messenger.id_for_label }}" class="formbuilder-text-label">Ваш аккаунт в мессенджере</label>
+            {{ form.applicant_messenger }}
+          </div>
+          {% endif %}
+
+          <div class="form-group">
+            <label for="{{ form.applicant_email.id_for_label }}" class="formbuilder-text-label">Email</label>
+            {{ form.applicant_email }}
+          </div>
+
+          {% if campaign.files_required %}
+          <div class="form-group">
+            <label>Прикрепить файлы:</label>
+            {{ form.files }}
+          </div>
+          {% endif %}
+
+          <div style="display:none">
+            {{ form.form_data }}
+          </div>
+
+          {{ form.status }}
+          {{ form.campaign }}
+
+          <div id="fb-render"></div>
+
+          <button
+            id="save"
+            class="btn col-12 mt-2"
+            type="submit"
+            style=""
+          >{{ campaign.submit_button_text|default:"Отправить" }}</button>
+
+        </form>
+      </div>
+    </div>
+  </section>
+
+<script src="{% static 'core/js/jquery.min.js' %}"></script>
+<script src="{% static 'core/js/campaign/jquery-ui.min.js' %}"></script>
+<script src="{% static 'core/js/campaign/form-render.min.js' %}"></script>
+<script type="text/javascript">
+  $("#twitter-campaign").addClass('active');
+  jQuery(function($) {
+    formOptions = {
+      dataType: 'json',
+      formData: {{ campaign.form_json|safe }},
+    }
+    var fbRender = $('#fb-render').formRender(formOptions);
+
+    $("#user-incident").submit(function (e) {
+      var formData = JSON.stringify(fbRender.userData);
+      $("#id_form_data").val(formData);
+    });
+  });
+</script>
+
+{% endblock %}

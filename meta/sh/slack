@@ -1,0 +1,16 @@
+#!/bin/zsh -f
+
+function show_info() {
+	{
+		cat
+	} | sed -r -e "\$!{:a;N;s@'@\`@g;s/\\n/\\\n/g;s@\"@\\\"@g;ta}"
+}
+
+text="$(show_info)"
+
+echo "${text}"
+
+[[ -n "${text}" ]] && curl -s \
+	-d "{'username': '${BOT_NAME-[CRON]}', 'text': '${text}', 'channel': '${SLACK_CHANNEL:-#${PROJECT}-logs}', 'icon_emoji': '${ICON-:alarm_clock:}'}" \
+	"$(</run/secrets/${PROJECT}.slack.dsn.secret)" | grep -v ok
+

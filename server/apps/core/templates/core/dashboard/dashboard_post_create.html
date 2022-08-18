@@ -1,0 +1,81 @@
+{% extends 'core/dashboard/layout.html' %}
+
+{% load static %}
+
+{% block title %} {{ post.title|default:"Новый пост" }} {% endblock title %}
+
+{% block container %}
+<script>window.CKEDITOR_BASEPATH = '/static/ckeditor/';</script>
+
+{% if saved %}
+<div class="alert alert-success alert-dismissible">
+  <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+  Пост успешно сохранен
+  {% if post.public and post.is_active %}
+  и опубликован
+  {% elif not post.is_active %}
+  и удален в корзину
+  {% endif %}
+</div>
+{% endif %}
+
+<div class="card shadow mb-4">
+  <div class="card-header py-3">
+    <h6 class="m-0 font-weight-bold text-primary">
+      {{ post.title|default:"Новый пост" }}
+    </h6>
+  </div>
+
+  <div class="card-body col-12">
+    <form method="post" class="form-horizontal" enctype="multipart/form-data">
+    {% csrf_token %}
+      <p>{{ form.errors }}</p>
+      <div class="form-group">
+        <label for="title">Заголовок:</label>
+        {{ form.title }}
+      </div>
+      <div class="form-group">
+        <label>Текст:</label><br>
+        {{ form.text }}
+      </div>
+      <div class="form-group">
+        <label for="card_type">Тип карточки:</label>
+        {{ form.card_type }}
+      </div>
+      <div class="form-group">
+        <label for="color">Цвет карточки:</label>
+        {{ form.color }}
+      </div>
+      <div class="form-group">
+        <label for="card_text">Текст для карточки:</label>
+        {{ form.card_text }}
+      </div>
+      <div class="form-group">
+        <label>
+          {{ form.public }}
+          Опубликовать
+        </label>
+      </div>
+
+      <div class="d-flex justify-content-between">
+        <button id="save" class="btn btn-primary mt-4 mb-4" type="submit">
+          Сохранить
+        </button>
+        {% if not post.is_active and post.id %}
+          <button id="save" class="btn btn-success mt-4 mb-4" type="submit" name="is_active" value="1">
+            Восстановить пост
+          </button>
+        {% elif post.id %}
+          <button class="btn btn-danger mt-4 mb-4 right" type="submit" name="is_active" value="">
+            Удалить
+          </button>
+        {% endif %}
+      </div>
+
+    </form>
+  </div>
+</div>
+
+<script type="text/javascript" src="{% static "ckeditor/ckeditor-init.js" %}"></script>
+<script type="text/javascript" src="{% static "ckeditor/ckeditor/ckeditor.js" %}"></script>
+{% endblock %}

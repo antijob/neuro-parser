@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Статистика просмотров</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+    <script src="https://unpkg.com/@popperjs/core@2"></script>
+    <script src="https://unpkg.com/tippy.js@6"></script>
+    <style type="text/css">
+      h3 {margin-top: 2em; margin-bottom: 1em;}
+      .hint {color: #bbb; font-size: 0.8em;}
+    </style>
+  </head>
+
+  <body>
+
+    <nav class="navbar navbar-dark bg-dark">
+      <div class="container">
+        <div class="navbar-header">
+          <a class="navbar-brand" href="{% url 'analytics:dashboard' %}">
+            Статистика просмотров
+          </a>
+        </div>
+      </div>
+    </nav>
+    <br>
+    <div class="container">
+
+      <div id="filter" class="card card-primary ">
+        <div class="card-header">
+          Фильтр
+        </div>
+        <div class="card-body">
+          <form method="GET" id="form" action="{% url 'analytics:dashboard' %}" >
+
+            <div class="row">
+              <div class="form-group col-md-6">
+                <label for="{{ form.start.id_for_label }}">Начало</label>
+                {{ form.start }}
+              </div>
+
+              <div class="form-group col-md-6">
+                <label for="{{ form.end.id_for_label }}">Конец</label>
+                {{ form.end }}
+              </div>
+            </div>
+
+            <div class="">
+              <button type="submit" class="btn btn-primary">Применить</button>
+              <button type="button" class="btn btn-danger float-right" id="reset">Сбросить</button>
+            </div>
+
+          </form>
+        </div>
+      </div>
+
+      <div id="tracking-stats">
+        {% include "analytics/snippets/stats.html" %}
+      </div>
+      <div id="charts">
+        {% include "analytics/snippets/charts.html" %}
+      </div>
+
+    </div>
+  </body>
+  <script type="text/javascript">tippy('[data-tippy-content]');</script>
+  <script type="text/javascript">
+    $('#reset').click(function() {
+      $("#{{ form.start.id_for_label }}").val("");
+      $("#{{ form.end.id_for_label }}").val("");
+      $("#{{ form.url.id_for_label }}").val("");
+    });
+
+    $(".delim").each(function () {
+        let text = $(this).text();
+        $(this).html(String(text).replace(/(\d)(?=(\d{3})+$)/g, "$1 "));
+    });
+  </script>
+</html>
+

@@ -1,0 +1,108 @@
+{% extends 'core/dashboard/layout.html' %}
+
+{% load static %}
+
+{% block container %}
+
+
+  {% include "core/dashboard/dashboard_stat_blocks.html" %}
+
+  <!-- DataTales Example -->
+  <div class="card shadow mb-4">
+    <div class="card-header py-3">
+      <h6 class="m-0 font-weight-bold text-primary">{{ table_title }}</h6>
+    </div>
+
+    <div class="card-body">
+
+      <div class="input-group mb-3 row">
+        <span class="col-xl-10 col-lg-8 col-md-12">
+          <input id="table-search" type="text" class="form-control" placeholder="Поиск...">
+        </span>
+        <span class="col-xl-2 col-lg-4 col-md-12">
+          <input id="dates" type="email" name="dates" class="form-control" autocomplete="off" placeholder="Даты">
+        </span>
+        <input type="hidden" id="start_date">
+        <input type="hidden" id="end_date">
+      </div>
+
+      <div class="table-responsive">
+        <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+        </table>
+        <a class="btn btn-primary" href="{% url 'core:dashboard-tag-create' %}">
+          <i class="fas fa-fw fa-plus-square"></i>
+          Создать тег
+        </a>
+      </div>
+    </div>
+  </div>
+
+{% endblock %}
+
+{% block dashboard_scripts %}
+<script src="{% static 'core/js/jquery.dataTables.min.js' %}"></script>
+<script src="{% static 'core/js/dataTables.bootstrap4.min.js' %}"></script>
+<script>
+  $(document).ready(function () {
+    data = {{ tags|safe|default_if_none:'[]' }};
+    var tableApi = $('#dataTable').DataTable({
+      dom: "Brtip",
+      serverSide: false,
+      info: false,
+      data: data,
+      pageLength: 12,
+      sPaginationType: "full_numbers",
+      columns: [
+        {data: 'name', width: "20%", title: "Имя тега"},
+        {data: 'markers', width: "60%", title: "Маркеры"},
+        {data: 'create_date', width: "10%", title: "Дата создания"},
+        {data: 'is_active', width: "10%", title: "Активен"},
+        {data: 'pk', width: "10%", title: "Активен"},
+      ],
+      columnDefs: [
+        {
+          render: function ( data, type, row ) {
+              td = "<a href='/dashboard/tag/"
+                + row['pk']
+                + "/update/'><i class='fas fa-tag mr-2 text-secondary' title='Тег'></i>"
+                + data
+                + "</a>";
+            return td;
+          },
+          targets: 0,
+        },
+        {
+          render: function ( data, type, row ) {
+              if (data == true) {
+                td = '<i class="fas fa-fw fa-check"></i>'
+              } else {
+                td = ""
+              }
+            return td;
+          },
+          targets: 3,
+        },
+        {
+          visible: false,
+          targets: 4,
+        },
+      ],
+      language: {
+        paginate: {
+          next: 'Вперед',
+          previous: "Назад",
+          first: '&laquo;',
+          last: '&raquo;'
+        },
+      },
+    });
+
+    $('#table-search').keyup(function () {
+      let query = $(this).val();
+      tableApi.search(query).draw();
+    });
+
+
+  });
+</script>
+{% endblock %}

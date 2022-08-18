@@ -1,0 +1,88 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <title>{% block title %}Сравнение алгоритмов оценки{% endblock %}</title>
+  <link href="{% static 'core/css/fontawesome/css/all.min.css' %}" rel="stylesheet"/>
+  <link href="{% static 'core/css/sb-admin.css' %}" rel="stylesheet">
+  <link href="{% static 'core/css/dataTables.bootstrap4.min.css' %}">
+</head>
+<body>
+
+<div class="card m-4 shadow-sm">
+  <div class="card-header">
+    Фильтр
+  </div>
+  <div class="card-body">
+    <div class="input-group mb-3 row">
+      <span class="col-xl-10 col-lg-8 col-md-12">
+        <select id="source" class="form-control" >
+          <option value="">-Выберите источник-</option>
+          {% for source in sources %}
+            <option value="{{ source.id }}">{{ source.url }}</option>
+          {% endfor %}
+        </select>
+      </span>
+      <span class="col-xl-2 col-lg-4 col-md-12">
+        <input id="date" type="date" name="date" class="form-control" autocomplete="off" placeholder="Дата">
+      </span>
+    </div>
+  </div>
+</div>
+
+<div class="card m-4 shadow-sm">
+  <div class="card-header">
+    Сравнение алгоритмов для <strong class="source_url">[источник не выбран]</strong>
+  </div>
+  <div class="card-body">
+    <form>
+      <div class="form-row mb-4">
+      <label class="col-sm-2 col-form-label">Используемый алгоритм
+      </label>
+        <select id="algorithm" class="form-control col-4">
+          <option value="">-Нет данных-</option>
+          {% for id, name in algorithms %}
+            <option value="{{ id }}">
+              {{ name }}
+            </option>
+          {% endfor %}
+        </select>
+      <button id="submit" type="button" class="btn btn-primary ml-5">Сохранить</button>
+      </div>
+    </form>
+
+    <table id="table" class="table">
+      <thead>
+        <tr>
+          <th>Заголовок</th>
+          <th>По маркерам</th>
+          <th>Косинусные расстояния</th>
+          <th>Источник</th>
+        </tr>
+      </thead>
+      <tbody>
+
+      </tbody>
+    </table>
+    <div class="text-center">
+      <strong id="updating" style="display:none;">Получение данных...</strong>
+      <strong id="updated" style="display:none;">Данные получены</strong>
+    </div>
+  </div>
+</div>
+
+<!-- Bootstrap core JavaScript-->
+<script src="{% static 'core/js/jquery.min.js' %}"></script>
+<script src="{% static 'core/js/bootstrap.bundle.min.js' %}"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/v/bs4/dt-1.10.20/datatables.min.js"></script>
+
+<!-- Custom scripts -->
+<script src="{% static 'core/js/grabber/scripts.js' %}"></script>
+
+</body>
+</html>

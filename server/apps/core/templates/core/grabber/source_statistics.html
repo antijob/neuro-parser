@@ -1,0 +1,58 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <title>{% block title %}Статистика по источникам{% endblock %}</title>
+  <link href="{% static 'core/css/fontawesome/css/all.min.css' %}" rel="stylesheet"/>
+  <link href="{% static 'core/css/sb-admin.css' %}" rel="stylesheet">
+  <link href="{% static 'core/css/dataTables.bootstrap4.min.css' %}">
+</head>
+<body>
+
+<div class="card m-4">
+  <div class="card-header">
+    Статистика по источникам
+  </div>
+  <div class="card-body">
+    <table id="table" class="table">
+      <thead>
+        <tr>
+          <th>Источник</th>
+          <th>URL</th>
+          <th>Регион</th>
+          <th>Статей за неделю</th>
+          <th>Статей всего</th>
+          <th>Инцидентов всего</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for source in sources %}
+        <tr>
+          <td><a href="{% url 'admin:core_source_change' source.pk %}" target="_blank"><i class="fas fa-edit"></i></a></td>
+          <td><a href="{{ source.url }}" target="_blank">{{ source.url }}</a></td>
+          <td>{{ source.get_region_display }}</td>
+          <td
+          {% if source.articles_by_week == 0 %}
+            class="bg-warning"
+          {% endif %}
+          >{{ source.articles_by_week }}</td>
+          <td>{{ source.all_articles }}</td>
+          <td>{{ source.all_incidents }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Bootstrap core JavaScript-->
+<script src="{% static 'core/js/jquery.min.js' %}"></script>
+<script src="{% static 'core/js/bootstrap.bundle.min.js' %}"></script>
+
+</body>
+</html>

@@ -1,0 +1,88 @@
+{% extends 'core/landing/layout.html' %}
+{% load  static %}
+{% block content %}
+
+  <section class="bg-primary-3 has-divider text-light o-hidden">
+    <div class="container layer-2">
+      <h2 class="h1">Попали ли вы в утечку Delivery Club?</h2>
+      <div class="lead my-5">
+        <p>Вы можете проверить свой номер телефона на наличие ваших персональных данных в утечках Delivery Club.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="container py-5">
+    <div class="row justify-content-center">
+      <div class="col-lg-12 col-xl-10">
+        <div class="card card-body hover-shadow-sm">
+          <h4 class="mb-2">Введите номер телефона:</h4>
+          <input id="phone" type="text" placeholder="Например: 79000000000" class="form-control form-control-md"
+                 data-ddg-inputtype="unknown">
+          <div class="mt-2">
+            <div id="loadingSpinner" class="text-center mb-2" style="display: none">
+              <div class="spinner-border" role="status">
+                <span class="sr-only">Loading...</span>
+              </div>
+            </div>
+            <div id="matchFound" class="alert alert-warning" role="alert" style="display: none">
+              Ваш номер найден в утечке. Рекомендуем вам сменить пароль в Delivery Club.
+            </div>
+            <div id="matchNotFound" class="alert alert-success alert-dismissible fade show" role="alert"
+                 style="display: none">
+              По представленным данным мы не обнаружили утечки ваших персональных данных.
+              Поэтому вы можете быть спокойны. Тем не менее, мы рекомендуем вам пройти тестирование на <a
+              href="https://securno.org/">https://securno.org/</a>
+              для повышения уровня защиты ваших личных данных и аккаунтов.
+              <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+          </div>
+          <div class="mt-2">
+            <button id="checkLeaks" class="btn btn-primary btn-block">Проверить</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+{% endblock %}
+
+{% block user_scripts %}
+  <script type="text/javascript">
+    (function () {
+      const $matchFound = $('#matchFound')
+      const $matchNotFound = $('#matchNotFound')
+      const $loadingSpinner = $('#loadingSpinner')
+
+      $('#checkLeaks').click(function () {
+        $loadingSpinner.show()
+
+        const phone = $('#phone').val()
+
+        fetch(`https://runet.report/dataleak/?phone=${phone}`, {
+          method: 'GET',
+          mode: 'cors',
+        }).then(response => response.json())
+          .then(data => {
+            $loadingSpinner.hide()
+            if (data.status === "ok") {
+              $matchFound.show()
+              $matchNotFound.hide()
+            } else {
+              $matchFound.hide()
+              $matchNotFound.show()
+            }
+          })
+          .catch(error => {
+            console.log(error)
+            $loadingSpinner.hide()
+          })
+      })
+      $('#phone').on('input', function () {
+        $('#matchFound').hide()
+        $('#matchNotFound').hide()
+      })
+    })()
+  </script>
+{% endblock %}

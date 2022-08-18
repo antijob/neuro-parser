@@ -1,0 +1,47 @@
+{% load static %}
+
+<html lang="ru">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+          integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+          crossorigin="anonymous"></script>
+
+</head>
+<body>
+<div class="container">
+
+  <div>
+    <strong>Menu:</strong>
+    <ul>
+      {% if user.is_authenticated %}
+        <li><a href="{% url 'account_email' %}">Change E-mail</a></li>
+        <li><a href="{% url 'account_logout' %}">Sign Out</a></li>
+      {% else %}
+        <li><a href="{% url 'account_login' %}">Sign In</a></li>
+        <li><a href="{% url 'account_signup' %}">Sign Up</a></li>
+      {% endif %}
+    </ul>
+
+    {% block content %}
+      <div class="row">
+        <div class="col-md-6 offset-md-3">
+          {% block inner %}
+
+          {% endblock %}
+        </div>
+      </div>
+    {% endblock %}
+  </div>
+</div>
+
+<script src="{% static 'core/js/moment.min.js' %}"></script>
+
+
+</body>
+
+</html>

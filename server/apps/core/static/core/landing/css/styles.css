@@ -1,0 +1,130 @@
+.flickity-button {
+  background: none;
+  border: none;
+}
+
+.flickity-prev-next-button {
+  width: 30px;
+  height: 30px;
+  border-radius: 5px;
+}
+
+.flickity-button-icon {
+  fill: white;
+}
+
+.flickity-prev-next-button.previous {
+  left: -40px;
+}
+
+.flickity-prev-next-button.next {
+  right: -40px;
+}
+
+.logo_creative {
+  width: 152px;
+}
+
+.required:after {
+  content:" *";
+  color: red;
+}
+
+/* form builder */
+.bg-grey {
+  background-color: #eee;
+}
+
+form#user-incident label {
+  color: #aaa;
+  font-size: 1rem;
+  font-weight: normal;
+  margin-top: 2rem;
+  margin-bottom: 0.2rem;
+}
+
+form#user-incident .radio-group,
+form#user-incident .checkbox-group {
+  margin-top: 0.5rem;
+}
+
+form#user-incident .formbuilder-radio label,
+form#user-incident .formbuilder-checkbox label {
+  margin-top: 0.2rem;
+  margin-bottom: 0.2rem;
+}
+
+form#user-incident .formbuilder-radio:last-child,
+form#user-incident .formbuilder-checkbox:last-child {
+  margin-bottom: 0;
+}
+
+form#user-incident .formbuilder-required {
+  margin-left: 0.2em;
+}
+
+form#user-incident .form-group select  {
+  font-size: 1.1rem;
+  color: black;
+}
+
+form#user-incident .other-val {
+  margin-left: 2rem;
+  box-shadow: rgba(0, 0, 0, 0.2) 1px 1px 3px 0px inset;
+  font-size: 1.1rem;
+  padding: 0.4375rem 0.75rem;
+  color: #000;
+  border: none;
+  border-radius: 5px;
+  outline: none;
+}
+
+form#user-incident input:not(input[type=file]):not(input[type=checkbox]):not(input[type=radio]),
+form#user-incident textarea {
+  box-shadow: rgba(0, 0, 0, 0.2) 1px 1px 3px 0px inset;
+  font-size: 1.1rem;
+  padding: 0.8em;
+  color: #000;
+  border: none;
+  outline: none;
+}
+
+
+form#user-incident input:not(input[type=file]):not(input[type=checkbox]):not(input[type=radio]) {
+  height: calc(2.375rem + 2px);
+}
+
+form#user-incident .checkbox-group label {
+  color: #000;
+  font-size: 1.1rem;
+  margin-left: 0.5rem;
+}
+
+
+/* charts */
+
+#line_chart_block .color_picker input {
+  width: 4rem;
+  height: 2.5rem;
+}
+
+#pie_legend {
+  list-style: none;
+}
+
+#pie_legend li span {
+  display: inline-block;
+  height: 1em;
+  width: 2em;
+  border: 1px solid white;
+}
+
+/* privacy */
+
+.privacy-sublist {
+  list-style: none; FkgXZbsH1i9QrbdQ
+}
+
+.privacy-sublist>li {
+  margin-bottom: 1em;
+}

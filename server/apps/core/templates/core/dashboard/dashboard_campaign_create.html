@@ -1,0 +1,571 @@
+{% extends 'core/dashboard/layout.html' %}
+
+{% load static %}
+
+{% block title %} {{ campaign.name|default:"Новая кампания" }} {% endblock title %}
+
+{% block container %}
+<script>window.CKEDITOR_BASEPATH = '/static/ckeditor/';</script>
+
+{% if saved %}
+<div class="alert alert-success alert-dismissible">
+  <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+  {% if campaign.is_active %}
+  Кампания успешно сохранена
+  {% else %}
+  Кампания удалена в корзину
+  {% endif %}
+</div>
+{% endif %}
+
+<form id="campaign" class="form-horizontal" method="post" enctype="multipart/form-data">
+  {% csrf_token %}
+
+  <div class="card shadow mb-4">
+
+    <div class="card-header py-3">
+      <h6 class="m-0 font-weight-bold text-primary">
+        {{ campaign.name|default:"Новая кампания" }}
+      </h6>
+    </div>
+
+    <div class="card-body text-dark labels-style">
+      <p>{{ form.errors }}</p>
+
+      <div class="form-group">
+        <label for="{{ form.name.id_for_label }}">Название:</label>
+        {{ form.name }}
+      </div>
+
+      <div class="form-group">
+        <label for="{{ form.slug.id_for_label }}">Название в URL:</label>
+        {{ form.slug }}
+        {% if campaign.slug %}
+        <p class="mt-3">
+          <a href="{% url 'core:campaign-detail' campaign.slug %}" target="_blank">
+            Открыть страницу кампании 🡕
+          </a>
+        </p>
+        {% endif %}
+
+      {% if campaign.pk %}
+        <p class="mt-3">
+          <a href="{% url 'core:dashboard-campaign-incidents' campaign.pk %}" target="_blank">Данные кампании</a>
+        </p>
+      {% endif %}
+
+      </div>
+
+      <div class="form-group">
+        <label for="{{ form.description.id_for_label }}">Описание:</label>
+        {{ form.description }}
+      </div>
+
+      <div style="display:none;">
+        {{ form.form_json }}
+      </div>
+
+      <div class="form-group">
+        <label for="{{ form.description.id_for_label }}">Email для оповещений:</label>
+        {{ form.notify_email }}
+      </div>
+
+    </div>
+  </div>
+
+  <div class="card shadow mb-4">
+
+    <div class="card-header py-3">
+      <h6 class="m-0 font-weight-bold text-primary">
+        Стиль страницы
+      </h6>
+    </div>
+
+    <div class="card-body text-dark">
+      <div class="form-group">
+        <label for="{{ form.picture.id_for_label }}">Фоновое изображение:</label>
+        {{ form.picture }}
+        <label for="{{ form.is_background.id_for_label }}">
+          {{ form.is_background }}
+          Использовать как фон
+        </label>
+      </div>
+
+      <div class="form-group">
+        <label for="{{ form.background_color.id_for_label }}">Цвет фона:</label>
+        {{ form.background_color }}
+      </div>
+
+      <div class="form-group">
+        <label for="{{ form.text_color.id_for_label }}">Цвет текста:</label>
+        {{ form.text_color }}
+      </div>
+    </div>
+  </div>
+
+  <div class="card shadow mb-4">
+
+    <div class="card-header py-3">
+      <h6 class="m-0 font-weight-bold text-primary">
+        Конструктор формы заявки
+      </h6>
+    </div>
+
+    <div class="card-body text-dark">
+
+      <div class="form-group">
+        <label for="{{ form.form_title.id_for_label }}">Заголовок формы</label>
+        {{ form.form_title }}
+      </div>
+
+      <div class="form-group">
+        <label for="{{ form.form_description.id_for_label }}">Пояснение в форме:</label>
+        {{ form.form_description }}
+      </div>
+
+      <h4>Обязательные поля</h4>
+      <div class="mb-3" id="editor">
+        <div class="labels-style form-group">
+          <label for="{{ form.applicant_email.id_for_label }}" class="formbuilder-text-label">Email</label>
+          {{ incident_form.applicant_email }}
+        </div>
+
+        <div class="form-group">
+          <label for="{{ form.description_required.id_for_label }}">
+          {{ form.description_required }}
+          Спрашивать описание инцидента</label>
+        </div>
+
+        <div class="form-group">
+          <label for="{{ form.applicant_messenger_required.id_for_label }}">
+          {{ form.applicant_messenger_required }}
+          Спрашивать аккаунт в мессенджере</label>
+        </div>
+
+        <div class="form-group">
+          <label for="{{ form.files_required.id_for_label }}">
+          {{ form.files_required }}
+          Разрешить прикреплять файлы</label>
+        </div>
+      </div>
+
+      <h4>Дополнительные поля</h4>
+      <div id="fb-editor" class="mb-3"></div>
+    </div>
+  </div>
+
+  <div class="card shadow mb-4">
+    <div class="card-header py-3">
+      <h6 class="m-0 font-weight-bold text-primary">
+        Документ
+      </h6>
+    </div>
+    <div class="card-body text-dark labels-style">
+      <div class="form-group">
+        <label>
+          <input
+            type="checkbox"
+            name="generate"
+            id="generate_document"
+            {% if form.document and form.document.initial %} checked {% endif%}
+          />
+          Генерировать документ по заявке
+        </label>
+      </div>
+
+      <div id="document_form" {% if not form.document or not form.document.initial %} style="display: none;"{% endif%}>
+        <div class="form-group" id="variables">
+          <label for="{{ form.document.id_for_label }}">Шаблон документа<br>
+            {{ form.document }}
+           <span class="var-list">
+            <h6>Доступные переменные:</h6>
+            <ul></ul>
+          </span>
+         </label>
+        </div>
+
+        <div class="form-group">
+          <label>Инструкция<br>
+            {{ form.instruction }}
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card shadow mb-4">
+    <div class="card-header py-3">
+      <h6 class="m-0 font-weight-bold text-primary">
+        Этапы
+      </h6>
+    </div>
+
+    {% if campaign %}
+      <div class="card-body text-dark labels-style">
+        <h2>Этапы кампании</h2>
+        {% for stage in campaign.ordered_stages %}
+          <div class="card mb-4" id="stage-{{ stage.pk }}">
+            <div class="card-header py-3">
+              <div class="row">
+                <h6 class="stage-title m-0 font-weight-bold text-primary col-12 col-md-8 mb-2">
+                  {{ stage.title }}
+                </h6>
+                <div class="stage-controls text-md-right right col-12 col-md-4">
+                  <a href="/dashboard/campaign/{{ campaign.pk }}/stage/{{ stage.pk }}/#f" class="open-stage-editor btn btn-sm btn-success mr-4 mt-2 mt-md-0">
+                    Редактировать
+                  </a>
+                  <span class="btn btn-sm btn-danger" onclick="deleteStage({{ campaign.pk }}, {{ stage.pk }})">Удалить</span>
+                </div>
+              </div>
+            </div>
+            <div class="card-body">
+              <p class="stage-summary">{{ stage.summary }}</p>
+            </div>
+          </div>
+        {% endfor %}
+
+        <a href="/dashboard/campaign/{{ campaign.pk }}/stage/"
+          class="open-stage-editor btn btn-success mr-4 mt-2 mt-md-0">
+          Добавить этап
+        </a>
+      </div>
+    {% else %}
+      <div class="card card-body">
+        <p>Перед добавлением этапов сохраните кампанию</p>
+      </div>
+    {% endif %}
+  </div>
+
+
+  <div class="card shadow mb-4">
+    <div class="card-header py-3">
+      <h6 class="m-0 font-weight-bold text-primary">
+        Блоки объяснений
+      </h6>
+    </div>
+
+    {% if campaign %}
+      <div class="card-body text-dark labels-style">
+        <h2>Блоки объяснений</h2>
+        {% for explanation in campaign.ordered_explanations %}
+          <div class="card mb-4" id="explanation-{{ explanation.pk }}">
+            <div class="card-header py-3">
+              <div class="row">
+                <h6 class="explanation-title m-0 font-weight-bold text-primary col-12 col-md-8 mb-2">
+                  {{ explanation.title }}
+                </h6>
+                <div class="explanation-controls text-md-right right col-12 col-md-4">
+                  <a href="/dashboard/campaign/{{ campaign.pk }}/explanation/{{ explanation.pk }}/#f" class="open-explanation-editor btn btn-sm btn-success mr-4 mt-2 mt-md-0">
+                    Редактировать
+                  </a>
+                  <span class="btn btn-sm btn-danger" onclick="deleteExplanation({{ campaign.pk }}, {{ explanation.pk }})">Удалить</span>
+                </div>
+              </div>
+            </div>
+            <div class="card-body">
+              <p class="explanation-text">{{ explanation.text }}</p>
+            </div>
+          </div>
+        {% endfor %}
+
+        <a href="/dashboard/campaign/{{ campaign.pk }}/explanation/"
+          class="open-explanation-editor btn btn-success mr-4 mt-2 mt-md-0">
+          Добавить блок
+        </a>
+      </div>
+    {% else %}
+      <div class="card card-body">
+        <p>Перед добавлением блоков сохраните кампанию</p>
+      </div>
+    {% endif %}
+  </div>
+
+  <div class="card shadow mb-4">
+    <div class="card-header py-3">
+      <h6 class="m-0 font-weight-bold text-primary">
+        Ответное письмо
+      </h6>
+    </div>
+    <div class="card-body text-dark labels-style">
+      <div class="form-group">
+        <label class="big-label">
+          {{ form.send_reply_email }}
+          Отправлять ответное письмо
+        </label>
+      </div>
+
+      <div id="reply_email_form" {% if not form.send_reply_email.value %} style="display: none;"{% endif%}>
+
+        <div class="form-group">
+          <label for="{{ form.reply_email_text.id_for_label }}">Текст письма:</label>
+          {{ form.reply_email_text }}
+        </div>
+        <div class="form-group">
+          <label for="{{ form.reply_email_image.id_for_label }}">Картинка для шапки письма:</label>
+          {{ form.reply_email_image }}
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="card shadow mb-4">
+    <div class="card-header py-3">
+      <h6 class="m-0 font-weight-bold text-primary">
+        Карта
+      </h6>
+    </div>
+    <div class="card-body text-dark">
+      <div class="form-group">
+        <label for="{{ form.chart_field.id_for_label }}">Имя чекбокса для диаграммы:</label>
+        {{ form.chart_field }}
+        <label for="{{ form.chart_description.id_for_label }}">Описание диаграммы:</label>
+        {{ form.chart_description }}
+      </div>
+    </div>
+  </div>
+
+
+  {% if campaign.id %}
+  <div class="card shadow mb-4">
+    <div class="card-header py-3">
+      <h6 class="m-0 font-weight-bold text-primary">
+        Дополнительные страницы кампании
+      </h6>
+    </div>
+    <div class="card-body text-dark">
+
+      <table class="table">
+        {% for page in campaign.pages.all %}
+          <tr>
+            <td>
+              <a
+                href="{% url 'core:dashboard-campaign-page-update' pk=page.pk %}"
+                target="_blank"
+              >
+                {{ page.title }}
+              </a>
+            </td>
+            <td>
+              {% if page.slug %}
+                <a href="{% url 'core:campaign-page' the_slug=page.slug %}" target="_blank">
+                  {% url 'core:campaign-page' the_slug=page.slug %}
+                </a>
+              {% else %}
+                <a href="{% url 'core:campaign-page' pk=page.pk %}" target="_blank">
+                  {% url 'core:campaign-page' pk=page.pk %}
+                </a>
+              {% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+      </table>
+
+      <p>
+        <a
+          class="btn btn-primary"
+          href="{% url 'core:dashboard-campaign-page-create' %}"
+          target="_blank"
+        >
+          Создать дополнительную страницу кампании
+        </a>
+      </p>
+
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="card shadow mb-4">
+    <div class="card-header py-3">
+      <h6 class="m-0 font-weight-bold text-primary">
+        Спасибо-страница
+      </h6>
+    </div>
+    <div class="card-body text-dark">
+      <div class="form-group">
+        <label class="big-label">
+          {{ form.use_custom_thanks }}
+          Свой текст спасибо-страницы
+        </label>
+      </div>
+      <div id="custom_thanks_form" {% if not form.use_custom_thanks.value %} style="display: none;" {% endif %}>
+        <div class="form-group">
+          <label for="{{ form.thanks_header.id_for_label }}">{{ form.thanks_header.label }}:</label>
+          {{ form.thanks_header }}
+        </div>
+        <div class="form-group">
+          <label class="d-block" for="{{ form.thanks_text.id_for_label }}">{{ form.thanks_text.label }}:</label>
+          {{ form.thanks_text }}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mb-4">
+    <label class="big-label">
+      {{ form.public }}
+      Опубликовать
+    </label>
+  </div>
+
+  <div class="d-flex justify-content-between">
+    <button id="save" class="btn btn-primary mt-4 mb-4" type="submit">
+      Сохранить
+    </button>
+    {% if not campaign.is_active and campaign.id %}
+      <button id="save" class="btn btn-success mt-4 mb-4" type="submit" name="is_active" value="1">
+        Восстановить кампанию
+      </button>
+    {% elif campaign.id %}
+      <button class="btn btn-danger mt-4 mb-4 right" type="submit" name="is_active" value="">
+        Удалить
+      </button>
+    {% endif %}
+  </div>
+
+  <br>
+  <br>
+</form>
+
+{% endblock %}
+
+{% block dashboard_scripts %}
+<script src="{% static 'core/js/jquery.min.js' %}"></script>
+<script src="{% static 'core/js/campaign/jquery-ui.min.js' %}"></script>
+<script src="{% static 'core/js/campaign/form-builder.min.js' %}"></script>
+<script>
+function disableInputs() {
+  $("#editor .form-group > :input").each(function() {
+    $(this).prop('disabled', true);
+  });
+};
+
+let defaultVariables= ['today', 'today_in_words'];
+
+jQuery(function($) {
+  var options = {
+    disabledActionButtons: ['data' , 'save', 'clear'],
+    disabledAttrs: ['access', 'className', 'style', 'inline', 'description'],
+    disableFields: ['autocomplete', 'file', 'hidden', 'button'],
+    disabledSubtypes: {text: ['password', 'color']},
+    controlOrder: [
+      'text',
+      'textarea',
+      'date'
+    ],
+    i18n: {locale: 'ru-RU'},
+    onAddField: function() {
+      updateVariables();
+    },
+    onRemoveField: function() {
+      updateVariables();
+    },
+    onCloseFieldEdit: function() {
+      updateVariables();
+    },
+  };
+
+  var formBuilder = $(document.getElementById('fb-editor')).formBuilder(options);
+  var formData = $("#id_form_json").val();
+  formBuilder.promise.then(formBuilder => {
+    formBuilder.actions.setData(formData);
+    disableInputs();
+    updateVariables();
+  });
+
+  $("#campaign").submit(function(event) {
+    if ($("#campaign")[0].checkValidity() == false) {
+      alert("Заполните форму");
+      event.preventDefault();
+      return false;
+    }
+
+    formData = JSON.stringify(formBuilder.actions.getData());
+    $("#id_form_json").val(formData);
+    $(".form-elements input[name=name]").remove();
+  });
+
+  function updateVariables() {
+    let variablesTags = "<li>{today}</li><li>{today_in_words}</li>";
+    for (let v of formBuilder.actions.getData()) {
+      if (v.name) {
+        variablesTags += ('<li>{' + v.name + '}</li>')
+      }
+    }
+    $("#variables ul").html(variablesTags);
+  }
+
+});
+</script>
+
+<script type="text/javascript">
+  $("#generate_document").change(function() {
+    if ($(this).is(":checked")) {
+      $("#document_form").show();
+    } else {
+      $("#document_form").hide();
+    }
+  });
+  $("#id_send_reply_email").change(function() {
+    if ($(this).is(":checked")) {
+      $("#reply_email_form").show();
+    } else {
+      $("#reply_email_form").hide();
+    }
+  });
+  $("#id_use_custom_thanks").change(function() {
+    if ($(this).is(":checked")) {
+      $("#custom_thanks_form").show();
+    } else {
+      $("#custom_thanks_form").hide();
+    }
+  });
+</script>
+
+<script type="text/javascript" src="{% static "ckeditor/ckeditor-init.js" %}"></script>
+<script type="text/javascript" src="{% static "ckeditor/ckeditor/ckeditor.js" %}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.css" />
+<script src="{% static 'core/js/dashboard_scripts.js' %}"></script>
+
+<script type="text/javascript">
+$('.open-stage-editor').click(function(event) {
+  event.preventDefault();
+  this.blur();
+  $.get(this.href,
+        function(html) {
+          $(html).appendTo("body").modal({
+              clickClose: false,
+              showClose: false
+            });
+          let config = $("#id_text").data()["config"];
+          CKEDITOR.replace("id_text", config)
+        }
+  );
+});
+
+$('html').on($.modal.AFTER_CLOSE, function(event, modal) {
+  if (CKEDITOR.instances["id_text"]) {
+    CKEDITOR.instances["id_text"].destroy();
+  };
+  $(".modal").remove();
+});
+</script>
+
+<script type="text/javascript">
+$('.open-explanation-editor').click(function(event) {
+  event.preventDefault();
+  this.blur();
+  $.get(this.href,
+        function(html) {
+          $(html).appendTo("body").modal({
+              clickClose: false,
+              showClose: false
+            });
+        }
+  );
+});
+
+</script>
+
+{% endblock %}

@@ -1,0 +1,411 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <title>{% block title %}Панель управления{% endblock %}</title>
+  <link href="{% static 'core/css/fontawesome/css/all.min.css' %}" rel="stylesheet"/>
+  <link href="{% static 'core/css/nunito.css' %}" rel="stylesheet">
+  <link href="{% static 'core/css/sb-admin.css' %}" rel="stylesheet">
+  <link href="{% static 'core/css/dataTables.bootstrap4.min.css' %}">
+  <link href="{% static 'core/css/bootstrap-select.css' %}" rel="stylesheet"/>
+  <link href="{% static 'core/css/dashboard-styles.css' %}" rel="stylesheet"/>
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+</head>
+
+<body id="page-top">
+
+<!-- Page Wrapper -->
+<div id="wrapper">
+
+  <!-- Sidebar -->
+  <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+
+    <!-- Sidebar - Brand -->
+    <a class="sidebar-brand d-flex align-items-center justify-content-center" href="{% url 'core:dashboard' %}">
+      <div class="sidebar-brand-text mx-2">Runet.Report</div>
+    </a>
+
+    <!-- Divider -->
+    <hr class="sidebar-divider">
+
+    <!-- Heading -->
+    <div class="sidebar-heading">
+      Инциденты из СМИ
+    </div>
+
+    <li class="nav-item">
+      <a class="nav-link" href="{% url 'core:dashboard-mediaincidents' %}">
+        <i class="fas fa-fw fa-list"></i>
+        <span>Все из СМИ</span></a>
+    </li>
+
+    <li class="nav-item">
+      <a class="nav-link" href="{% url 'core:dashboard-mediaincidents-unprocessed' %}">
+        <i class="fas fa-fw fa-pause"></i>
+        <span>Необработанные из СМИ</span>
+        {% if unprocessed_media_incidents %}
+        <small class="badge badge-pill badge-danger">{{ unprocessed_media_incidents }}</small>
+        {% endif %}
+      </a>
+    </li>
+
+    <li class="nav-item">
+      <a class="nav-link" href="{% url 'core:dashboard-mediaincidents-accepted' %}">
+        <i class="fas fa-fw fa-thumbs-up"></i>
+        <span>Принятые из СМИ</span></a>
+    </li>
+
+    <li class="nav-item">
+      <a class="nav-link" href="{% url 'core:dashboard-mediaincidents-rejected' %}">
+        <i class="fas fa-fw fa-thumbs-down"></i>
+        <span>Отклоненные из СМИ</span></a>
+    </li>
+
+    <li class="nav-item">
+      <a class="nav-link" href="{% url 'core:dashboard-article-list' %}">
+        <i class="fas fa-fw fa-robot"></i>
+        <span>Отклоненные ИИ</span></a>
+    </li>
+
+
+    <!-- Divider -->
+    <hr class="sidebar-divider">
+
+    <!-- Heading -->
+    <div class="sidebar-heading">
+      Заявки с сайта
+    </div>
+
+    <li class="nav-item">
+      <a class="nav-link" href="{% url 'core:dashboard-campaign-list' %}">
+        <i class="fas fa-fw fa-list"></i>
+        <span>Все кампании</span></a>
+    </li>
+
+    <li class="nav-item">
+      <a class="nav-link" href="{% url 'core:dashboard-campaign-create' %}">
+        <i class="fas fa-fw fa-plus-square"></i>
+        <span>Создать кампанию</span></a>
+    </li>
+
+    <li class="nav-item">
+      <a class="nav-link" href="{% url 'core:dashboard-userincidents' %}">
+        <i class="fas fa-fw fa-list"></i>
+        <span>Все заявки</span></a>
+    </li>
+
+    <li class="nav-item">
+      <a class="nav-link" href="{% url 'core:dashboard-userincidents-unprocessed' %}">
+        <i class="fas fa-fw fa-pause"></i>
+        <span>Необработанные заявки</span></a>
+    </li>
+
+    <li class="nav-item">
+      <a class="nav-link" href="{% url 'core:dashboard-incidents-in-progress' %}">
+        <i class="fas fa-fw fa-cogs"></i>
+        <span>Заявки в работе</span></a>
+    </li>
+
+    <li class="nav-item">
+      <a class="nav-link" href="{% url 'core:dashboard-userincidents-accepted' %}">
+        <i class="fas fa-fw fa-thumbs-up"></i>
+        <span>Принятые заявки</span></a>
+    </li>
+
+    <li class="nav-item">
+      <a class="nav-link" href="{% url 'core:dashboard-userincidents-rejected' %}">
+        <i class="fas fa-fw fa-thumbs-down"></i>
+        <span>Отклоненные заявки</span></a>
+    </li>
+
+    <!-- Divider -->
+    <hr class="sidebar-divider">
+
+    <!-- Heading -->
+    <div class="sidebar-heading">
+      Создать инцидент
+    </div>
+
+    <li class="nav-item">
+      <a class="nav-link" href="{% url 'core:dashboard-incident-create' %}">
+        <i class="fas fa-fw fa-plus-square"></i>
+        <span>Инцидент по заявкам</span></a>
+    </li>
+
+    <li class="nav-item">
+      <a class="nav-link" href="{% url 'core:dashboard-mediaincident-create' %}">
+        <i class="fas fa-fw fa-plus-square"></i>
+        <span>Инцидент из СМИ</span></a>
+    </li>
+
+    <!-- Divider -->
+    <hr class="sidebar-divider">
+
+    <!-- Heading -->
+    <div class="sidebar-heading">
+      Теги
+    </div>
+
+    <li class="nav-item">
+      <a class="nav-link" href="{% url 'core:dashboard-tag-list' %}">
+        <i class="fas fa-fw fa-list"></i>
+        <span>Все теги</span></a>
+    </li>
+
+    <li class="nav-item">
+      <a class="nav-link" href="{% url 'core:dashboard-tag-create' %}">
+        <i class="fas fa-fw fa-plus-square"></i>
+        <span>Создать тег</span></a>
+    </li>
+
+    <!-- Divider -->
+    <hr class="sidebar-divider">
+
+    <!-- Heading -->
+    <div class="sidebar-heading">
+      Посты
+    </div>
+
+    <li class="nav-item">
+      <a class="nav-link" href="{% url 'core:dashboard-posts' %}">
+        <i class="fas fa-fw fa-list"></i>
+        <span>Все посты</span></a>
+    </li>
+
+    <li class="nav-item">
+      <a class="nav-link" href="{% url 'core:dashboard-post-create' %}">
+        <i class="fas fa-fw fa-plus-square"></i>
+        <span>Создать пост</span></a>
+    </li>
+
+    <!-- Divider -->
+    <hr class="sidebar-divider">
+
+    <!-- Heading -->
+    <div class="sidebar-heading">
+      Корзина
+    </div>
+
+    <li class="nav-item">
+      <a class="nav-link" href="{% url 'core:dashboard-trash-list' %}">
+        <i class="fas fa-fw fa-trash"></i>
+        <span>Удаленные инциденты</span></a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="{% url 'core:dashboard-trash-campaigns' %}">
+        <i class="fas fa-fw fa-trash"></i>
+        <span>Удаленные кампании</span></a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="{% url 'core:dashboard-trash-posts' %}">
+        <i class="fas fa-fw fa-trash"></i>
+        <span>Удаленные посты</span></a>
+    </li>
+
+    <!-- Divider -->
+    <hr class="sidebar-divider d-none d-md-block">
+
+    <!-- Sidebar Toggler (Sidebar) -->
+    <div class="text-center d-none d-md-inline">
+      <button class="rounded-circle border-0" id="sidebarToggle"></button>
+    </div>
+
+  </ul>
+  <!-- End of Sidebar -->
+
+  <!-- Content Wrapper -->
+  <div id="content-wrapper" class="d-flex flex-column">
+
+    <!-- Main Content -->
+    <div id="content">
+
+      <!-- Topbar -->
+      <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+
+        <!-- Sidebar Toggle (Topbar) -->
+        <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
+          <i class="fa fa-bars"></i>
+        </button>
+
+        <!-- Topbar Navbar -->
+        <ul class="navbar-nav ml-auto">
+
+          <!-- Nav Item - Search Dropdown (Visible Only XS) -->
+          <li class="nav-item dropdown no-arrow d-sm-none">
+            <a class="nav-link dropdown-toggle" href="#" id="searchDropdown" role="button" data-toggle="dropdown"
+               aria-haspopup="true" aria-expanded="false">
+              <i class="fas fa-search fa-fw"></i>
+            </a>
+            <!-- Dropdown - Messages -->
+            <div class="dropdown-menu dropdown-menu-right p-3 shadow animated--grow-in"
+                 aria-labelledby="searchDropdown">
+              <form class="form-inline mr-auto w-100 navbar-search">
+                <div class="input-group">
+                  <input type="text" class="form-control bg-light border-0 small" placeholder="Search for..."
+                         aria-label="Search" aria-describedby="basic-addon2">
+                  <div class="input-group-append">
+                    <button class="btn btn-primary" type="button">
+                      <i class="fas fa-search fa-sm"></i>
+                    </button>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </li>
+
+          <!-- Nav Item - Alerts -->
+          {% if messages %}
+            <li class="nav-item dropdown no-arrow mx-1">
+              <a class="nav-link dropdown-toggle" id="alertsDropdown" role="button"
+                 data-toggle="dropdown"
+                 aria-haspopup="true" aria-expanded="false">
+                <i class="fas fa-bell fa-fw"></i>
+                <!-- Counter - Alerts -->
+                {% if messages %}
+                  <span id="notification-count" class="badge badge-danger badge-counter">
+                {% if messages|length  > 3 %}
+                  3+
+                {% else %}
+                  {{ messages | length }}
+                {% endif %}
+                </span>
+                {% endif %}
+              </a>
+
+              <!-- Dropdown - Alerts -->
+              <div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in"
+                   aria-labelledby="alertsDropdown">
+                <h6 class="dropdown-header">
+                  Уведомления
+                </h6>
+
+                {% for message in messages %}
+                  <a class="dropdown-item d-flex align-items-center">
+                    <div class="mr-3">
+                      {% if message.tags == 'success' %}
+                        <div class="icon-circle bg-success">
+                          <i class="fas fa-check-circle text-white"></i>
+                        </div>
+                      {% else %}
+                        <div class="icon-circle bg-danger">
+                          <i class="fas fa-exclamation-circle text-white"></i>
+                        </div>
+                      {% endif %}
+                    </div>
+                    <div>
+                      <span class="font-weight-bold">{{ message }}</span>
+                    </div>
+                  </a>
+                {% endfor %}
+                <a id="mark-as-read" style="cursor: pointer" class="dropdown-item text-center small text-gray-500">
+                  Отметить, как прочитанное
+                </a>
+              </div>
+            </li>
+          {% endif %}
+
+          <div class="topbar-divider d-none d-sm-block"></div>
+
+          <!-- Nav Item - User Information -->
+          <li class="nav-item dropdown no-arrow">
+            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown"
+               aria-haspopup="true" aria-expanded="false">
+              <span class="mr-2 d-none d-lg-inline text-gray-600 small">{{ user.get_full_name }}</span>
+              {% if user.photo %}
+                <img class="img-profile rounded-circle" src="{{ user.photo.url }}">
+              {% else %}
+                <img class="img-profile rounded-circle" src="https://source.unsplash.com/ramdom/60x60">
+              {% endif %}
+            </a>
+            <!-- Dropdown - User Information -->
+            <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
+              <a class="dropdown-item" href="{% url 'core:dashboard-user-update' %}">
+                <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
+                Профиль
+              </a>
+
+              <a class="dropdown-item" href="{% url 'account_logout' %}">
+                <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
+                Выйти
+              </a>
+              <div class="dropdown-divider"></div>
+              <a class="dropdown-item" href="{% url 'core:index' %}">
+                <i class="fas fa-link fa-sm fa-fw mr-2 text-gray-400"></i>
+                Перейти на сайт
+              </a>
+            </div>
+          </li>
+
+        </ul>
+
+      </nav>
+      <!-- End of Topbar -->
+
+      <!-- Begin Page Content -->
+      <div class="container-fluid">
+        {% block container %}
+        {% endblock %}
+      </div>
+      <!-- /.container-fluid -->
+
+    </div>
+    <!-- End of Main Content -->
+
+    <!-- Footer -->
+    <footer class="sticky-footer bg-white">
+      <div class="container my-auto">
+        <div class="copyright text-center my-auto">
+          <span>Роскомсвобода, 2019</span>
+        </div>
+      </div>
+    </footer>
+    <!-- End of Footer -->
+
+  </div>
+  <!-- End of Content Wrapper -->
+
+</div>
+<!-- End of Page Wrapper -->
+
+<!-- Scroll to Top Button-->
+<a class="scroll-to-top rounded" href="#page-top">
+  <i class="fas fa-angle-up"></i>
+</a>
+
+<!-- Bootstrap core JavaScript-->
+<script src="{% static 'core/js/jquery.min.js' %}"></script>
+<script src="{% static 'core/js/bootstrap.bundle.min.js' %}"></script>
+<script src="{% static 'core/js/bootstrap-select.min.js' %}"></script>
+<script src="{% static 'core/js/bootstrap-select-ru.js' %}"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+
+<!-- Core plugin JavaScript-->
+<script src="{% static 'core/js/jquery.easing.min.js' %}"></script>
+
+<!-- Custom scripts for all pages-->
+<script src="{% static 'core/js/sb-admin-2.min.js' %}"></script>
+
+<!-- Page level plugins -->
+<script src="{% static 'core/js/Chart.min.js' %}"></script>
+
+<script type="text/javascript">
+  $('.select-organization').selectpicker();
+  $('#mark-as-read').click(function () {
+    $('#notification-count').remove()
+  });
+
+</script>
+
+{% block dashboard_scripts %}
+{% endblock %}
+
+</body>
+
+</html>

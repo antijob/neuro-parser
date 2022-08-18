@@ -1,0 +1,106 @@
+{% extends 'core/dashboard/layout.html' %}
+
+{% load static %}
+
+{% block title %} {{ title|default:"Список кампаний" }} {% endblock title %}
+
+{% block container %}
+
+  <!-- DataTales Example -->
+  <div class="card shadow mb-4">
+    <div class="card-header py-3">
+      <h6 class="m-0 font-weight-bold text-primary"><a href="{% url 'core:dashboard-campaign-list' %}">{{ title|default:"Список кампаний" }}</a></h6>
+    </div>
+
+    <div class="card-body">
+
+      <div class="input-group mb-3">
+        <input id="table-search" type="text" class="form-control" placeholder="Поиск...">
+      </div>
+
+      <div class="table-responsive">
+        <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+          <thead>
+          <tr>
+            <th style="width: 45%">Название кампании</th>
+            <th style="width: 15%">Автор</th>
+            <th style="width: 15%">Дата создания</th>
+            <th style="width: 10%">Опубликовано</th>
+            <th style="width: 10%">Публичная страница</th>
+          </tr>
+          </thead>
+          <tbody>
+          {% if campaigns %}
+            {% for campaign in campaigns %}
+              <tr>
+                <td>
+                  <a href="{% url 'core:dashboard-campaign-update' campaign.pk %}">
+                    {{ campaign.name }}
+                  </a>
+                </td>
+                <td>{{ campaign.author.get_full_name }}</td>
+                <td>{{ campaign.create_date }}</td>
+                <td>
+                  {% if campaign.public %}
+                    <span class="badge badge-success public-badge" style="cursor:pointer">Да</span>
+                  {% else %}
+                    <span class="badge badge-danger public-badge" style="cursor:pointer">Нет</span>
+                  {% endif %}
+                </td>
+                <td align="center">
+                  <a href="{% url 'core:campaign-detail' campaign.slug %}">
+                    {{ campaign.slug }}
+                  </a>
+                </td>
+              </tr>
+            {% endfor %}
+          {% else %}
+            <tr>
+              <td colspan=9>Нет данных</td>
+            </tr>
+          {% endif %}
+          </tbody>
+        </table>
+        <a class="btn btn-primary" href="{% url 'core:dashboard-campaign-create' %}">
+          <i class="fas fa-fw fa-plus-square"></i>
+          Создать кампанию
+        </a>
+      </div>
+    </div>
+  </div>
+
+{% endblock %}
+
+{% block dashboard_scripts %}
+  <script src="{% static 'core/js/jquery.dataTables.min.js' %}"></script>
+  <script src="{% static 'core/js/dataTables.bootstrap4.min.js' %}"></script>
+  <script>
+    $(document).ready(function () {
+      let table = $('#dataTable').dataTable({
+        dom: "Brtip",
+        info: false,
+        pageLength: 12,
+        "order": [[ 2, "desc" ]],
+        sPaginationType: "full_numbers",
+        language: {
+          paginate: {
+            next: 'Вперед',
+            previous: "Назад",
+            first: '&laquo;',
+            last: '&raquo;'
+          },
+        },
+      });
+
+      $(function () {
+        $('[data-toggle="tooltip"]').tooltip()
+      });
+
+      let tableApi = $(table).DataTable();
+      $('#table-search').keyup(function () {
+        let query = $(this).val();
+        tableApi.search(query).draw();
+      });
+    });
+  </script>
+{% endblock %}

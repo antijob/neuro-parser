@@ -1,0 +1,254 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-66538108-13"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-66538108-13');
+  </script>
+  <link rel="apple-touch-icon" sizes="57x57" href="{% static 'core/img/favicon/apple-icon-57x57.png' %}">
+  <link rel="apple-touch-icon" sizes="60x60" href="{% static 'core/img/favicon/apple-icon-60x60.png' %}">
+  <link rel="apple-touch-icon" sizes="72x72" href="{% static 'core/img/favicon/apple-icon-72x72.png' %}">
+  <link rel="apple-touch-icon" sizes="76x76" href="{% static 'core/img/favicon/apple-icon-76x76.png' %}">
+  <link rel="apple-touch-icon" sizes="114x114" href="{% static 'core/img/favicon/apple-icon-114x114.png' %}">
+  <link rel="apple-touch-icon" sizes="120x120" href="{% static 'core/img/favicon/apple-icon-120x120.png' %}">
+  <link rel="apple-touch-icon" sizes="144x144" href="{% static 'core/img/favicon/apple-icon-144x144.png' %}">
+  <link rel="apple-touch-icon" sizes="152x152" href="{% static 'core/img/favicon/apple-icon-152x152.png' %}">
+  <link rel="apple-touch-icon" sizes="180x180" href="{% static 'core/img/favicon/apple-icon-180x180.png' %}">
+  <link rel="icon" type="image/png" sizes="192x192"  href="{% static 'core/img/favicon/android-icon-192x192.png' %}">
+  <link rel="icon" type="image/png" sizes="32x32" href="{% static 'core/img/favicon/favicon-32x32.png' %}">
+  <link rel="icon" type="image/png" sizes="96x96" href="{% static 'core/img/favicon/favicon-96x96.png' %}">
+  <link rel="icon" type="image/png" sizes="16x16" href="{% static 'core/img/favicon/favicon-16x16.png' %}">
+  <link rel="shortcut icon" href="{% static 'core/img/favicon/favicon.ico' %}" />
+  <link href="{% static 'core/img/favicon/favicon.ico' %}" rel="icon" type="image/x-icon" />
+  <meta name="msapplication-TileColor" content="#0f5257">
+  <meta name="msapplication-TileImage" content="{% static 'core/img/favicon/ms-icon-144x144.png' %}">
+  <meta name="theme-color" content="#0f5257">
+
+
+  <meta name="description" content="Runet.Report. Помощь при преследованиях в сети.">
+  <meta property="og:url" content="https://runet.report/" />
+  <meta property="og:title" content="Runet.Report" />
+  <meta property="og:description" content="Помощь при преследованиях в сети" />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="https://runet.report{% static 'core/landing/images/preview.png' %}" />
+  <meta property="fb:app_id" content="257953674358265" />
+  <meta name="twitter:image" content="https://runet.report{% static 'core/landing/images/preview.png' %}" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:site" content="@rublacklistNET" />
+  <meta name="twitter:title" content="Runet.Report" />
+  <meta name="twitter:description" content="Помощь при преследованиях в сети" />
+  <meta property="og:image:width" content="600" />
+  <meta property="og:image:height" content="315" />
+  <meta name="format-detection" content="telephone=no" />
+  <meta http-equiv="x-dns-prefetch-control" content="on">
+  <link rel="canonical" href="https://runet.report">
+
+  <title>{% block title %}Runet.Report{% endblock %}</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link href="{% static 'core/landing/bootstrap/css/loaders/loader-typing.css' %}" rel="stylesheet" type="text/css" media="all" />
+  <link href="{% static 'core/landing/bootstrap/css/theme-course.css' %}" rel="stylesheet" type="text/css" media="all" />
+  <link href="{% static 'core/css/fontawesome/css/all.min.css' %}" rel="stylesheet"/>
+  <link href="{% static 'core/landing/css/styles.css' %}" rel="stylesheet" type="text/css" media="all" />
+  <link rel="preload" as="font" href="{% static 'core/landing/bootstrap/fonts/Inter-UI-upright.var.woff2' %}" type="font/woff2" crossorigin="anonymous">
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&display=swap" rel="stylesheet">
+  <link rel="preload" as="font" href="{% static 'core/landing/bootstrap/fonts/Inter-UI.var.woff2' %}" type='font/woff2' crossorigin='anonymous'>
+</head>
+<body>
+    <div class="loader">
+      <div class="loading-animation"></div>
+    </div>
+    <div class="navbar-container bg-primary-3">
+      <nav class="navbar navbar-expand-lg navbar-dark bg-primary-3" data-sticky="top">
+        <div class="container">
+          <a class="navbar-brand" href="{% url 'core:index' %}">Runet<span>.Report</span></a>
+          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse" aria-expanded="false" aria-label="Toggle navigation">
+            <img class="icon navbar-toggler-open" src="{% static 'core/landing/bootstrap/img/icons/interface/menu.svg' %}" alt="menu interface icon" data-inject-svg />
+            <img class="icon navbar-toggler-close" src="{% static 'core/landing/bootstrap/img/icons/interface/cross.svg' %}" alt="cross interface icon" data-inject-svg />
+          </button>
+          <div class="collapse navbar-collapse justify-content-end">
+            <div class="py-2 py-lg-0">
+              <ul class="navbar-nav">
+                <li id="home-link" class="nav-item"><a href="{% url 'core:index' %}" class="nav-link">Главная</a></li>
+                <li class="nav-item dropdown">
+                  <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown-grid" aria-expanded="true" aria-haspopup="true">Кампании</a>
+                  <div class="dropdown-menu row">
+                    <div class="col-auto" data-dropdown-content="">
+                      <div class="dropdown-grid-menu">
+                        <a href="https://runet.report/campaign/twitter/" class="dropdown-item fade-page">Битва за Твиттер</a>
+                        <a href="https://tor.roskomsvoboda.org/" target="_blank" class="dropdown-item fade-page">Битва за Tor</a>
+                        <a href="https://eda.runet.report/" target="_blank" class="dropdown-item fade-page">Битва с «Яндекс.Еда»</a>
+                      </div>
+                    </div>
+                  </div>
+                </li>
+                <li id="incidents-link" class="nav-item"><a href="{% url 'core:incidents' %}" class="nav-link">Инциденты</a></li>
+                <li id="chart-link" class="nav-item"><a href="{% url 'core:chart' %}" class="nav-link">Графики</a></li>
+                <li id="reports-link" class="nav-item"><a href="{% url 'core:reports' %}" class="nav-link">Исследования</a></li>
+                <li id="about-link" class="nav-item"><a href="{% url 'core:about' %}" class="nav-link">О Нас</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </div>
+
+{% block content %}
+{% endblock %}
+
+<footer class="pb-4 bg-primary-3 text-light" id="footer">
+      <div class="container">
+        <div class="row mb-5">
+          <div class="col-12 col-lg-8 col-xl-8 row">
+
+            <div class="col-12 col-lg-4 col-xl-4">
+              <h4>Навигация</h4>
+              <ul class="nav flex-column">
+                <li class="nav-item">
+                  <a href="{% url 'core:index' %}" class="nav-link">Главная</a>
+                </li>
+                <li class="nav-item">
+                  <a href="{% url 'core:incidents' %}" class="nav-link">Инциденты</a>
+                </li>
+                <li class="nav-item">
+                  <a href="{% url 'core:about' %}" class="nav-link">О Нас</a>
+                </li>
+              </ul>
+            </div>
+
+            <div class="col-12 col-lg-8 col-xl-8 mt-3 mt-lg-0">
+              <h4>Контакты</h4>
+              <ul class="list-unstyled">
+                <li class="mb-3 d-flex">
+                  <div class="ml-3">
+                    Если нужна помощь, или есть идеи, пишите через форму на сайте или на <a href="https://t.me/NFP_Hotline"><u>горячую линию в Telegram</u></a>
+                  </div>
+                </li>
+              </ul>
+            </div>
+
+            <div class="col-lg-12 col-xl-12 mt-3 mt-lg-0">
+              <h4>О проекте</h4>
+              <p>Runet.Report — проект, созданный для защиты цифровых прав граждан.</p>
+              <div class="row">
+                <div class="col-auto">
+                  <ul class="nav">
+                    <li class="nav-item">
+                      <a target="_blank" href="https://twitter.com/RuBlackListNET" class="nav-link">
+                        <img class="icon icon" src="{% static '/core/landing/bootstrap/img/icons/social/twitter.svg' %}" alt="twitter social icon" data-inject-svg />
+                      </a>
+                    </li>
+                    </li>
+                    <li class="nav-item">
+                      <a target="_blank" href="https://www.instagram.com/roskomsvoboda/" class="nav-link">
+                        <img class="icon icon" src="{% static '/core/landing/bootstrap/img/icons/social/instagram.svg' %}" alt="instagram social icon" data-inject-svg />
+                      </a>
+                    </li>
+                    <li class="nav-item">
+                      <a target="_blank" href="https://www.facebook.com/roskomsvoboda" class="nav-link">
+                        <img class="icon icon" src="{% static '/core/landing/bootstrap/img/icons/social/facebook.svg' %}" alt="facebook social icon" data-inject-svg />
+                      </a>
+                    </li>
+                    <li class="nav-item">
+                      <a target="_blank" href="https://www.youtube.com/user/RosKomSvoboda" class="nav-link">
+                        <img class="icon icon" src="{% static '/core/landing/bootstrap/img/icons/social/youtube.svg' %}" alt="youtube social icon" data-inject-svg />
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+              <p class="mt-2">
+                <a target="_blank" href="https://creativecommons.org/licenses/by-sa/3.0/">
+                  <img class="logo_creative" src="{% static '/core/img/logo_creative_white.webp' %}" alt="Время менять копирайт">
+                </a>
+              </p>
+            </div>
+          </div>
+
+          {% if contact_form %}
+          <div class="col-lg-4 col-xl-4 mt-3 mt-lg-0">
+            <h5>Задайте вопрос</h5>
+            <form action="{% url 'core:contact' %}" method="POST">
+              {% csrf_token %}
+              <div class="form-group">
+                {{ contact_form.email }}
+              </div>
+              <div class="form-group">
+                {{ contact_form.message }}
+              </div>
+              <div class="form-row">
+                <button type="submit" class="btn btn-primary col-12" data-loading-text="Sending">
+                  Отправить
+                </button>
+              </div>
+            </form>
+          </div>
+          {% endif %}
+
+        </div>
+      </div>
+    </footer>
+
+<!-- Required vendor scripts (Do not remove) -->
+    <script type="text/javascript" src="{% static 'core/landing/bootstrap/js/jquery.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'core/landing/bootstrap/js/popper.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'core/landing/bootstrap/js/bootstrap.js' %}"></script>
+
+    <!-- Optional Vendor Scripts (Remove the plugin script here and comment initializer script out of index.js if site does not use that feature) -->
+
+    <!-- AOS (Animate On Scroll - animates elements into view while scrolling down) -->
+    <script type="text/javascript" src="{% static 'core/landing/bootstrap/js/aos.js' %}"></script>
+    <!-- Clipboard (copies content from browser into OS clipboard) -->
+    <script type="text/javascript" src="{% static 'core/landing/bootstrap/js/clipboard.js' %}"></script>
+    <!-- Fancybox (handles image and video lightbox and galleries) -->
+    <script type="text/javascript" src="{% static 'core/landing/bootstrap/js/jquery.fancybox.min.js' %}"></script>
+    <!-- Flatpickr (calendar/date/time picker UI) -->
+    <script type="text/javascript" src="{% static 'core/landing/bootstrap/js/flatpickr.min.js' %}"></script>
+    <!-- Flickity (handles touch enabled carousels and sliders) -->
+    <script type="text/javascript" src="{% static 'core/landing/bootstrap/js/flickity.pkgd.min.js' %}"></script>
+    <!-- Ion rangeSlider (flexible and pretty range slider elements) -->
+    <script type="text/javascript" src="{% static 'core/landing/bootstrap/js/ion.rangeSlider.min.js' %}"></script>
+    <!-- Isotope (masonry layouts and filtering) -->
+    <script type="text/javascript" src="{% static 'core/landing/bootstrap/js/isotope.pkgd.min.js' %}"></script>
+    <!-- jarallax (parallax effect and video backgrounds) -->
+    <script type="text/javascript" src="{% static 'core/landing/bootstrap/js/jarallax.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'core/landing/bootstrap/js/jarallax-video.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'core/landing/bootstrap/js/jarallax-element.min.js' %}"></script>
+    <!-- jQuery Countdown (displays countdown text to a specified date) -->
+    <script type="text/javascript" src="{% static 'core/landing/bootstrap/js/jquery.countdown.min.js' %}"></script>
+    <!-- jQuery smartWizard facilitates steppable wizard content -->
+    <script type="text/javascript" src="{% static 'core/landing/bootstrap/js/jquery.smartWizard.min.js' %}"></script>
+    <!-- Plyr (unified player for Video, Audio, Vimeo and Youtube) -->
+    <script type="text/javascript" src="{% static 'core/landing/bootstrap/js/plyr.polyfilled.min.js' %}"></script>
+    <!-- Prism (displays formatted code boxes) -->
+    <script type="text/javascript" src="{% static 'core/landing/bootstrap/js/prism.js' %}"></script>
+    <!-- ScrollMonitor (manages events for elements scrolling in and out of view) -->
+    <script type="text/javascript" src="{% static 'core/landing/bootstrap/js/scrollMonitor.js' %}"></script>
+    <!-- Smooth scroll (animation to links in-page)-->
+    <script type="text/javascript" src="{% static 'core/landing/bootstrap/js/smooth-scroll.polyfills.min.js' %}"></script>
+    <!-- SVGInjector (replaces img tags with SVG code to allow easy inclusion of SVGs with the benefit of inheriting colors and styles)-->
+    <script type="text/javascript" src="{% static 'core/landing/bootstrap/js/svg-injector.umd.production.js' %}"></script>
+    <!-- TwitterFetcher (displays a feed of tweets from a specified account)-->
+    <script type="text/javascript" src="{% static 'core/landing/bootstrap/js/twitterFetcher_min.js' %}"></script>
+    <!-- Typed text (animated typing effect)-->
+    <script type="text/javascript" src="{% static 'core/landing/bootstrap/js/typed.min.js' %}"></script>
+    <!-- Required theme scripts (Do not remove) -->
+    <script type="text/javascript" src="{% static 'core/landing/bootstrap/js/theme.js' %}"></script>
+    <!-- Removes page load animation when window is finished loading -->
+    <script type="text/javascript">
+      window.addEventListener("load", function () {    document.querySelector('body').classList.add('loaded');  });
+    </script>
+
+{% block user_scripts %}
+{% endblock %}
+
+</body>
+</html>

@@ -1,0 +1,47 @@
+[tool.poetry]
+name = "dri"
+version = "0.1.0"
+description = ""
+authors = []
+
+[tool.poetry.dependencies]
+python = "^3.8"
+cryptography = "3.3.2"
+django = "^3.1.1"
+djangorestframework = "*"
+django-split-settings = "*"
+bcrypt = "*"
+requests = "*"
+psycopg2-binary = "*"
+pillow = "*"
+django-allauth = "*"
+pymorphy2 = "*"
+lxml = "*"
+cssselect = "*"
+dateparser = "*"
+sentry-sdk = "*"
+navec = "^0.9.0"
+slovnet = "^0.4.0"
+XlsxWriter = "^1.3.3"
+django-redis-cache = "^3.0.0"
+hiredis = "^1.1.0"
+celery = "^5.0.2"
+pdfkit = "^0.6.1"
+openpyxl = "^3.0.6"
+django-tracking2 = "^0.5.0"
+python-dateutil = "^2.8.1"
+htmldocx = "^0.0.5"
+django-ckeditor = "6.0"
+pyTelegramBotAPI = "^4.0.0"
+python-telegram-bot = "^13.7"
+numpy = "^1.22.1"
+joblib = "^1.1.0"
+
+[tool.poetry.dev-dependencies]
+nplusone = "^1.0.0"
+django-querycount = "^0.7.0"
+django-debug-toolbar = "^2.2"
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"

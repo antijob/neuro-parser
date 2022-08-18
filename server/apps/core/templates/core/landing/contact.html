@@ -1,0 +1,59 @@
+{% extends 'core/landing/layout.html' %}
+{% load  static %}
+{% block content %}
+
+
+  <section class="hero-wrap hero-wrap-2 js-fullheight"
+           style="background-image: url('{% static 'core/landing/images/bg.jpg' %}');"
+           data-stellar-background-ratio="0.5">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row no-gutters slider-text js-fullheight align-items-end justify-content-start">
+        <div class="col-md-9 ftco-animate pb-5">
+          <h1 class="mb-3 bread text-light">Контакты</h1>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="ftco-section contact-section">
+    <div class="container">
+      <div class="row justify-content-center mb-5">
+      </div>
+      <div class="container">
+        <div class="row block-9 justify-content-center mb-5">
+          <div class="col-md-8 mb-md-5">
+            <h3 class="text-center">Если у вас есть какие-либо вопросы,
+              <br>воспользуйтесь формой, что представлена ниже</h3>
+            <form action="{% url 'core:contact' %}" method="POST" class="bg-light p-5 contact-form">
+              {% csrf_token %}
+              <div class="form-group">
+                {{ form.name }}
+              </div>
+              <div class="form-group">
+                {{ form.email }}
+              </div>
+              <div class="form-group">
+                {{ form.message }}
+              </div>
+              <div class="form-group">
+                <input type="submit" value="Отправить сообщение" class="btn btn-primary py-3 px-5">
+              </div>
+              <p><small>
+                Нажимая кнопку “Отправить сообщение», вы даете согласие на передачу отправляемых данных третьим лицам в целях осуществления коммуникации с вами для решения вашего запроса, а также на использование данных обращения для формирования публичной статистики обращений.
+                <a href='{% url "core:privacy_policy" %}'>Политика конфиденциальности.</a>
+              </small></p>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+{% endblock %}
+
+{% block user_scripts %}
+  <script type="text/javascript">
+    $('#contacts-link').addClass('active')
+  </script>
+{% endblock %}

@@ -1,0 +1,46 @@
+{% extends 'core/landing/layout.html' %}
+{% load  static %}
+{% block content %}
+
+  <section class="hero-wrap hero-wrap-2 js-fullheight"
+           style="background-color: #000;"
+           data-stellar-background-ratio="0.5">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row no-gutters slider-text js-fullheight align-items-end justify-content-start">
+        <div class="col-md-9 ftco-animate pb-5">
+          <h1 class="mb-3 bread">{{ incident.public_title }}</h1>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="ftco-section ftco-no-pt ftco-no-pb">
+    <div class="container">
+      <div class="row no-gutters">
+        <div class="col-md-12 wrap-about ftco-animate">
+          <div class="heading-section mb-5 pl-md-5">
+            <p>
+              {{ incident.public_description|linebreaks }}
+            </p>
+            <p class="card-text mt-4">
+              <small class="text-muted mr-1">
+                <i class="fa fa-calendar-alt"></i> {{ incident.create_date | date:'d.m.Y' }}
+              </small>
+            </p>
+            {% if incident.public_organization %}
+              Организации:
+              <p>
+                {% for org in incident.public_organization.all %}
+                  <span class="badge badge-dark">{{ org.name }}</span>
+                {% endfor %}
+              </p>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+{% endblock %}

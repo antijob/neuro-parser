@@ -1,0 +1,190 @@
+{% extends 'core/dashboard/layout.html' %}
+
+{% load static %}
+
+{% block title %} Отклоненные ИИ инциденты из СМИ {% endblock title %}
+
+{% block container %}
+
+  {% include "core/dashboard/dashboard_stat_blocks.html" %}
+
+  <!-- DataTales Example -->
+  <div class="card shadow mb-4">
+    <div class="card-header py-3">
+      <h6 class="m-0 font-weight-bold text-primary"><a href="{% url 'core:dashboard-article-list' %}">Отклоненные ИИ инциденты из СМИ</a></h6>
+    </div>
+
+    <div class="card-body">
+
+      <div class="input-group mb-3 row">
+        <span class="col-xl-10 col-lg-8 col-md-12">
+          <input id="table-search" type="text" class="form-control" placeholder="Поиск...">
+        </span>
+        <span class="col-xl-2 col-lg-4 col-md-12">
+          <input id="dates" type="email" name="dates" class="form-control" autocomplete="off" placeholder="Даты">
+        </span>
+        <input type="hidden" id="start_date">
+        <input type="hidden" id="end_date">
+      </div>
+
+      <div class="table-responsive">
+        <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+        </table>
+      </div>
+    </div>
+  </div>
+
+{% endblock %}
+
+{% block dashboard_scripts %}
+<script src="{% static 'core/js/jquery.dataTables.min.js' %}"></script>
+<script src="{% static 'core/js/dataTables.bootstrap4.min.js' %}"></script>
+<script>
+
+const DATA_URL = "{% url 'core:dashboard-articles-data' %}";
+const COLUMNS = [
+  {data: 'title', width: "50%", title: "Заголовок"},
+  {data: 'url', width: "30%", title: "Источник"},
+  {data: 'publication_date', width: "12%", title: "Дата публикации"},
+  {data: 'relevance', width: "8%", title: "Оценка"},
+];
+const COLUMNS_DEF = [
+          {
+            render: function ( data, type, row ) {
+              let td = "<a href='/dashboard/article/" + row['pk'] + "/' target='_blank'><i class='fas fa-newspaper mr-2 text-secondary'></i> "
+              return td + data;
+            },
+            targets: 0
+          },
+          {
+            render: function ( data, type, row ) {
+              let td = "<a href='" + data + "' target='_blank'>";
+              let visible_url = data.length > 50 ? data.substring(0, 50) + '...' : data;
+              return td + visible_url;
+            },
+            targets: 1
+          },
+          {
+            render: function ( data, type, row ) {
+              const COLORS = ['info', 'success', 'warning', 'danger'];
+              let percents = data / 8 * 100;
+              let colorIndex = Math.floor(percents / 25);
+              if (colorIndex >= COLORS.length) {
+                colorIndex = COLORS.length - 1
+              } else if (colorIndex < 0) {
+                colorIndex = 0
+              }
+              let color = COLORS[colorIndex];
+              let td = '<div class="progress"><div class="progress-bar bg-'
+                + color
+                + '" role="progressbar" aria-valuemin="0" style="width:'
+                + percents
+                + '%">' + percents + '</div></div>';
+              return td;
+
+            },
+            targets: 3
+          },
+      ]
+
+  $(document).ready(function () {
+    var tableApi = $('#dataTable').DataTable({
+      dom: "Brtip",
+      ajax: {
+        url: DATA_URL,
+        data: function ( d ) {
+              d.start_date = $("#start_date").val();
+              d.end_date = $("#end_date").val();
+          },
+      },
+      serverSide: true,
+      info: false,
+      pageLength: 12,
+      sPaginationType: "full_numbers",
+      columns: COLUMNS,
+      columnDefs: COLUMNS_DEF,
+      language: {
+        paginate: {
+          next: 'Вперед',
+          previous: "Назад",
+          first: '&laquo;',
+          last: '&raquo;'
+        },
+      },
+    });
+
+    $(function () {
+      $('[data-toggle="tooltip"]').tooltip()
+    });
+
+    $('#table-search').keyup(function () {
+      let query = $(this).val();
+      tableApi.search(query).draw();
+    });
+
+
+    $('#dates').daterangepicker({
+    ranges: {
+        'Сегодня': [moment(), moment()],
+        'Вчера': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+        'За 7 дней': [moment().subtract(6, 'days'), moment()],
+        'За 30 дней': [moment().subtract(29, 'days'), moment()],
+        'Этот месяц': [moment().startOf('month'), moment().endOf('month')],
+        'Предыдущий месяц': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+    },
+    locale: {
+        "format": "DD/MM/YYYY",
+        "separator": " - ",
+        "applyLabel": "Принять",
+        "cancelLabel": "Отмена",
+        "fromLabel": "С",
+        "toLabel": "до",
+        "customRangeLabel": "Выбрать свои даты",
+        "weekLabel": "Нед",
+        "daysOfWeek": [
+            "Вс",
+            "Пн",
+            "Вт",
+            "Ср",
+            "Чт",
+            "Пт",
+            "Сб"
+        ],
+        "monthNames": [
+            "Январь",
+            "Февраль",
+            "Март",
+            "Апрель",
+            "Май",
+            "Июнь",
+            "Июль",
+            "Август",
+            "Сентябрь",
+            "Октябрь",
+            "Ноябрь",
+            "Декабрь"
+        ],
+        "firstDay": 1
+    },
+    autoUpdateInput: false,
+    autoApply: true,
+    });
+
+    $('#dates').on('apply.daterangepicker', function(ev, picker) {
+      start_date = picker.startDate.format('YYYY-MM-DD');
+      end_date = picker.endDate.format('YYYY-MM-DD');
+      $("#start_date").val(start_date);
+      $("#end_date").val(end_date);
+      $('#dates').val(picker.startDate.format('DD.MM.YYYY') + ' - ' + picker.endDate.format('DD.MM.YYYY'));
+      tableApi.draw();
+    });
+
+    $('#dates').on('cancel.daterangepicker', function(ev, picker) {
+      $("#start_date").val(null);
+      $("#end_date").val(null);
+      $('#dates').val('');
+      tableApi.draw();
+    });
+  });
+</script>
+{% endblock %}

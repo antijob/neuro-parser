@@ -1,0 +1,166 @@
+{% extends 'core/dashboard/layout.html' %}
+
+{% load static %}
+
+{% block title %}Инцидент по заявке #{{ incident.pk }}{% endblock title %}
+
+{% block container %}
+
+  <div class="card shadow mb-4">
+    <div class="card-header py-3">
+      <h6 class="m-0 font-weight-bold text-primary">
+        Заявка #{{ incident.pk }}
+        {% if incident.campaign %}
+          [{{ incident.campaign.name }}]
+        {% endif %}
+      </h6>
+    </div>
+
+    <div class="card-body text-dark labels-style">
+      <h4>{{ incident.title|default:'Без заголовка' }}</h4>
+
+      <div>
+        <label>Email заявителя:</label>
+        {{ incident.applicant_email|default:'(Не указано)' }}
+      </div>
+
+      <div>
+        <label>Аккаунт в мессенджере заявителя:</label>
+        {{ incident.applicant_messenger|default:'(Не указано)' }}
+      </div>
+
+      <div>
+        <label>Описание:</label>
+        {{ incident.description|linebreaks|default:'Нет описания' }}
+      </div>
+    </div>
+
+  </div>
+
+  <div class="card shadow mb-4">
+    <div class="card-header py-3">
+      <h6 class="m-0 font-weight-bold text-primary">
+        Инцидент по заявке #{{ incident.pk }}
+        <div class="badge status-badge badge-{{ incident.status_color }}">{{ incident.get_status_display }}</div>
+      </h6>
+    </div>
+
+    <div class="card-body text-dark labels-style">
+      <form id="user-incident"
+            class="form-horizontal"
+            method="post"
+            enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <div class="form-group">
+          <label>Публичное название:</label>
+          {{ form.public_title }}
+        </div>
+
+        <div class="form-group">
+          <label>Публичное описание:</label>
+          {{ form.public_description }}
+        </div>
+
+        <div class="form-group">
+          <label>Дата инцидента:</label>
+          {{ form.create_date }}
+        </div>
+
+        <div class="form-group">
+          <label>Категория:</label>
+          {{ form.incident_type }}
+        </div>
+
+        <div class="form-group">
+          <label>Регион:</label>
+          {{ form.region }}
+        </div>
+
+        <div class="form-group">
+          <label>Количество нарушений:</label>
+          {{ form.count }}
+        </div>
+
+        {% if files %}
+        <div class="form-group">
+          <label>Файлы:</label>
+          <table class="table">
+            {% for file in files %}
+              <tr>
+                <td><a href="{{ file.file.url }}">{{ file }}</a></td>
+                <td><label class="big-label"><input type="checkbox" name="delete_file" value="{{ file.pk }}"> Удалить</label></td>
+              </tr>
+            {% endfor %}
+          </table>
+        </div>
+        {% endif %}
+
+        <div class="form-group">
+          <label>Добавить файлы:</label>
+          {{ form.files }}
+        </div>
+
+        <div style="display:none">
+            {{ form.form_data }}
+        </div>
+        <div id="fb-render"></div>
+
+        <div class="mt-4">
+          <button type="submit" name="status" value="2" class="btn btn-success"><i class="fas fa-check"></i> Принять</button>
+          <button type="submit" name="status" value="1" class="btn btn-danger"><i class="fas fa-times"></i> Отклонить</button>
+          <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Сохранить</button>
+        </div>
+      </form>
+
+    </div>
+
+  </div>
+
+{% endblock %}
+
+{% block dashboard_scripts %}
+  <script src="{% static 'core/datepicker/js/bootstrap-datepicker.min.js' %}"></script>
+  <link rel="stylesheet" type="text/css" href="{% static 'core/datepicker/css/bootstrap-datepicker3.min.css' %}">
+  <script src="{% static 'core/js/jquery.min.js' %}"></script>
+  <script src="{% static 'core/js/campaign/jquery-ui.min.js' %}"></script>
+  <script src="{% static 'core/js/campaign/form-render.min.js' %}"></script>
+  <script type="text/javascript">
+    $(function($) {
+      let formData = {{ form_json|safe }};
+      if (typeof(formData) === "string") {
+        formData = JSON.parse(formData);
+      }
+      formOptions = {
+        dataType: 'json',
+        formData: formData,
+        notify: {
+          success: function(message) {
+            let userData = formOptions.formData;
+            if (typeof(userData) === "string") {
+              userData = JSON.parse(userData);
+            };
+            userData.forEach( ( column , key ) => {
+              if( column.type == 'checkbox-group' && column.userData ) {
+                column.userData.forEach( ( checked_value , key ) => {
+                  var cbxElements = $('[name="'+ column.name + '[]"]');
+                  $.each( cbxElements , (index, element) => {
+                    if ( checked_value  == $(element).val() && $(element).prop("required")) {
+                      $(element).click();
+                    }
+                  })
+                })
+              }
+            })
+          },
+        }
+      };
+      var fbRender = $('#fb-render').formRender(formOptions);
+
+      $("#user-incident").submit(function (e) {
+        var formData = JSON.stringify(fbRender.userData);
+        $("#id_form_data").val(formData);
+      });
+    });
+  </script>
+{% endblock dashboard_scripts %}

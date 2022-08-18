@@ -1,0 +1,64 @@
+{% extends 'core/landing/layout.html' %}
+{% load  static %}
+{% block content %}
+  <style data-media-url="{% get_media_prefix %}">
+  body, html {
+    background-color: #0D2128;
+  }
+  {% if post.image %}
+  .backgrounded {
+    background: url({{ post.image.url }}) no-repeat center;
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
+    min-height: 50vh;
+  }
+  {% endif %}
+  .background-tint {
+    background-color: rgba(73,80,87,.7);
+    background-blend-mode: multiply;
+  }
+  .text {
+   font-size: 1.2rem;
+  }
+  </style>
+
+  <div class="jumbotron jumbotron-fluid backgrounded background-tint pt-6 pb-6">
+    <div class="container text-light">
+        <div class="lead">{{ post.publication_date|date }}</div>
+        <h1 class="mb-4 display-4">
+          {{ post.title }}
+        </h1>
+    </div>
+  </div>
+
+  <section class="text-light pt-2 pb-0">
+    <div class="container">
+      <div class="text text-white">
+        {% autoescape off %}
+        {{ post.text }}
+        {% endautoescape %}
+      </div></div>
+    </div>
+  </section>
+
+<script src="{% static 'core/js/jquery.min.js' %}"></script>
+<script src="{% static 'core/js/post/jquery-ui.min.js' %}"></script>
+<script src="{% static 'core/js/post/form-render.min.js' %}"></script>
+<script type="text/javascript">
+  jQuery(function($) {
+    formOptions = {
+      dataType: 'json',
+      formData: {{ post.form_json|safe }},
+    }
+    var fbRender = $('#fb-render').formRender(formOptions);
+
+    $("#user-incident").submit(function (e) {
+      var formData = JSON.stringify(fbRender.userData);
+      $("#id_form_data").val(formData);
+    });
+  });
+</script>
+
+{% endblock %}

@@ -1,0 +1,140 @@
+{% extends 'core/landing/layout.html' %}
+{% load  static %}
+{% block content %}
+  <style data-media-url="{% get_media_prefix %}">
+  html {
+    scroll-behavior: smooth;
+  }
+
+  section {
+    padding-top: 0;
+  }
+  .container {
+    font-family: Inter, sans-serif;
+  }
+  .narrow {
+    max-width: 930px !important;
+  }
+  .summary-section,
+  .form-section {
+    background-color:{{ page.campaign.background_color }};
+    color:{{ page.campaign.text_color }};
+  }
+
+  {% if page.campaign.picture and page.campaign.is_background %}
+    .summary-section {
+      background-image: url({{ page.campaign.picture.url }});
+      background-position: center center;
+      background-repeat: no-repeat;
+      background-size: cover;
+    }
+  {% endif %}
+
+  .top-picture {
+    max-height: 400px;
+  }
+
+  .page-text a {
+    font-weight: normal;
+  }
+
+  .summary-section h1 {
+    font-size: 5em;
+    font-weight: 800;
+    color:{{ page.campaign.text_color }};
+  }
+
+  .summary-section .lead {
+    max-width: 926px;
+    font-size: 22px;
+    font-weight: 400;
+    color:{{ page.campaign.text_color }};
+  }
+
+  .summary-section .spacer {
+    height: 300px;
+  }
+
+  .summary-section .buttons .btn {
+    width: 300px;
+    margin-bottom: 10px;
+    padding: auto;
+    background-color: rgba(0,0,0,0) !important;
+    color: {{ page.campaign.text_color }} !important;
+    border: 2px solid {{ page.campaign.text_color }}
+  }
+
+  .summary-section .buttons .btn-inverted {
+    color: {{ page.campaign.background_color }} !important;
+    background-color: {{ page.campaign.text_color }} !important;
+  }
+
+  @media screen and (max-width: 900px) {
+    .summary-section h1 {
+      font-size: 3em;
+    }
+
+    .summary-section .lead {
+      max-width: 926px;
+      font-size: 18px;
+    }
+  }
+
+  .form-section label {
+    color: {{ page.campaign.text_color }} !important;
+  }
+  .summary-section button,
+  .form-section button {
+    background-color: {{ page.campaign.text_color }} !important;
+    color: {{ page.campaign.background_color}} !important;
+    border-color:{{ page.campaign.text_color }};
+  }
+
+  .form-section h2 {
+    font-size: 36px;
+  }
+
+  .stage h4 a {
+    color: #000;
+  }
+
+  </style>
+
+
+<section class="summary-section pt-5">
+  {% if page.campaign.is_background %}
+    <div class="spacer"> </div>
+  {% endif %}
+  <div class="container narrow text-center">
+    {% if page.campaign.picture and not page.campaign.is_background %}
+      <img src="{{ page.campaign.picture.url }}" class="img-fluid mb-3 top-picture">
+    {% endif %}
+    <h1 class="mb-4 text-center">
+      {{ page.campaign.name }}
+    </h1>
+    <div class="buttons">
+      <a class="btn btn-inverted" href="{% url 'core:campaign-detail' the_slug=page.campaign.slug %}#form" target="_blank">Присоединиться</a>
+      {% if page.campaign.ordered_stages %}
+        <a class="btn ml-lg-3" href="{% url 'core:campaign-detail' the_slug=page.campaign.slug %}#stages" target="_blank">События кампании</a>
+      {% endif %}
+
+      {% if page.campaign.chart_field %}
+        <a class="btn ml-lg-3" href="{% url 'core:campaign-detail' the_slug=page.campaign.slug %}map/" target="_blank">Посмотреть карту кампании</a>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+<section class="py-lg-5">
+  <div class="container narrow page-text">
+    <h2>{{ page.title }}</h2>
+    <div>{{ page.text|safe }}</div>
+  </div>
+</section>
+
+<script src="{% static 'core/js/jquery.min.js' %}"></script>
+<script src="{% static 'core/js/campaign/jquery-ui.min.js' %}"></script>
+<script type="text/javascript">
+</script>
+
+{% endblock %}

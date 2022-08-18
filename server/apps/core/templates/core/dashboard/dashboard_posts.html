@@ -1,0 +1,179 @@
+{% extends 'core/dashboard/layout.html' %}
+
+{% load static %}
+
+{% block title %} Список постов {% endblock title %}
+
+{% block container %}
+
+  <!-- DataTales Example -->
+  <div class="card shadow mb-4">
+    <div class="card-header py-3">
+      <h6 class="m-0 font-weight-bold text-primary"><a href="{% url 'core:dashboard-posts' %}">Все посты</a></h6>
+    </div>
+
+    <div class="card-body">
+
+      <div class="input-group mb-3">
+        <input id="table-search" type="text" class="form-control" placeholder="Поиск...">
+      </div>
+
+      <div class="table-responsive">
+        <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+        </table>
+        <a class="btn btn-primary" href="{% url 'core:dashboard-post-create' %}">
+          <i class="fas fa-fw fa-plus-square"></i>
+          Создать пост
+        </a>
+      </div>
+    </div>
+  </div>
+
+{% endblock %}
+
+{% block dashboard_scripts %}
+  <script src="{% static 'core/js/jquery.dataTables.min.js' %}"></script>
+  <script src="{% static 'core/js/dataTables.bootstrap4.min.js' %}"></script>
+  <script>
+  $(document).ready(function () {
+    var tableApi = $('#dataTable').DataTable({
+      dom: "Brtip",
+      ajax: {
+        url: "{% url 'core:dashboard-posts-data' %}",
+        data: function ( d ) {
+              d.start_date = $("#start_date").val();
+              d.end_date = $("#end_date").val();
+              d.is_active = {{ is_active|default_if_none:"1" }};
+          },
+      },
+      serverSide: true,
+      info: false,
+      pageLength: 12,
+      sPaginationType: "full_numbers",
+      columns: [
+        {data: 'title', width: "65%", title: "Заголовок"},
+        {data: 'create_date', width: "10%", title: "Дата создания"},
+        {data: 'author', width: "15%", title: "Автор"},
+        {data: 'pk'},
+        {data: 'public', width: "10%", title: "Опубликован"},
+      ],
+      language: {
+        paginate: {
+          next: 'Вперед',
+          previous: "Назад",
+          first: '&laquo;',
+          last: '&raquo;'
+        },
+      },
+      columnDefs: [
+        {
+          render: function ( data, type, row ) {
+            let td = "<a href='/dashboard/post/" + row['pk'] + "/update/'><i class='fas fa-pen-alt mr-2 text-secondary' title='Инцидент из СМИ'></i> "
+            return td + data;
+          },
+          targets: 0
+        },
+        {
+          render: function ( data, type, row ) {
+            return moment(data).format('DD.MM.YYYY');
+          },
+          targets: 1
+        },
+        {
+          render: function ( data, type, row ) {
+            if (data) {
+              td = '<span class="badge badge-success public-badge">Да</span>';
+            } else {
+              td = '<span class="badge badge-danger public-badge">Нет</span>';
+            };
+            return td;
+          },
+          targets: 4
+        },
+        {
+          visible: false,
+          targets: 3
+        },
+      ]
+    });
+
+    $(function () {
+      $('[data-toggle="tooltip"]').tooltip()
+    });
+
+    searchTimeout = null;
+    $('#table-search').keyup(function () {
+      let query = $(this).val();
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(function () {
+        tableApi.search(query).draw();
+      },
+      1000);
+    });
+
+
+    datePicker = $('#dates').daterangepicker({
+    ranges: {
+        'Сегодня': [moment(), moment()],
+        'Вчера': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+        'За 7 дней': [moment().subtract(6, 'days'), moment()],
+        'За 30 дней': [moment().subtract(29, 'days'), moment()],
+        'Этот месяц': [moment().startOf('month'), moment().endOf('month')],
+        'Предыдущий месяц': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+    },
+    locale: {
+        "format": "DD.MM.YYYY",
+        "separator": " - ",
+        "applyLabel": "Принять",
+        "cancelLabel": "Отмена",
+        "fromLabel": "С",
+        "toLabel": "до",
+        "customRangeLabel": "Выбрать свои даты",
+        "weekLabel": "Нед",
+        "daysOfWeek": [
+            "Вс",
+            "Пн",
+            "Вт",
+            "Ср",
+            "Чт",
+            "Пт",
+            "Сб"
+        ],
+        "monthNames": [
+            "Январь",
+            "Февраль",
+            "Март",
+            "Апрель",
+            "Май",
+            "Июнь",
+            "Июль",
+            "Август",
+            "Сентябрь",
+            "Октябрь",
+            "Ноябрь",
+            "Декабрь"
+        ],
+        "firstDay": 1
+    },
+    autoUpdateInput: false,
+    autoApply: true,
+    });
+
+    $('#dates').on('apply.daterangepicker', function(ev, picker) {
+      start_date = picker.startDate.format('YYYY-MM-DD');
+      end_date = picker.endDate.format('YYYY-MM-DD');
+      $("#start_date").val(start_date);
+      $("#end_date").val(end_date);
+      $('#dates').val(picker.startDate.format('DD.MM.YYYY') + ' - ' + picker.endDate.format('DD.MM.YYYY'));
+      tableApi.draw();
+    });
+
+    $('#dates').on('cancel.daterangepicker', function(ev, picker) {
+      $("#start_date").val(null);
+      $("#end_date").val(null);
+      $('#dates').val('');
+      tableApi.draw();
+    });
+  });
+</script>
+{% endblock %}
