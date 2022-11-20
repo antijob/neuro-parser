@@ -14,7 +14,7 @@ import os
 
 from decouple import config as c
 
-from server.settings.components import BASE_DIR, env
+from server.settings.components import BASE_DIR
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
@@ -96,11 +96,11 @@ DATABASES = {
     },
 }
 
-EMAIL_HOST = env("EMAIL_HOST", default="localhost")
-EMAIL_HOST_USER = env("EMAIL_HOST_USER", default="")
+EMAIL_HOST = c("EMAIL_HOST", default="localhost")
+EMAIL_HOST_USER = c("EMAIL_HOST_USER", default="")
 EMAIL_HOST_PASSWORD = c("email.passwd", default="")
-EMAIL_PORT = env("EMAIL_PORT", default=25, cast=int)
-EMAIL_USE_TLS = env("EMAIL_USE_TLS", cast=bool, default=True)
+EMAIL_PORT = c("EMAIL_PORT", cast=int, default=25)  
+EMAIL_USE_TLS = c("EMAIL_USE_TLS", cast=bool, default=True)
 DEFAULT_FROM_EMAIL = 'runet.report@roskomsvoboda.org'
 
 # Internationalization

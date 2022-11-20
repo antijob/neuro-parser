@@ -6,7 +6,6 @@ Caching settings module
 
 from decouple import config as c
 
-from server.settings.components.common import env
 
 REDIS_HOST = c("REDIS_HOST")
 
