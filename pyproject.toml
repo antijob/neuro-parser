@@ -36,6 +36,8 @@ pyTelegramBotAPI = "^4.0.0"
 python-telegram-bot = "^13.7"
 numpy = "^1.22.1"
 joblib = "^1.1.0"
+python-decouple = "^3.6"
+docutils = "^0.19"
 
 [tool.poetry.dev-dependencies]
 nplusone = "^1.0.0"

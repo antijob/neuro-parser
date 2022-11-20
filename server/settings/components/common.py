@@ -12,12 +12,14 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 
 import os
 
-from server.settings.components import BASE_DIR, env, secret
+from decouple import config as c
+
+from server.settings.components import BASE_DIR, env
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
 
-SECRET_KEY = secret('django.key')
+SECRET_KEY = c('django.key')
 
 # Application definition:
 
@@ -84,19 +86,19 @@ DATABASES = {
         # Choices are: postgresql, mysql, sqlite3, oracle
         "ENGINE": "django.db.backends.postgresql",
         # Database name or filepath if using 'sqlite3':
-        "NAME": env("DB_NAME"),
+        "NAME": c('DB_NAME'),
         # You don't need these settings if using 'sqlite3':
-        "USER": env("DB_USER"),
-        "PASSWORD": secret("pg.%s.passwd" % env("DJANGO_ENV")),
-        "HOST": env("DB_HOST"),
-        "PORT": env("DB_PORT", default=5432, cast=int),
-        "CONN_MAX_AGE": env("CONN_MAX_AGE", cast=int, default=60),
+        "USER": c("DB_USER"),
+        "PASSWORD": c("PASSWORD"),
+        "HOST": c("DB_HOST"),
+        "PORT": c("DB_PORT", default=5432, cast=int),
+        "CONN_MAX_AGE": c("CONN_MAX_AGE", cast=int, default=60),
     },
 }
 
 EMAIL_HOST = env("EMAIL_HOST", default="localhost")
 EMAIL_HOST_USER = env("EMAIL_HOST_USER", default="")
-EMAIL_HOST_PASSWORD = secret("email.passwd", default="")
+EMAIL_HOST_PASSWORD = c("email.passwd", default="")
 EMAIL_PORT = env("EMAIL_PORT", default=25, cast=int)
 EMAIL_USE_TLS = env("EMAIL_USE_TLS", cast=bool, default=True)
 DEFAULT_FROM_EMAIL = 'runet.report@roskomsvoboda.org'

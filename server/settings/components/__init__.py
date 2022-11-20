@@ -5,12 +5,14 @@ Settings module
 """
 
 import os
-from pathlib import PurePath
+from pathlib import Path
+
+from decouple import config as c
 
 # Build paths inside the project like this: BASE_DIR.joinpath('some')
 # `pathlib` is better than writing:
 # BASE_DIR = dirname(dirname(dirname(dirname(__file__))))
-BASE_DIR = PurePath(__file__).parent.parent.parent.parent
+BASE_DIR = Path(__file__).parent.parent.parent.parent
 
 
 def err(msg, fatal=True):
@@ -45,20 +47,20 @@ def env(var, fatal=True, default=None, cast=keepcast):
     return cast(val)
 
 
-def secret(secret_name, fatal=True, default=None, cast=keepcast, stack_name=None):
-    """
-    Docker Secrets loader
-    """
-    val = None
-    if default is not None:
-        fatal = False
-        val = default
-    if stack_name is None:
-        stack_name = env("PROJECT")
-    secret_path = PurePath("/run/secrets/%s.%s.secret" % (stack_name, secret_name))
-    if os.path.isfile(secret_path):
-        with open(secret_path, "r") as secfile:
-            val = secfile.read().replace("\n", "")
-    else:
-        err('Secret "%s" ("%s") is missing' % (secret_name, secret_path), fatal)
-    return cast(val)
+# def secret(secret_name, fatal=True, default=None, cast=keepcast, stack_name=None):
+#     """
+#     Docker Secrets loader
+#     """
+#     val = None
+#     if default is not None:
+#         fatal = False
+#         val = default
+#     if stack_name is None:
+#         stack_name = c('PROJECT')
+#     secret_path = PurePath("/run/secrets/%s.%s.secret" % (stack_name, secret_name))
+#     if os.path.isfile(secret_path):
+#         with open(secret_path, "r") as secfile:
+#             val = secfile.read().replace("\n", "")
+#     else:
+#         err('Secret "%s" ("%s") is missing' % (secret_name, secret_path), fatal)
+#     return cast(val)
