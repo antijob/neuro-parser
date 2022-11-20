@@ -4,6 +4,6 @@
 Telegram bot configuration module
 """
 
-from server.settings.components import secret
+from decouple import config  as c
 
-TELEGRAM_BOT_TOKEN = secret("telegram.bot.token")
+TELEGRAM_BOT_TOKEN = c('TELEGRAM_BOT_TOKEN')

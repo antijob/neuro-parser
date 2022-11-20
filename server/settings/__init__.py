@@ -10,11 +10,15 @@ To change settings file:
 `DJANGO_ENV=production python manage.py runserver`
 """
 
+from decouple import config
+
+
 from split_settings.tools import include, optional
 
 from server.settings.components import env
 
-ENV = env('DJANGO_ENV')
+
+ENV = config('DJANGO_ENV')
 
 base_settings = [
     'components/common.py',

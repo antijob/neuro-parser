@@ -7,9 +7,10 @@ Sentry configuration module
 import sentry_sdk
 from sentry_sdk.integrations.django import DjangoIntegration
 
-from server.settings.components import env, secret
+from decouple import config as c
 
-SENTRY_DSN = secret('sentry.%s.dsn' % env('DJANGO_ENV'))
+
+SENTRY_DSN = c('SENTRY_DSN')
 
 sentry_sdk.init(
     dsn=SENTRY_DSN,

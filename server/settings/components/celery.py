@@ -4,7 +4,7 @@
 Celery module
 """
 
-from server.settings.components import env, secret
+from decouple import config as c 
 
 
-CELERY_BROKER_URL = 'redis://{host}:6379/0'.format(host=env('REDIS_HOST'))
+CELERY_BROKER_URL = 'redis://{host}:6379/0'.format(host=c('REDIS_HOST'))
