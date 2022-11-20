@@ -15,8 +15,6 @@ from decouple import config
 
 from split_settings.tools import include, optional
 
-from server.settings.components import env
-
 
 ENV = config('DJANGO_ENV')
 
