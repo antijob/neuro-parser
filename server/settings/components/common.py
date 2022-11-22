@@ -76,7 +76,7 @@ MIDDLEWARE = (
 
 ROOT_URLCONF = 'server.urls'
 
-WSGI_APPLICATION = 'server.wsgi.application'
+# WSGI_APPLICATION = 'server.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
