@@ -38,6 +38,7 @@ numpy = "^1.22.1"
 joblib = "^1.1.0"
 python-decouple = "^3.6"
 docutils = "^0.19"
+scikit-learn = "^1.2.0"
 
 [tool.poetry.dev-dependencies]
 nplusone = "^1.0.0"
