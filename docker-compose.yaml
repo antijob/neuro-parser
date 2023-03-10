@@ -1,12 +1,17 @@
 services:
   db:
-    image: postgres
+    image: postgres:13.4-alpine
     volumes:
       - ./data/db:/var/lib/postgresql/data
     environment:
-      - POSTGRES_DB=neural-parser
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD={POSTGRES_PASSWORD}
+      - POSTGRES_HOST_AUTH_METHOD=trust
+    env_file:
+      - .env
+    networks:
+      - djangonetwork
   web:
     build: .
     command: bash -c "python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
@@ -14,9 +19,22 @@ services:
       - .:/code
     ports:
       - "8000:8000"
+    env_file:
+      - .env
     environment:
-      - POSTGRES_NAME=postgres
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_NAME=${POSTGRES_NAME}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     depends_on:
       - db
+    networks:
+      - djangonetwork
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - djangonetwork
+networks:
+  djangonetwork:
+    driver: bridge

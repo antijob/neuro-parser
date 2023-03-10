@@ -24,7 +24,7 @@ More about [Pipenv](https://github.com/kennethreitz/pipenv) you can read at [off
 
 ## Running
 
-Firstly modify `config/.env` and create database.
+Firstly modify `config/.env` and create database and replase to apps.
 
 
 After that run migrations:
@@ -40,3 +40,4 @@ If you want to run it on local machine, just:
 ```
 
 **Note**: Don't forget about migrations.
+

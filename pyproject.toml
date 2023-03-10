@@ -39,6 +39,11 @@ joblib = "^1.1.0"
 python-decouple = "^3.6"
 docutils = "^0.19"
 scikit-learn = "^1.2.0"
+pandas = "^1.5.2"
+torch = "^1.12.0"
+transformers = "^4.25.1"
+nltk = "^3.8.1"
+update = "^0.0.1"
 
 [tool.poetry.dev-dependencies]
 nplusone = "^1.0.0"

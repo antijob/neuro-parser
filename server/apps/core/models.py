@@ -550,6 +550,8 @@ class Article(models.Model):
             self.save()
             return
         words = normalize_text(self.text)
+
+        
         if not words:
             self.relevance = -1
         else:
@@ -558,8 +560,12 @@ class Article(models.Model):
                 self.source.algorithm, 'cosine')
                          if self.source
                          else cosine)
-            self.relevance = (
-                    algorithm.rate(words) * settings.RELEVANCE_TRESHOLD)
+            if(self.source.algorithm == 'cosine'):
+                self.relevance = (
+                        algorithm.rate(self.text) * settings.RELEVANCE_TRESHOLD)
+            else:
+                self.relevance = (
+                        algorithm.rate(words) * settings.RELEVANCE_TRESHOLD)
         self.save()
 
     def create_incident(self):
