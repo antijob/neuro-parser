@@ -13,7 +13,7 @@ services:
       - djangonetwork
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.traefik.rule=Host(`report.antijob.net`)"
+      - "traefik.http.routers.traefik.rule=Host(`traefik.${HOST}`)"
       - "traefik.http.routers.traefik.tls=true"
       - "traefik.http.routers.traefik.tls.certresolver=letsencrypt"
   db:
@@ -48,7 +48,7 @@ services:
       - djangonetwork
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.web.rule=Host(`example.com`) && PathPrefix(`/`)"
+      - "traefik.http.routers.web.rule=Host(`${HOST}`) && PathPrefix(`/`)"
       - "traefik.http.services.web.loadbalancer.server.port=8000"
       - "traefik.http.routers.web.tls=true"
       - "traefik.http.routers.web.tls.certresolver=letsencrypt"
