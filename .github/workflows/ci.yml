@@ -1,0 +1,59 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  check-secrets:
+    name: Check for exposed secrets
+    runs-on: 'ubuntu-latest'
+    steps:
+      - uses: actions/checkout@v3
+      - run: |
+          docker run --rm --name=deepfence-secretscanner \
+            -v $(pwd):/deepfence/mnt \
+            deepfenceio/deepfence_secret_scanner:latest \
+            --host-mount-path /deepfence/mnt --local /deepfence/mnt
+
+  build:
+    name: Build production
+    runs-on: [ 'self-hosted', 'report', 'production' ]
+    if: github.ref == 'refs/heads/main'
+    needs:
+      - check-secrets
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+
+      - name: Prepare .env
+        run: |
+          cd code
+          cp .env.template .env
+        env:
+          POSTGRES_USER=${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
+          SENTRY_DSN=${{ secrets.SENTRY_DSN }}
+          TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }}
+          DJANGO_KEY=${{secrets.DJANGO_KEY}}
+      - name: Build image
+        run: docker-compose build
+
+  start:
+    name: Start production
+    needs:
+      - build
+    runs-on: [ 'self-hosted', 'report', 'production' ]
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Approve deployment
+        uses: trstringer/manual-approval@v1
+        with:
+          secret: ${{ github.TOKEN }}
+          approvers: Vldln,person63846
+          minimum-approvals: 1
+
+      - name: Start the app
+        run: |
+          docker-compose up -d

@@ -6,7 +6,7 @@ Caching settings module
 
 from decouple import config as c
 
-
+c.path='../../../.env'
 REDIS_HOST = c("REDIS_HOST")
 
 CACHES = {

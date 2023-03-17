@@ -18,8 +18,8 @@ from server.settings.components import BASE_DIR
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
-
-SECRET_KEY = c('django.key')
+c.path='../../../.env'
+SECRET_KEY = c('DJANGO_KEY')
 
 # Application definition:
 
@@ -99,7 +99,7 @@ DATABASES = {
 EMAIL_HOST = c("EMAIL_HOST", default="localhost")
 EMAIL_HOST_USER = c("EMAIL_HOST_USER", default="")
 EMAIL_HOST_PASSWORD = c("email.passwd", default="")
-EMAIL_PORT = c("EMAIL_PORT", cast=int, default=25)  
+EMAIL_PORT = c("EMAIL_PORT", cast=int, default=25)
 EMAIL_USE_TLS = c("EMAIL_USE_TLS", cast=bool, default=True)
 DEFAULT_FROM_EMAIL = 'runet.report@roskomsvoboda.org'
 

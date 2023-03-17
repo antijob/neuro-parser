@@ -3,7 +3,7 @@
 """
 Celery module
 """
-
+c.path='../../../.env'
 from decouple import config as c
 
 
