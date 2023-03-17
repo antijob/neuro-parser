@@ -1,0 +1,18 @@
+logLevel = "ERROR"
+
+[api]
+  dashboard = true
+
+[entryPoints]
+  [entryPoints.http]
+    address = ":80"
+  [entryPoints.https]
+    address = ":443"
+
+[acme]
+  email = "you@example.com"
+  storage = "acme.json"
+  entryPoint = "https"
+  onHostRule = true
+  [acme.httpChallenge]
+    entryPoint = "http"

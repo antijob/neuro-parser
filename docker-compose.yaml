@@ -1,4 +1,21 @@
 services:
+  traefik:
+    image: "traefik:v2.4"
+    container_name: "traefik"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "./traefik.toml:/traefik.toml:ro"
+      - "./acme.json:/acme.json"
+    networks:
+      - djangonetwork
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.traefik.rule=Host(`report.antijob.net`)"
+      - "traefik.http.routers.traefik.tls=true"
+      - "traefik.http.routers.traefik.tls.certresolver=letsencrypt"
   db:
     image: postgres:13.4-alpine
     volumes:
@@ -6,8 +23,8 @@ services:
     environment:
       - POSTGRES_DB=${POSTGRES_DB}
       - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD={POSTGRES_PASSWORD}
-      - POSTGRES_HOST_AUTH_METHOD=trust
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_HOST_AUTH_METHOD=md5
     env_file:
       - .env
     networks:
@@ -29,10 +46,24 @@ services:
       - db
     networks:
       - djangonetwork
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.web.rule=Host(`example.com`) && PathPrefix(`/`)"
+      - "traefik.http.services.web.loadbalancer.server.port=8000"
+      - "traefik.http.routers.web.tls=true"
+      - "traefik.http.routers.web.tls.certresolver=letsencrypt"
   redis:
     image: redis:alpine
-    ports:
-      - "6379:6379"
+    expose:
+      - "6379"
+    networks:
+      - djangonetwork
+  celery:
+    build: .
+    command: celery -A server worker --loglevel=info
+    restart: always
+    depends_on:
+      - redis
     networks:
       - djangonetwork
 networks:
