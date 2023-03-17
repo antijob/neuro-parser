@@ -19,7 +19,7 @@ jobs:
 
   build:
     name: Build production
-    runs-on: [ 'self-hosted', 'report', 'production' ]
+    runs-on: [ 'self-hosted', 'antijob-report', 'production' ]
     if: github.ref == 'refs/heads/main'
     needs:
       - check-secrets
