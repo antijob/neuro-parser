@@ -44,7 +44,7 @@ jobs:
     name: Start production
     needs:
       - build
-    runs-on: [ 'self-hosted', 'report', 'production' ]
+    runs-on: [ 'self-hosted', 'antijob-report', 'production' ]
     if: github.ref == 'refs/heads/main'
     steps:
       - name: Approve deployment
