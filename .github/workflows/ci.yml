@@ -36,7 +36,7 @@ jobs:
           POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
           SENTRY_DSN=${{ secrets.SENTRY_DSN }}
           TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }}
-          DJANGO_KEY=${{secrets.DJANGO_KEY}}
+          DJANGO_KEY=${{ secrets.DJANGO_KEY}}
       - name: Build image
         run: docker-compose build
 
