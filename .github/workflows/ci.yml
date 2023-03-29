@@ -8,7 +8,7 @@ on:
 jobs:
   check-secrets:
     name: Check for exposed secrets
-    runs-on: 'ubuntu-latest'
+    runs-on: "ubuntu-latest"
     steps:
       - uses: actions/checkout@v3
       - run: |
@@ -19,7 +19,7 @@ jobs:
 
   build:
     name: Build production
-    runs-on: [ 'self-hosted', 'antijob-report', 'production' ]
+    runs-on: ["self-hosted", "antijob-report", "production"]
     if: github.ref == 'refs/heads/main'
     needs:
       - check-secrets
@@ -28,9 +28,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Prepare .env
-        run: |
-          cd code
-          cp .env.template .env
+        run: cp .env.template .env
         env:
           POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
           POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
@@ -44,7 +42,7 @@ jobs:
     name: Start production
     needs:
       - build
-    runs-on: [ 'self-hosted', 'antijob-report', 'production' ]
+    runs-on: ["self-hosted", "antijob-report", "production"]
     if: github.ref == 'refs/heads/main'
     steps:
       - name: Approve deployment
