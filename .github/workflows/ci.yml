@@ -28,8 +28,8 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Prepare .env
-        run: cp .env.template .env
         run: |
+          cp .env.template .env
           sed -i \
             -e s,^POSTGRES_USER=.*,POSTGRES_USER=$POSTGRES_USER, \
             -e s,^POSTGRES_PASSWORD=.*,POSTGRES_PASSWORD=$POSTGRES_PASSWORD, \
