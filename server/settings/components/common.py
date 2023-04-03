@@ -18,7 +18,7 @@ from server.settings.components import BASE_DIR
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
-c.path='../../../.env'
+c.path = '../../../.env'
 SECRET_KEY = c('DJANGO_KEY')
 
 # Application definition:
@@ -86,10 +86,10 @@ DATABASES = {
         # Choices are: postgresql, mysql, sqlite3, oracle
         "ENGINE": "django.db.backends.postgresql",
         # Database name or filepath if using 'sqlite3':
-        "NAME": c('DB_NAME'),
+        "NAME": c('POSTGRES_DB'),
         # You don't need these settings if using 'sqlite3':
-        "USER": c("DB_USER"),
-        "PASSWORD": c("PASSWORD"),
+        "USER": c("POSTGRES_USER"),
+        "PASSWORD": c("POSTGRES_PASSWORD"),
         "HOST": c("DB_HOST"),
         "PORT": c("DB_PORT", default=5432, cast=int),
         "CONN_MAX_AGE": c("CONN_MAX_AGE", cast=int, default=60),
