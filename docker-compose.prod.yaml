@@ -3,17 +3,26 @@ services:
     image: "traefik:v2.4"
     container_name: "traefik"
     ports:
-      - 8008:80
-      - 8081:8080
+      - 80:80
+      - 443:443
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
-      - "./traefik.dev.toml:/traefik.toml:ro"
+      - "./traefik-public-certificates:/certificates"
+      - "$PWD/traefik.toml:/etc/traefik/traefik.toml"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.dashboard.rule=Host(`${HOST}`)"
+      - "traefik.http.routers.dashboard.tls=true"
+      - "traefik.http.routers.dashboard.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.dashboard.service=api@internal"
+      - "traefik.http.routers.dashboard.middlewares=auth"
+      - "traefik.http.middlewares.auth.basicauth.users=testuser:$$apr1$$jIKW.bdS$$eKXe4Lxjgy/rH65wP1iQe1"
     networks:
       - djangonetwork
   db:
     image: postgres:13.4-alpine
     volumes:
-      - ~/.parser/data/db:/var/lib/postgresql/data
+      - postgres_data_prod:/var/lib/postgresql/data
     environment:
       - POSTGRES_DB=${POSTGRES_DB}
       - POSTGRES_USER=${POSTGRES_USER}
@@ -33,16 +42,20 @@ services:
     env_file:
       - .env
     environment:
+      - DEBUG=0
       - POSTGRES_NAME=${POSTGRES_NAME}
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - DJANGO_ALLOWED_HOSTS=${HOST}
     depends_on:
       - db
     networks:
       - djangonetwork
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.django.rule=Host(`django.localhost`)"
+      - "traefik.http.routers.django.rule=Host(`${HOST}`)"
+      - "traefik.http.routers.django.tls=true"
+      - "traefik.http.routers.django.tls.certresolver=letsencrypt"
   redis:
     image: redis:alpine
     expose:
@@ -60,3 +73,7 @@ services:
 networks:
   djangonetwork:
     driver: bridge
+
+volumes:
+  postgres_data_prod:
+  traefik-public-certificates:

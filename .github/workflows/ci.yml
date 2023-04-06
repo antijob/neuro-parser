@@ -44,7 +44,7 @@ jobs:
           TELEGRAM_BOT_TOKEN: "${{ secrets.TELEGRAM_BOT_TOKEN }}"
           DJANGO_KEY: "${{ secrets.DJANGO_KEY}}"
       - name: Build image
-        run: docker-compose build
+        run: docker-compose -f docker-compose.prod.yml build
 
   start:
     name: Start production
@@ -62,4 +62,4 @@ jobs:
 
       - name: Start the app
         run: |
-          docker-compose up -d
+          docker-compose -f docker-compose.prod.yml up -d
