@@ -14,7 +14,7 @@
 [accessLog]
 
 [api]
-dashboard = true
+dashboard = false
 
 [providers]
   [providers.docker]

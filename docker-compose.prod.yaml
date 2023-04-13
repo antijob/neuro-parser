@@ -11,12 +11,10 @@ services:
       - "$PWD/traefik.toml:/etc/traefik/traefik.toml"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.dashboard.rule=Host(`${HOST}`)"
-      - "traefik.http.routers.dashboard.tls=true"
-      - "traefik.http.routers.dashboard.tls.certresolver=letsencrypt"
-      - "traefik.http.routers.dashboard.service=api@internal"
-      - "traefik.http.routers.dashboard.middlewares=auth"
-      - "traefik.http.middlewares.auth.basicauth.users=testuser:$$apr1$$jIKW.bdS$$eKXe4Lxjgy/rH65wP1iQe1"
+      - "traefik.http.routers.web.rule=Host(`${HOST}`)"
+      - "traefik.http.routers.web.tls=true"
+      - "traefik.http.routers.web.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.web.service=api@internal"
     networks:
       - djangonetwork
   db:
@@ -34,7 +32,7 @@ services:
       - djangonetwork
   web:
     build: .
-    command: bash -c 'while !</dev/tcp/db/5432; do sleep 1; done; python manage.py runserver 0.0.0.0:8000'
+    command: bash -c 'while !</dev/tcp/db/5432; do sleep 1; done; gunicorn app.wsgi'
     volumes:
       - .:/code
     expose:
@@ -42,7 +40,7 @@ services:
     env_file:
       - .env
     environment:
-      - DEBUG=0
+      - DEBUG=False
       - POSTGRES_NAME=${POSTGRES_NAME}
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
