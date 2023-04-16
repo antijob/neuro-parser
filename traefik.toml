@@ -13,6 +13,9 @@
 
 [accessLog]
 
+[log]
+level = "DEBUG"
+
 [api]
 dashboard = false
 
