@@ -21,7 +21,7 @@ dashboard = false
     exposedByDefault = false
 
 [certificatesResolvers.letsencrypt.acme]
-  email = "your@email.com"
+  email = "info@antijob.net"
   storage = "/certificates/acme.json"
   [certificatesResolvers.letsencrypt.acme.httpChallenge]
     entryPoint = "web"
