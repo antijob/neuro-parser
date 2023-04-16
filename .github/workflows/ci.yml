@@ -63,4 +63,4 @@ jobs:
       - name: Start the app
         run: |
           docker-compose -f docker-compose.prod.yaml up -d
-          docker-compose exec web python manage.py migrate
+          docker-compose -it exec web python manage.py migrate
