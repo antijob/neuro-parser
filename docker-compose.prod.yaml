@@ -32,7 +32,7 @@ services:
       - djangonetwork
   web:
     build: .
-    command: bash -c 'while !</dev/tcp/db/5432; do sleep 1; done; gunicorn app.wsgi'
+    command: bash -c 'while !</dev/tcp/db/5432; do sleep 1; done; gunicorn server.wsgi'
     volumes:
       - .:/code
     expose:
