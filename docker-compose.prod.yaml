@@ -1,6 +1,8 @@
 services:
   traefik:
-    image: "traefik:v2.4"
+    build:
+      context: .
+      dockerfile: Dockerfile.traefik
     container_name: "traefik"
     ports:
       - 80:80
@@ -8,7 +10,6 @@ services:
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
       - "traefik-public-certificates:/certificates"
-      - "$PWD/traefik.toml:/etc/traefik/traefik.toml"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.dashboard.rule=Host(`${TRAEFIK_HOST}`)"
@@ -34,7 +35,7 @@ services:
       - djangonetwork
   web:
     build: .
-    command: bash -c 'while !</dev/tcp/db/5432; do sleep 1; done; gunicorn server.wsgi'
+    command: bash -c 'while !</dev/tcp/db/5432; do sleep 1;done; gunicorn --bind 0.0.0.0:8000 server.wsgi'
     volumes:
       - .:/code
     expose:

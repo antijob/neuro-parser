@@ -42,7 +42,7 @@ services:
       - djangonetwork
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.django.rule=Host(`django.localhost`)"
+      - "traefik.http.routers.django.rule=Host(`${HOST}`)"
   redis:
     image: redis:alpine
     expose:
