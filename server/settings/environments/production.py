@@ -19,7 +19,7 @@ ALLOWED_HOSTS = [
 
 # Adding STATIC_ROOT to collect static files via 'collectstatic'
 STATIC_ROOT = BASE_DIR.joinpath('public', 'static')
-
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 MEDIA_ROOT = BASE_DIR.joinpath('public', 'uploads')
 
 _PASS = 'django.contrib.auth.password_validation'
