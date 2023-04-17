@@ -38,6 +38,7 @@ services:
     command: bash -c 'while !</dev/tcp/db/5432; do sleep 1;done; gunicorn --bind 0.0.0.0:8000 server.wsgi'
     volumes:
       - .:/code
+      - ~/home/${USER}/data:/server/apps/core/logic/classificator/data
     expose:
       - 8000
     env_file:
