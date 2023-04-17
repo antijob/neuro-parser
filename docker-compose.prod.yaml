@@ -34,7 +34,9 @@ services:
     networks:
       - djangonetwork
   web:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
     command: bash -c 'while !</dev/tcp/db/5432; do sleep 1;done; gunicorn --bind 0.0.0.0:8000 server.wsgi'
     volumes:
       - .:/code
