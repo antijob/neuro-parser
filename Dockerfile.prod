@@ -52,6 +52,8 @@ COPY --from=builder /usr/src/app/wheels /wheels
 COPY --from=builder /code/requirements.txt .
 RUN pip install --upgrade pip
 RUN pip install --no-cache /wheels/*
+RUN python -m nltk.downloader punkt
+RUN python -m nltk.downloader stopwords
 
 # copy project
 COPY . $APP_HOME
