@@ -38,10 +38,21 @@ def apply_tags():
 
 
 def grab_news():
+    print("UPDATE SOURCES")
     update_sources()
+
+    print("DOWNLOAD ART")
     download_articles()
+
+    print("RATE ART")
     rate_articles()
+
+    print("CREATE INC")
     create_incidents()
+
+    print("APPLY TAGS")
     apply_tags()
+
+    print("DELETE DUPES")
     delete_duplicates()
 
