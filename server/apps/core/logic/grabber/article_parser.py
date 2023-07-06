@@ -2,11 +2,12 @@ import datetime
 import re
 from collections import namedtuple
 from random import choice
-
 import dateparser
 import requests
 from lxml import cssselect, etree
 from lxml.html.clean import Cleaner
+from goose3 import Goose
+from goose3.configuration import Configuration
 
 
 MIN_WORDS_IN_SENTENCE = 5
@@ -65,6 +66,9 @@ ArticleData = namedtuple('ArticleData', 'title text date final_url')
 
 
 def get_document(url, clean=False):
+    """ Get document by given url,
+        cleans it if clean = True and return etree document
+    """
     headers = random_headers()
     try:
         if url.startswith('https://t.co/'):
@@ -97,8 +101,15 @@ def decoded(response):
 
 
 def random_headers():
-    return {'User-Agent': choice(USER_AGENTS),
+    ua = choice(USER_AGENTS)
+    print('UA')
+    print(type(ua))
+    head = {'User-Agent': ua,
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8'}
+    print(head, type(head), sep='\n\n')
+    # return {'User-Agent': choice(USER_AGENTS),
+            # 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8'}
+    return head
 
 
 def remove_double_spaces(text):
@@ -264,7 +275,7 @@ def find_node_with_article(tree):
         return longest
 
 
-def get_article(url):
+# def get_article_old(url):
     """Returns title and text of article."""
 
     tree = get_document(url, clean=True)
@@ -277,6 +288,8 @@ def get_article(url):
         title_tag = tree.find(".//title")
         title = title_tag.text if title_tag is not None else ''
 
+    # looking by article tag, then by lins of known classes,
+    # then by article class and then by longest text of node
     article = find_article_tag(tree)
     if article is None:
         article = find_by_known_class(tree)
@@ -293,6 +306,24 @@ def get_article(url):
     date = extract_date(tree, article, final_url)
     return ArticleData(title, text, date, final_url)
 
+def get_article(url) -> ArticleData:
+    """Get url of article
+        Returns title, text, date, url as a namedtuple
+    """
+    config = Configuration()
+    config.strict = False  # turn of strict exception handling
+    # config.browser_user_agent = random_headers() # set the browser agent string
+    config.http_timeout = 8  # set http timeout in seconds
+
+    with Goose(config) as g:
+        article = g.extract(url=url)
+        title = article.title
+        text = article.cleaned_text
+        final_url = article.final_url
+
+    date = extract_date(article.doc, article.top_node, final_url)
+
+    return ArticleData(title, text, date, final_url)
 
 def find_article_tag(node):
     if node is None:

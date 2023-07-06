@@ -1,26 +1,26 @@
-## Prerequisites
-
-You will need:
-
-- `Python 3.7` (see `Pipfile` for full version)
-- `PostgreSQL` with version `9.6`
+UPD on 06.07.23
+I deleted almost all previous stuff cause it's not very usable now
 
 ## Development
 
-When developing locally, we use:
-
-- [`editorconfig`](http://editorconfig.org/) plugin (**required**)
-- [`pipenv`](https://github.com/kennethreitz/pipenv) (**required**)
-- `pycharm 2018` (recommended)
-
-## Dependencies and Virtual Environment
+For managing python packages we use ['poetry'](https://python-poetry.org/docs/)
 
 ```
-pipenv install
+# install everything
+poetry install
+
+# update 
+poetry update
+
+# go to venv
+poetry shell
+
+# generate requirements.txt
+poetry export --format requirements.txt --without-hashes --output requirements.txt
 ```
 
-More about [Pipenv](https://github.com/kennethreitz/pipenv) you can read at [official documentation](https://pipenv.readthedocs.io/en/latest/) of [Pipenv](https://github.com/kennethreitz/pipenv).
-
+docker still use generated requirements.txt file
+git should contain both pyproject.toml and poetry.lock files 
 
 ## Running
 

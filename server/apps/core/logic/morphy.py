@@ -1,6 +1,6 @@
 import re
 
-import pymorphy2
+import pymorphy3
 
 import string
 
@@ -13,7 +13,7 @@ nltk.download('stopwords')
 
 USEFULL_GRAMMEMES = ['NOUN', 'VERB', 'ADJF', 'ADJS', 'INFN',
                      'PRTF', 'PRTS', 'GRND', 'ADVB']
-morphy = pymorphy2.MorphAnalyzer().parse
+morphy = pymorphy3.MorphAnalyzer().parse
 
 
 def normalize_words(words):
