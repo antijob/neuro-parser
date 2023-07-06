@@ -3,7 +3,7 @@ import os
 from django.conf import settings
 import joblib
 import pandas as pd
-import torch
+# import torch
 from transformers import BertForSequenceClassification, AutoTokenizer
 import argparse
 import logging
@@ -14,6 +14,9 @@ DATA_DIR = os.path.join(settings.BASE_DIR, 'server', 'apps',
 
 
 def rate(normalized_text):
+    """ Temporary disabled because of torch"""
+    return True
+
     modelname = 'atiwar_fired'
     tokenizer = AutoTokenizer.from_pretrained(os.path.join(DATA_DIR, modelname), use_fast=False)
 
@@ -28,9 +31,8 @@ def rate(normalized_text):
         max_length=256,
     )
     input_ids = encoding["input_ids"]
-    dataset = torch.utils.data.TensorDataset(
-        input_ids,)
-    model_iter = torch.utils.data.DataLoader(dataset, batch_size=1, shuffle=False)
+    # dataset = torch.utils.data.TensorDataset(input_ids,)
+    # model_iter = torch.utils.data.DataLoader(dataset, batch_size=1, shuffle=False)
     for text in tqdm.tqdm(model_iter):
         outputs = model(text[0])
         predictions = outputs.logits
