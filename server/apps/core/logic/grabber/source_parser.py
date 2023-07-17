@@ -4,6 +4,9 @@ from urllib.parse import urlparse, urljoin, unquote
 from django.conf import settings
 from lxml import cssselect, etree
 
+import feedparser
+from icecream import ic
+
 from .article_parser import (
     count_links,
     get_document,
@@ -92,6 +95,7 @@ def extract_html_urls(source_url, document):
         if is_path_ignored(url):
             continue
         if not is_rss_link(url):
+            print(url)
             yield url
 
 
@@ -144,18 +148,24 @@ def is_correct_article_link(url):
 
 def find_rss_urls(source_url, document):
     """Finds URLs to rss-files on page."""
-
+    ic('find_rss_urls')
+    ic(source_url, document)
     if document is None:
+        ic('return empty')
         return []
     links = cssselect.CSSSelector('a')(document)
+    links += cssselect.CSSSelector('link')(document)
+    ic(links)
     for link in links:
         url = link.get('href')
         absolute_url = get_absolute_url(source_url, url)
         if is_rss_link(absolute_url):
+            ic(absolute_url)
             yield absolute_url
 
 
 def is_rss_link(url):
+    ic("is_rss_link")
     path = str(urlparse(url).path)
     return 'rss' in path or path.endswith('.xml') or 'feed' in path
 
@@ -177,19 +187,37 @@ def find_articles_urls_in_rss(document):
             yield url
 
 
-def extract_rss_urls(source_url, document):
-    """Extracts article urls using RSS."""
+# def extract_rss_urls(source_url, document):
+#     """Extracts article urls using RSS."""
+#     if document is None:
+#         return []
+#     rss_urls = find_rss_urls(source_url, document)
+#     for rss_url in rss_urls:
+#         rss_document = get_document(rss_url)
+#         article_urls = list(find_articles_urls_in_rss(rss_document))
+#         absolute_urls = (get_absolute_url(source_url, url)
+#                          for url in article_urls)
+#         for article_url in absolute_urls:
+#             if is_correct_article_link(article_url):
+#                 yield article_url
 
+def extract_rss_urls(source_url, document):
+    """Extracts article urls using RSS"""
+    ic('extract_rss_urls')
     if document is None:
         return []
     rss_urls = find_rss_urls(source_url, document)
     for rss_url in rss_urls:
-        rss_document = get_document(rss_url)
-        article_urls = list(find_articles_urls_in_rss(rss_document))
+        # parse each rss_url for article links
+        # ic(rss_url)
+        data_parsed = feedparser.parse(rss_url)
+        article_urls = [art.link for art in data_parsed.entries]
+        # ic(article_urls)
         absolute_urls = (get_absolute_url(source_url, url)
                          for url in article_urls)
         for article_url in absolute_urls:
             if is_correct_article_link(article_url):
+                # ic(article_url)
                 yield article_url
 
 
@@ -198,6 +226,7 @@ def unquote_urls(urls):
 
 
 def extract_all_news_urls(url):
+    ic('extract_all_news_urls')
     document = get_document(url)
     if document is None:
         return

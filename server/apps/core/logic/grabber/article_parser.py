@@ -8,6 +8,7 @@ from lxml import cssselect, etree
 from lxml.html.clean import Cleaner
 from goose3 import Goose
 from goose3.configuration import Configuration
+from icecream import ic
 
 
 MIN_WORDS_IN_SENTENCE = 5
@@ -101,12 +102,12 @@ def decoded(response):
 
 
 def random_headers():
+    ic('random_headers')
     ua = choice(USER_AGENTS)
-    print('UA')
-    print(type(ua))
+    # print(type(ua))
     head = {'User-Agent': ua,
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8'}
-    print(head, type(head), sep='\n\n')
+    # print(head, type(head), sep='\n\n')
     # return {'User-Agent': choice(USER_AGENTS),
             # 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8'}
     return head
@@ -276,35 +277,35 @@ def find_node_with_article(tree):
 
 
 # def get_article_old(url):
-    """Returns title and text of article."""
+    # """Returns title and text of article."""
 
-    tree = get_document(url, clean=True)
-    if tree is None:
-        return
+    # tree = get_document(url, clean=True)
+    # if tree is None:
+    #     return
 
-    final_url = tree.get("url")
-    title = extract_heading(tree)
-    if not title:
-        title_tag = tree.find(".//title")
-        title = title_tag.text if title_tag is not None else ''
+    # final_url = tree.get("url")
+    # title = extract_heading(tree)
+    # if not title:
+    #     title_tag = tree.find(".//title")
+    #     title = title_tag.text if title_tag is not None else ''
 
-    # looking by article tag, then by lins of known classes,
-    # then by article class and then by longest text of node
-    article = find_article_tag(tree)
-    if article is None:
-        article = find_by_known_class(tree)
-    if article is None:
-        article = find_article_class(tree)
-    if article is None:
-        article = find_node_with_article(tree)
-    if article is None:
-        return
+    # # looking by article tag, then by lins of known classes,
+    # # then by article class and then by longest text of node
+    # article = find_article_tag(tree)
+    # if article is None:
+    #     article = find_by_known_class(tree)
+    # if article is None:
+    #     article = find_article_class(tree)
+    # if article is None:
+    #     article = find_node_with_article(tree)
+    # if article is None:
+    #     return
 
-    text = text_content(article,
-                        include_links=True,
-                        long_text_only=False).strip()
-    date = extract_date(tree, article, final_url)
-    return ArticleData(title, text, date, final_url)
+    # text = text_content(article,
+    #                     include_links=True,
+    #                     long_text_only=False).strip()
+    # date = extract_date(tree, article, final_url)
+    # return ArticleData(title, text, date, final_url)
 
 def get_article(url) -> ArticleData:
     """Get url of article
