@@ -39,11 +39,16 @@ slovnet = "==0.4.0"
 python-telegram-bot = "==13.10"
 pillow = "==9.0.0"
 whitenoise = "==6.3.0"
+bcrypt = "==3.2.0"
 goose3 = "^3.1"
+feedparser = "^6"
 scikit-learn = { version = "==1.2.0", optional = false }
 
 [tool.poetry.extras]
 transformers = ["scikit-learn"]
+
+[tool.poetry.group.dev.dependencies]
+icecream = "*"
 
 [build-system]
 requires = ["poetry-core"]
