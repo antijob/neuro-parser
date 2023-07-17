@@ -551,7 +551,7 @@ class Article(models.Model):
             return
         words = normalize_text(self.text)
 
-        
+
         if not words:
             self.relevance = -1
         else:
