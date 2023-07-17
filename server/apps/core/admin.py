@@ -43,7 +43,7 @@ class UserIncidentAdmin(admin.ModelAdmin):
 
 @admin.register(Article)
 class ArticleAdmin(admin.ModelAdmin):
-    list_display = ('url', 'is_downloaded', 'title', 'relevance')
+    list_display = ('url', 'publication_date', 'is_downloaded', 'title', 'relevance')
 
 
 @admin.register(Source)
