@@ -20,7 +20,8 @@ from server.apps.core.models import (
     Post,
     Stage,
     Tag,
-    UserIncident)
+    UserIncident,
+    IncidentType)
 
 
 class BootstrapDatePicker(forms.DateInput):
@@ -152,7 +153,7 @@ class UserIncidentUpdateForm(forms.ModelForm):
 
     incident_type = forms.ChoiceField(
         label='', required=False,
-        choices=UserIncident.INCIDENT_TYPES,
+        choices=IncidentType.get_choices(),
         widget=forms.Select(
             attrs={
                 'class': 'form-control'
@@ -278,7 +279,7 @@ class MediaIncidentCreateForm(forms.ModelForm):
     )
     incident_type = forms.ChoiceField(
         label='Категория', required=False,
-        choices=MediaIncident.INCIDENT_TYPES,
+        choices=IncidentType.get_choices(),
         widget=forms.Select(
             attrs={
                 'class': 'form-control'
@@ -364,7 +365,7 @@ class MediaIncidentUpdateForm(forms.ModelForm):
 
     incident_type = forms.ChoiceField(
         label='Категория', required=False,
-        choices=MediaIncident.INCIDENT_TYPES,
+        choices=IncidentType.get_choices(),
         widget=forms.Select(
             attrs={
                 'class': 'form-control'
@@ -599,7 +600,7 @@ class UserIncidentCreateForm(forms.ModelForm):
 
     incident_type = forms.ChoiceField(
         label='Категория', required=False,
-        choices=MediaIncident.INCIDENT_TYPES,
+        choices=IncidentType.get_choices(),
         widget=forms.Select(
             attrs={
                 'class': 'form-control'

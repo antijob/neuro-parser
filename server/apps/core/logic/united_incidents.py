@@ -74,7 +74,7 @@ class UnitedTablesData:
             url = (row["urls"][0]
                    if row["urls"]
                    else "")
-            category = dict(MediaIncident.INCIDENT_TYPES)[row["incident_type"]]
+            category = IncidentType.objects.get(id=row["incident_type"]) 
             count = row["count"]
             date = row["create_date"]
             yield (title, region, url, category, count, date)

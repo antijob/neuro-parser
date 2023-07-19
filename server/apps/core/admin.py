@@ -16,6 +16,7 @@ from server.apps.core.models import (
     Source,
     Stage,
     Tag,
+    IncidentType,
     UserIncident,
     UserIncidentFile,
 )
@@ -29,6 +30,11 @@ admin.site.register(Tag)
 admin.site.register(UserIncidentFile)
 admin.site.register(Document)
 
+
+@admin.register(IncidentType)
+class IncidentTypeAdmin(admin.ModelAdmin):
+    list_display = ('description', 'zip_file')
+    
 
 @admin.register(MediaIncident)
 class MediaIncidentAdmin(admin.ModelAdmin):

@@ -27,8 +27,57 @@ from server.apps.core.logic.grabber.classificator import (
 from server.apps.core.logic.grabber.region import region_code
 from server.apps.core.logic.morphy import normalize_text, normalize_words
 from server.apps.users.models import User
+from server.settings.components.common import BASE_DIR
 
 BASE_URL = "https://runet.report"
+
+
+
+def unzip_file(file_path, extract_path):
+    import zipfile
+
+    with zipfile.ZipFile(file_path, 'r') as zip_ref:
+        zip_ref.extractall(extract_path)
+
+
+class IncidentType(models.Model):
+    zip_dir   = BASE_DIR.joinpath('models', 'zip_data')
+    model_dir = BASE_DIR.joinpath('models', 'data')
+
+    description = models.CharField('Вид ограничения', max_length=128, null=True, blank=True)
+    zip_file = models.FileField(upload_to=zip_dir, null=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+
+        # Unpack the uploaded zip file
+        if self.zip_file:
+            file_path = self.zip_file.path
+            unzip_file(file_path, model_dir)
+
+    def delete(self, *args, **kwargs):
+        file_name = os.path.basename(self.zip_file.name)
+        unpacked_files_path = os.path.join(model_dir, file_name)
+
+        if os.path.exists(unpacked_files_path):
+            shutil.rmtree(unpacked_files_path)
+
+        super().delete(*args, **kwargs)
+
+    @classmethod
+    def types_list(cls):
+        return [(it.id, it.description) for it in cls.objects.all()]
+
+    @classmethod
+    def get_choices(cls):
+        return [(incident_type.id, incident_type.description) for incident_type in cls.objects.all()]
+
+    class Meta:
+        verbose_name = 'Тип инцидента'
+        verbose_name_plural = 'Типы инцидентов'
+
+    def __str__(self):
+        return str(self.description)
 
 
 class BaseIncident(models.Model):
@@ -138,19 +187,7 @@ class BaseIncident(models.Model):
         ('RU-MOW', 'Москва'),
         ('UA-40', 'Севастополь'),
     ]
-    INCIDENT_TYPES = [
-        (1, 'Уголовное преследование'),
-        (2, 'Административное давление'),
-        (4, 'Регулирование'),
-        (5, 'Насилие'),
-        (6, 'Интернет-цензура'),
-        (7, 'Гражданские иски'),
-        (8, 'Кибератаки'),
-        (9, 'Давление на IT-бизнес'),
-        (10, 'Шатдауны'),
-        (11, 'Запросы личной информации у интернет-сервисов'),
-        (0, 'Другое'),
-    ]
+
     title = models.TextField('Заголовок', null=True, blank=True)
     description = models.TextField('Описание', null=True, blank=True)
     status = models.IntegerField('Статус', choices=STATUSES, null=False, blank=False, default=UNPROCESSED)
@@ -163,7 +200,7 @@ class BaseIncident(models.Model):
         on_delete=models.DO_NOTHING,
     )
     region = models.CharField('Регион', choices=REGIONS, default='RU', max_length=16)
-    incident_type = models.IntegerField('Вид ограничения', choices=INCIDENT_TYPES, null=False, blank=False, default=0)
+    incident_type = models.ForeignKey(IncidentType, null=True, on_delete=models.CASCADE) # OnCascade? 
     count = models.PositiveIntegerField('Количество ограничений', default=1)
     tags = ArrayField(models.CharField(max_length=32, blank=True, default='', null=True), blank=True, null=True)
     urls = ArrayField(models.URLField(blank=True, default='', null=True), blank=True, null=True)
@@ -222,15 +259,7 @@ class BaseIncident(models.Model):
         return dict(self.REGIONS).get(self.region)
 
     def category_name(self):
-        return dict(self.INCIDENT_TYPES).get(self.incident_type)
-
-    @classmethod
-    def category_index(cls, category_name):
-        category_index_map = {
-            category: index
-            for index, category in cls.INCIDENT_TYPES
-        }
-        return category_index_map.get(category_name, 0)
+        return self.incident_type.description
 
     @classmethod
     def available_statuses(cls):
