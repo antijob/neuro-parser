@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
+import os
 import datetime
 import re
 import uuid
+import shutil
 
 from ckeditor_uploader.fields import RichTextUploadingField
 from django.conf import settings
@@ -10,6 +12,8 @@ from django.db import models
 from django.db.models import Q
 from django.urls import reverse
 from django.utils import timezone
+from django.core.files.storage import FileSystemStorage, default_storage
+
 from htmldocx import HtmlToDocx
 from io import BytesIO
 import pdfkit
@@ -26,41 +30,51 @@ from server.apps.core.logic.grabber.classificator import (
 )
 from server.apps.core.logic.grabber.region import region_code
 from server.apps.core.logic.morphy import normalize_text, normalize_words
+from server.apps.core.common import unpack_file, extract_filename_without_extension
+
 from server.apps.users.models import User
 from server.settings.components.common import BASE_DIR
+
 
 BASE_URL = "https://runet.report"
 
 
-
-def unzip_file(file_path, extract_path):
-    import zipfile
-
-    with zipfile.ZipFile(file_path, 'r') as zip_ref:
-        zip_ref.extractall(extract_path)
+# should be complex logig? override only files from this IncidentType?
+class OverwriteStorage(FileSystemStorage):
+    def get_available_name(self, name, max_length=None):
+        self.delete(name)
+        return name
 
 
 class IncidentType(models.Model):
-    zip_dir   = BASE_DIR.joinpath('models', 'zip_data')
-    model_dir = BASE_DIR.joinpath('models', 'data')
+    zip_dir   = 'models_archives' # inside settings.MEDIA_ROOT
+    model_dir = BASE_DIR.joinpath('server', 'apps',
+                    'core', 'logic', 'grabber', 'classificator', 'data')
 
     description = models.CharField('Вид ограничения', max_length=128, null=True, blank=True)
-    zip_file = models.FileField(upload_to=zip_dir, null=True, blank=True)
+    zip_file = models.FileField(upload_to=zip_dir, null=True, blank=True, storage=OverwriteStorage())
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
 
-        # Unpack the uploaded zip file
+        # Unpack the uploaded file
         if self.zip_file:
             file_path = self.zip_file.path
-            unzip_file(file_path, model_dir)
+
+            # assume that unpacked directory has the same name
+            unpack_file(file_path, self.model_dir)
 
     def delete(self, *args, **kwargs):
-        file_name = os.path.basename(self.zip_file.name)
-        unpacked_files_path = os.path.join(model_dir, file_name)
+        file_name = extract_filename_without_extension(self.zip_file.name)
+        unpacked_files_path = self.model_dir.joinpath(file_name)
 
         if os.path.exists(unpacked_files_path):
             shutil.rmtree(unpacked_files_path)
+
+        if self.zip_file:
+            storage_path = self.zip_file.path
+            if default_storage.exists(storage_path):
+                default_storage.delete(storage_path)
 
         super().delete(*args, **kwargs)
 
