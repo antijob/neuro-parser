@@ -3,6 +3,9 @@ import os
 import zipfile
 import tarfile
 
+from django.core.exceptions import ValidationError
+from pathlib import Path
+
 
 class UnsupportedFileFormatError(Exception):
     pass
@@ -18,7 +21,7 @@ def unpack_file(file_path, extract_path):
         with tarfile.open(file_path, "r:") as tar:
             tar.extractall(extract_path)
     else:
-        raise UnsupportedFileFormatError("Unsupported file format: " + file_path)
+        raise UnsupportedFileFormatError("Неподдерживаемое разрешение файла: " + file_path)
 
 
 def extract_filename_without_extension(file_path):
@@ -29,3 +32,12 @@ def extract_filename_without_extension(file_path):
         filename, extensions = os.path.splitext(filename)
 
     return filename
+
+
+def validate_file_extension(value):
+    if value.name.endswith('.zip') or \
+       value.name.endswith('.tar') or \
+       value.name.endswith('.tar.gz'):
+       return
+
+    raise ValidationError('Неподдерживаемое разрешение файла: ' + value.name)

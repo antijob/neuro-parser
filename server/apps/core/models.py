@@ -30,7 +30,7 @@ from server.apps.core.logic.grabber.classificator import (
 )
 from server.apps.core.logic.grabber.region import region_code
 from server.apps.core.logic.morphy import normalize_text, normalize_words
-from server.apps.core.common import unpack_file, extract_filename_without_extension
+from server.apps.core.logic.files import unpack_file, extract_filename_without_extension, validate_file_extension
 
 from server.apps.users.models import User
 from server.settings.components.common import BASE_DIR
@@ -52,7 +52,12 @@ class IncidentType(models.Model):
                     'core', 'logic', 'grabber', 'classificator', 'data')
 
     description = models.CharField('Вид ограничения', max_length=128, null=True, blank=True)
-    zip_file = models.FileField(upload_to=zip_dir, null=True, blank=True, storage=OverwriteStorage())
+    zip_file = models.FileField('Архив с моделью', 
+                    help_text = "архивы .zip, .tar, .tar.gz",
+                    upload_to=zip_dir, 
+                    null=True, blank=True, 
+                    storage=OverwriteStorage(), 
+                    validators=[validate_file_extension])
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
