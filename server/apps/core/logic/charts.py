@@ -70,10 +70,7 @@ class ChartData(UnitedTablesData):
                 )
             if category_summs:
                 categories, data = zip(*category_summs.items())
-                labels = [
-                    dict(MediaIncident.INCIDENT_TYPES)[category]
-                    for category in categories
-                ]
+                labels = list(IncidentType.objects.filter(id__in=categories).values_list('description', flat=True))
             else:
                 categories = []
                 data = []
