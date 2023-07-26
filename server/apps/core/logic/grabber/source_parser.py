@@ -13,6 +13,7 @@ from .article_parser import (
     MIN_WORDS_IN_SENTENCE,
     SERVICE_TAGS,
     text_content)
+from .tg_parser import extract_tg_urls
 
 IGNORED_PATHS = [
     'about', 'stat', 'statistics', 'statistika', 'statisticheskie-dannyie',
@@ -225,14 +226,23 @@ def unquote_urls(urls):
     return (unquote(url) for url in urls if url)
 
 
-def extract_all_news_urls(url):
+def extract_all_news_urls(url: str):
     ic('extract_all_news_urls')
+
+    tg_urls = None
+    if url.startswith('https://t.me/'):
+        tg_urls = set(unquote_urls(extract_tg_urls(url)))
+    if tg_urls:
+        return tg_urls
+
     document = get_document(url)
     if document is None:
         return
+
     rss_urls = set(unquote_urls(extract_rss_urls(url, document)))
     if rss_urls:
         return rss_urls
+
     html_urls = set(unquote_urls(extract_html_urls(url, document)))
     return html_urls
 
