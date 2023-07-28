@@ -9,6 +9,7 @@ from lxml.html.clean import Cleaner
 from goose3 import Goose
 from goose3.configuration import Configuration
 from icecream import ic
+from .tg_parser import get_tg_page_data
 
 
 MIN_WORDS_IN_SENTENCE = 5
@@ -309,8 +310,11 @@ def find_node_with_article(tree):
 
 def get_article(url) -> ArticleData:
     """Get url of article
-        Returns title, text, date, url as a namedtuple
+       Returns title, text, date, url as a namedtuple
     """
+    if url.startswith('https://t.me/'):
+        return get_tg_page_data(url)
+
     config = Configuration()
     config.strict = False  # turn of strict exception handling
     # config.browser_user_agent = random_headers() # set the browser agent string
