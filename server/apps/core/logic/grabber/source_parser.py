@@ -14,6 +14,7 @@ from .article_parser import (
     SERVICE_TAGS,
     text_content)
 from .tg_parser import extract_tg_urls
+from .vk_parser import extract_vk_urls
 
 IGNORED_PATHS = [
     'about', 'stat', 'statistics', 'statistika', 'statisticheskie-dannyie',
@@ -234,6 +235,12 @@ def extract_all_news_urls(url: str):
         tg_urls = set(unquote_urls(extract_tg_urls(url)))
     if tg_urls:
         return tg_urls
+
+    vk_urls = None
+    if url.startswith('https://vk.com/'):
+        vk_urls = set(unquote_urls(extract_vk_urls(url)))
+    if vk_urls:
+        return vk_urls
 
     document = get_document(url)
     if document is None:
