@@ -23,6 +23,13 @@ def rate(normalized_text):
     model = BertForSequenceClassification.from_pretrained(os.path.join(DATA_DIR, modelname))
     model.eval()
 
+    return rate_with_model_and_tokenizer(normalized_text, model, tokenizer)
+
+
+def rate_with_model_and_tokenizer(normalized_text, model, tokenizer):
+    """ Temporary disabled because of torch"""
+    return True
+
     encoding = tokenizer(
         normalized_text,
         return_tensors="pt",
