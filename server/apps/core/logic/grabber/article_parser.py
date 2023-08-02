@@ -12,6 +12,7 @@ from icecream import ic
 from .user_agent import random_headers
 from .tg_parser import get_tg_page_data
 from .vk_parser import get_vk_page_data
+from .ok_parser import get_ok_page_data
 
 
 MIN_WORDS_IN_SENTENCE = 5
@@ -297,6 +298,10 @@ def get_article(url) -> ArticleData:
 
     if url.startswith('https://vk.com/'):
         return get_vk_page_data(url)
+
+    if url.startswith('https://ok.ru/'):
+        return get_ok_page_data(url)
+
 
     config = Configuration()
     config.strict = False  # turn of strict exception handling
