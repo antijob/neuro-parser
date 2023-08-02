@@ -4,7 +4,7 @@ from random import choice
 from collections import namedtuple
 import re
 import dateparser
-from .article_parser import random_headers
+from .user_agent import random_headers
 
 ArticleData = namedtuple('ArticleData', 'title text date final_url')
 
@@ -52,7 +52,12 @@ def get_vk_page_data(url: str):
     page = requests.get(url, headers=random_headers())
     tree = HTMLParser(page.text)
     text = tree.css_first('div.wall_post_text').text()
-    title = get_first_sentence(text)
+    if text:
+        title = text.split(sep='\n')[0]
+        if len(title) > 100:
+            title = get_first_sentence(text)
+    else:
+        title = ''
     date = convert_to_utc(tree.css_first('time.PostHeaderSubtitle__item').text())
 
     # print(text, end='\n\n')
