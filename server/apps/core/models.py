@@ -27,6 +27,7 @@ from server.apps.core.logic.grabber.classificator import (
 from server.apps.core.logic.grabber.region import region_code
 from server.apps.core.logic.morphy import normalize_text, normalize_words
 from server.apps.users.models import User
+from server.apps.core.logic.reposts import check_repost
 
 BASE_URL = "https://runet.report"
 
@@ -494,6 +495,7 @@ class Article(models.Model):
     is_downloaded = models.BooleanField(verbose_name='Скачана', default=False)
     is_incident_created = models.BooleanField(verbose_name='Инцидент создан',
                                               default=False)
+    is_duplicate = models.BooleanField(verbose_name='Дубликат', default=False)
     relevance = models.IntegerField(verbose_name='Оценка релевантности',
                                     null=True, blank=True)
     incident = models.OneToOneField(MediaIncident,
@@ -532,6 +534,8 @@ class Article(models.Model):
             if publication_date:
                 self.publication_date = publication_date
         self.is_downloaded = True
+        if check_repost(self.text):
+            self.is_duplicate = True
         self.save()
 
     def any_title(self):
