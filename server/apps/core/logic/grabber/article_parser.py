@@ -290,8 +290,9 @@ def find_node_with_article(tree):
     # return ArticleData(title, text, date, final_url)
 
 def get_article(url) -> ArticleData:
-    """Get url of article
-       Returns title, text, date, url as a namedtuple
+    """ Get url of article
+        Grab data from posts on tg, vk, ok, websites
+        Returns title, text, date, url as a namedtuple
     """
     if url.startswith('https://t.me/'):
         return get_tg_page_data(url)
