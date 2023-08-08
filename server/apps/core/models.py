@@ -29,8 +29,6 @@ from server.apps.core.logic.morphy import normalize_text, normalize_words
 from server.apps.users.models import User
 from server.apps.core.logic.reposts import check_repost
 
-BASE_URL = "https://runet.report"
-
 
 class BaseIncident(models.Model):
     UNPROCESSED = 0
@@ -517,11 +515,6 @@ class Article(models.Model):
     class Meta:
         verbose_name = 'Cтатья'
         verbose_name_plural = 'Статьи'
-
-    def get_incident_url(self):
-        if not self.incident:
-            return ''
-        return f"{BASE_URL}{self.incident.get_absolute_url()}"
 
     def save(self, *args, **kwargs):
         self.title = self.title or self.text[:200]
