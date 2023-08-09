@@ -33,10 +33,7 @@ from server.apps.core.logic.morphy import normalize_text, normalize_words
 from server.apps.core.logic.files import unpack_file, extract_filename_without_extension, validate_file_extension
 
 from server.apps.users.models import User
-from server.settings.components.common import BASE_DIR
-
-
-BASE_URL = "https://runet.report"
+from server.apps.core.logic.reposts import check_repost
 
 
 # should be complex logig? override only files from this IncidentType?
@@ -542,6 +539,7 @@ class Article(models.Model):
     is_downloaded = models.BooleanField(verbose_name='Скачана', default=False)
     is_incident_created = models.BooleanField(verbose_name='Инцидент создан',
                                               default=False)
+    is_duplicate = models.BooleanField(verbose_name='Дубликат', default=False)
     relevance = models.IntegerField(verbose_name='Оценка релевантности',
                                     null=True, blank=True)
     incident = models.OneToOneField(MediaIncident,
@@ -564,11 +562,6 @@ class Article(models.Model):
         verbose_name = 'Cтатья'
         verbose_name_plural = 'Статьи'
 
-    def get_incident_url(self):
-        if not self.incident:
-            return ''
-        return f"{BASE_URL}{self.incident.get_absolute_url()}"
-
     def save(self, *args, **kwargs):
         self.title = self.title or self.text[:200]
         super().save(*args, **kwargs)
@@ -580,6 +573,8 @@ class Article(models.Model):
             if publication_date:
                 self.publication_date = publication_date
         self.is_downloaded = True
+        if check_repost(self.text):
+            self.is_duplicate = True
         self.save()
 
     def any_title(self):

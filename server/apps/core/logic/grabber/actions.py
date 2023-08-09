@@ -41,7 +41,6 @@ def grab_news():
     print("UPDATE SOURCES")
     update_sources()
 
-
     print("DOWNLOAD ART")
     download_articles()
 

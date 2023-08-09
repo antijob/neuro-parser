@@ -3,6 +3,7 @@ import requests
 import re
 from collections import namedtuple
 from datetime import datetime
+from icecream import ic
 
 
 ArticleData = namedtuple('ArticleData', 'title text date final_url')
@@ -46,18 +47,24 @@ def extract_tg_urls(url: str):
 def get_tg_page_data(url):
     '''
     Gets url of post on t.me site
+    Then parse data on [url]?embed=1
     Returns data from this page - text, title, date, url
     '''
+    # ic(url)
     params = {'embed': '1'}
     page = requests.get(url, params)
     tree = HTMLParser(page.text)
-    text = tree.css_first('div.tgme_widget_message_text').text()
-    if text:
+    # text = tree.css_first('div.tgme_widget_message_text').text()
+    text_tag = tree.css_first('div.tgme_widget_message_text')
+    if text_tag is not None:
+        text = text_tag.text()
         title = text.split(sep='\n')[0]
         if len(title) > 100:
             title = get_first_sentence(text)
     else:
+        text = ''
         title = ''
+
     time_tag = tree.css_first('time.datetime')
     date_time = time_tag.attributes['datetime']
     original_datetime = datetime.fromisoformat(date_time)
