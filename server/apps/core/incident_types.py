@@ -13,7 +13,6 @@ from server.apps.core.logic.files import unpack_file, extract_filename_without_e
 from server.settings.components.common import BASE_DIR
 
 
-# should be complex logig? override only files from this IncidentType?
 class OverwriteStorage(FileSystemStorage):
     def get_available_name(self, name, max_length=None):
         self.delete(name)
@@ -32,7 +31,7 @@ class IncidentType(models.Model):
                     null=True, blank=True, 
                     storage=OverwriteStorage(), 
                     validators=[validate_file_extension])
-
+    treshold = models.PositiveIntegerField('Treshold для модели', default=1)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

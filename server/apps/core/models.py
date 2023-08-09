@@ -12,7 +12,6 @@ from django.db import models
 from django.db.models import Q
 from django.urls import reverse
 from django.utils import timezone
-from django.core.files.storage import FileSystemStorage, default_storage
 
 from htmldocx import HtmlToDocx
 from io import BytesIO
@@ -30,72 +29,9 @@ from server.apps.core.logic.grabber.classificator import (
 )
 from server.apps.core.logic.grabber.region import region_code
 from server.apps.core.logic.morphy import normalize_text, normalize_words
-from server.apps.core.logic.files import unpack_file, extract_filename_without_extension, validate_file_extension
-
+from server.apps.core.incident_types import IncidentType
 from server.apps.users.models import User
 from server.apps.core.logic.reposts import check_repost
-
-from server.settings.components.common import BASE_DIR
-
-
-# should be complex logig? override only files from this IncidentType?
-class OverwriteStorage(FileSystemStorage):
-    def get_available_name(self, name, max_length=None):
-        self.delete(name)
-        return name
-
-
-class IncidentType(models.Model):
-    zip_dir   = 'models_archives' # inside settings.MEDIA_ROOT
-    model_dir = BASE_DIR.joinpath('server', 'apps',
-                    'core', 'logic', 'grabber', 'classificator', 'data')
-
-    description = models.CharField('Вид ограничения', max_length=128, null=True, blank=True)
-    zip_file = models.FileField('Архив с моделью', 
-                    help_text = "архивы .zip, .tar, .tar.gz",
-                    upload_to=zip_dir, 
-                    null=True, blank=True, 
-                    storage=OverwriteStorage(), 
-                    validators=[validate_file_extension])
-
-    def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
-
-        # Unpack the uploaded file
-        if self.zip_file:
-            file_path = self.zip_file.path
-
-            # assume that unpacked directory has the same name
-            unpack_file(file_path, self.model_dir)
-
-    def delete(self, *args, **kwargs):
-        file_name = extract_filename_without_extension(self.zip_file.name)
-        unpacked_files_path = self.model_dir.joinpath(file_name)
-
-        if os.path.exists(unpacked_files_path):
-            shutil.rmtree(unpacked_files_path)
-
-        if self.zip_file:
-            storage_path = self.zip_file.path
-            if default_storage.exists(storage_path):
-                default_storage.delete(storage_path)
-
-        super().delete(*args, **kwargs)
-
-    @classmethod
-    def types_list(cls):
-        return [(it.id, it.description) for it in cls.objects.all()]
-
-    @classmethod
-    def get_choices(cls):
-        return [(incident_type.id, incident_type.description) for incident_type in cls.objects.all()]
-
-    class Meta:
-        verbose_name = 'Тип инцидента'
-        verbose_name_plural = 'Типы инцидентов'
-
-    def __str__(self):
-        return str(self.description)
 
 
 class BaseIncident(models.Model):
@@ -613,13 +549,19 @@ class Article(models.Model):
                         algorithm.rate(words) * settings.RELEVANCE_TRESHOLD)
         self.save()
 
+
+    # ToDo: made self.incident field contain multiple incidents
     def create_incident(self):
         if self.is_incident_created:
             return self.incident
         if not self.text.strip():
             return
         normalized_text = normalize_text(self.text)
-        incident_type = category.predict(normalized_text)
+        incident_types = category.predict_incident_type(normalized_text)
+
+        if not incident_types:
+            return None
+
         region = self.source.region if self.source else 'RU'
         if region == 'RU':
             region = region_code("{} {}".format(self.title, self.text))
@@ -627,16 +569,17 @@ class Article(models.Model):
         annotated_title = annotate_banned_organizations(public_title)
         if annotated_title:
             public_title = annotated_title
-        self.incident = MediaIncident.objects.create(
-            urls=[self.url],
-            status=MediaIncident.UNPROCESSED,
-            title=self.any_title(),
-            public_title=public_title,
-            create_date=self.publication_date or datetime.date.today(),
-            description=self.text,
-            public_description=self.text,
-            incident_type=incident_type,
-            region=region)
+        for incident_type in incident_types:
+            self.incident = MediaIncident.objects.create(
+                urls=[self.url],
+                status=MediaIncident.UNPROCESSED,
+                title=self.any_title(),
+                public_title=public_title,
+                create_date=self.publication_date or datetime.date.today(),
+                description=self.text,
+                public_description=self.text,
+                incident_type=incident_type, 
+                region=region)
         self.is_incident_created = True
         self.save()
         return self.incident

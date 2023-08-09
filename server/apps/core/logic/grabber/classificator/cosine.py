@@ -14,9 +14,6 @@ DATA_DIR = os.path.join(settings.BASE_DIR, 'server', 'apps',
 
 
 def rate(normalized_text):
-    """ Temporary disabled because of torch"""
-    return True
-
     modelname = 'atiwar_fired'
     tokenizer = AutoTokenizer.from_pretrained(os.path.join(DATA_DIR, modelname), use_fast=False)
 
@@ -26,10 +23,12 @@ def rate(normalized_text):
     return rate_with_model_and_tokenizer(normalized_text, model, tokenizer)
 
 
+# ToDo: rewrite this method:
+# ....predictions overwriting on every step of cycle
+# ....is batch_size=1 right size?
+# ....return torch
 def rate_with_model_and_tokenizer(normalized_text, model, tokenizer):
-    """ Temporary disabled because of torch"""
-    return True
-
+    return 1
     encoding = tokenizer(
         normalized_text,
         return_tensors="pt",
@@ -44,4 +43,3 @@ def rate_with_model_and_tokenizer(normalized_text, model, tokenizer):
         outputs = model(text[0])
         predictions = outputs.logits
     return predictions[0][1].item()- predictions[0][0].item()
-

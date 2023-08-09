@@ -18,7 +18,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('description', models.CharField(blank=True, max_length=128, null=True, verbose_name='Вид ограничения')),
-                ('zip_file', models.FileField(blank=True, help_text='архивы .zip, .tar, .tar.gz', null=True, storage=server.apps.core.models.OverwriteStorage(), upload_to='models_archives', validators=[server.apps.core.logic.files.validate_file_extension], verbose_name='Архив с моделью')),
+                ('zip_file', models.FileField(blank=True, help_text='архивы .zip, .tar, .tar.gz', null=True, storage=server.apps.core.incident_types.OverwriteStorage(), upload_to='models_archives', validators=[server.apps.core.logic.files.validate_file_extension], verbose_name='Архив с моделью')),
             ],
             options={
                 'verbose_name': 'Тип инцидента',
