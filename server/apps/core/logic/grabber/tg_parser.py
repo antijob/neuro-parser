@@ -65,12 +65,6 @@ def get_tg_page_data(url):
         text = ''
         title = ''
 
-    # if text:
-    #     title = text.split(sep='\n')[0]
-    #     if len(title) > 100:
-    #         title = get_first_sentence(text)
-    # else:
-    #     title = ''
     time_tag = tree.css_first('time.datetime')
     date_time = time_tag.attributes['datetime']
     original_datetime = datetime.fromisoformat(date_time)
