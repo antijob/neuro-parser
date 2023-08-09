@@ -45,6 +45,7 @@ from server.apps.core.models import (
     CampaignPage,
     Document,
     Explanation,
+    IncidentType,
     MediaIncident,
     MediaIncidentFile,
     Post,
@@ -134,21 +135,6 @@ class MapDataView(generic.View):
 
 
 class FilterDataView(generic.View):
-    incident_names = dict(MediaIncident.INCIDENT_TYPES)
-    incident_type_names = {
-        'prosecution': incident_names[1],
-        'administrative': incident_names[2],
-        'regulation': incident_names[4],
-        'violence': incident_names[5],
-        'access': incident_names[6],
-        'civil': incident_names[7],
-        'cyberattack': incident_names[8],
-        'business': incident_names[9],
-        'shutdown': incident_names[10],
-        'personal_info_request': incident_names[11],
-        'other': incident_names[0],
-    }
-
     def get(self, request, *args, **kwargs):
         sorted_regions = (MediaIncident.REGIONS[:1] +
                           sorted(MediaIncident.REGIONS[1:],

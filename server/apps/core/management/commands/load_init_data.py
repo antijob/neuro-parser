@@ -4,7 +4,7 @@ from datetime import date
 
 from django.core.management.base import BaseCommand
 
-from server.apps.core.models import MediaIncident
+from server.apps.core.models import IncidentType, MediaIncident
 
 
 class Command(BaseCommand):
@@ -24,12 +24,11 @@ class Command(BaseCommand):
         if MediaIncident.objects.count() and not options.get('force'):
             raise Exception("The database isn't empty, use option --force "
                             "to populate the DB anyway")
-        incident_types = {v: k for k, v in MediaIncident.INCIDENT_TYPES}
         for item in data:
             # use first sentence of topic for public_title
             public_title = item['topic'].split('. ')[0][:512]
 
-            incident_type = incident_types.get(item['type'], 0)
+            incident_type = IncidentType.objects.filter(description=item['type']).first()
             incident = MediaIncident(
                 public_description=item['topic'],
                 public_title=public_title,

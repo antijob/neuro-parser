@@ -12,7 +12,6 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         with open("server/apps/core/management/commands/data/MediaIncidents2019.json") as f:
             data = json.load(f)
-        incident_types = {v: k for k, v in MediaIncident.INCIDENT_TYPES}
         for item in data:
             if self.check_if_exists(item):
                 continue
@@ -20,7 +19,7 @@ class Command(BaseCommand):
             # Create incident
             public_title = item['topic'].split('. ')[0][:512].strip()
             public_description = item['topic'].strip()
-            incident_type = incident_types.get(item['type'], 0)
+            incident_type = IncidentType.objects.filter(description=item['type']).first()
             incident = MediaIncident(
                 public_description=public_description,
                 public_title=public_title,
