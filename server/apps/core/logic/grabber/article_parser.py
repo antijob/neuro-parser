@@ -9,7 +9,10 @@ from lxml.html.clean import Cleaner
 from goose3 import Goose
 from goose3.configuration import Configuration
 from icecream import ic
+from .user_agent import random_headers
 from .tg_parser import get_tg_page_data
+from .vk_parser import get_vk_page_data
+from .ok_parser import get_ok_page_data
 
 
 MIN_WORDS_IN_SENTENCE = 5
@@ -22,16 +25,6 @@ BLOCK_TAGS = [
     "h3", "h4", "h5", "h6", "header", "li", "main", "nav", "ol", "p", "pre",
     "section", "table", "tfoot", "ul"]
 HEADINGS = ('h1', 'h2', 'h3', 'h4', 'h5', 'h6')
-USER_AGENTS = ['Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.129 Safari/537.36',
-               'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.129 Safari/537.36',
-               'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.129 Safari/537.36',
-               'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_1) AppleWebKit/602.2.14 (KHTML, like Gecko) Version/10.0.1 Safari/602.2.14',
-               'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.71 Safari/537.36',
-               'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.129 Safari/537.36',
-               'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.129 Safari/537.36',
-               'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.71 Safari/537.36',
-               'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.129 Safari/537.36',
-               'Mozilla/5.0 (Windows NT 10.0; WOW64; rv:50.0) Gecko/20100101 Firefox/50.0']
 IGNORED_IDS = ['comments_block', 'seo']
 IGNORED_CLASSES = [
     'print-data', 'alert-warning', 'breadcrumb-list', 'feeds-page__header',
@@ -100,18 +93,6 @@ def decoded(response):
             return response.content.decode(encoding)
         except UnicodeDecodeError:
             pass
-
-
-def random_headers():
-    ic('random_headers')
-    ua = choice(USER_AGENTS)
-    # print(type(ua))
-    head = {'User-Agent': ua,
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8'}
-    # print(head, type(head), sep='\n\n')
-    # return {'User-Agent': choice(USER_AGENTS),
-            # 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8'}
-    return head
 
 
 def remove_double_spaces(text):
@@ -309,11 +290,19 @@ def find_node_with_article(tree):
     # return ArticleData(title, text, date, final_url)
 
 def get_article(url) -> ArticleData:
-    """Get url of article
-       Returns title, text, date, url as a namedtuple
+    """ Get url of article
+        Grab data from posts on tg, vk, ok, websites
+        Returns title, text, date, url as a namedtuple
     """
     if url.startswith('https://t.me/'):
         return get_tg_page_data(url)
+
+    if url.startswith('https://vk.com/'):
+        return get_vk_page_data(url)
+
+    if url.startswith('https://ok.ru/'):
+        return get_ok_page_data(url)
+
 
     config = Configuration()
     config.strict = False  # turn of strict exception handling
