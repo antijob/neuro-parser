@@ -9,7 +9,7 @@ from difflib import SequenceMatcher
 
 def todays_articles():
     from server.apps.core.models import Article
-    start_date = datetime.now().date() - timedelta(days=1)
+    start_date = datetime.now().date() - timedelta(days=3)
     return Article.objects.filter(publication_date__gte=start_date)
 
 def check_repost(article_text_to_check: str):
