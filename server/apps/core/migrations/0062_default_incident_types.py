@@ -27,7 +27,7 @@ def create_incident_types(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0060_auto_20230718_1925'),
+        ('core', '0061_incident_type'),
     ]
 
     operations = [

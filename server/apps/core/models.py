@@ -35,6 +35,8 @@ from server.apps.core.logic.files import unpack_file, extract_filename_without_e
 from server.apps.users.models import User
 from server.apps.core.logic.reposts import check_repost
 
+from server.settings.components.common import BASE_DIR
+
 
 # should be complex logig? override only files from this IncidentType?
 class OverwriteStorage(FileSystemStorage):
