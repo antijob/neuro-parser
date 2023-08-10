@@ -10,6 +10,7 @@ from goose3 import Goose
 from goose3.configuration import Configuration
 from icecream import ic
 from .user_agent import random_headers
+from .utils import convert_date_format
 from .tg_parser import get_tg_page_data
 from .vk_parser import get_vk_page_data
 from .ok_parser import get_ok_page_data
@@ -314,8 +315,9 @@ def get_article(url) -> ArticleData:
         title = article.title
         text = article.cleaned_text
         final_url = article.final_url
+        date = convert_date_format(article.publish_date)
 
-    date = extract_date(article.doc, article.top_node, final_url)
+    # date = extract_date(article.doc, article.top_node, final_url)
 
     return ArticleData(title, text, date, final_url)
 
