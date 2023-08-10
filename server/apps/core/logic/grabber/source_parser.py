@@ -158,7 +158,7 @@ def find_rss_urls(source_url, document):
         return []
     links = cssselect.CSSSelector('a')(document)
     links += cssselect.CSSSelector('link')(document)
-    ic(links)
+    # ic(links)
     for link in links:
         url = link.get('href')
         absolute_url = get_absolute_url(source_url, url)
@@ -168,7 +168,7 @@ def find_rss_urls(source_url, document):
 
 
 def is_rss_link(url):
-    ic("is_rss_link")
+    # ic("is_rss_link")
     path = str(urlparse(url).path)
     return 'rss' in path or path.endswith('.xml') or 'feed' in path
 
