@@ -18,6 +18,8 @@ services:
       - "traefik.http.routers.dashboard.service=api@internal"
       - "traefik.http.routers.dashboard.middlewares=auth"
       - "traefik.http.middlewares.auth.basicauth.users=testuser:$$apr1$$jIKW.bdS$$eKXe4Lxjgy/rH65wP1iQe1"
+    environment:
+      - CF_DNS_API_TOKEN=${CF_DNS_API_TOKEN}
     networks:
       - djangonetwork
   db:

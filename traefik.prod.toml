@@ -26,5 +26,6 @@ dashboard = false
 [certificatesResolvers.letsencrypt.acme]
   email = "info@antijob.net"
   storage = "/certificates/acme.json"
-  [certificatesResolvers.letsencrypt.acme.httpChallenge]
-    entryPoint = "web"
+  [certificatesResolvers.letsencrypt.acme.dnsChallenge]
+    provider = "cloudflare"
+    delayBeforeCheck = 0
