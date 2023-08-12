@@ -3,8 +3,8 @@ from selectolax.parser import HTMLParser
 from random import choice
 from collections import namedtuple
 import re
-import dateparser
 from .user_agent import random_headers
+from .utils import convert_date_format
 
 ArticleData = namedtuple('ArticleData', 'title text date final_url')
 
@@ -29,20 +29,6 @@ def get_first_sentence(text: str) -> str:
 
     return match.group(0) if match else ''
 
-def convert_to_utc(date_string: str) -> str:
-    '''
-    Parse data string and return in UTC format
-    '''
-    # date_obj = dateparser.parse(date_string, languages=['en', 'ru'], settings={'TO_TIMEZONE': 'UTC'})
-    date_obj = dateparser.parse(date_string, languages=['en', 'ru'])
-    if date_obj:
-        # Convert the datetime object to UTC timezone
-        utc_date = date_obj.strftime('%Y-%m-%d')
-        return utc_date
-    else:
-        return "Invalid date format!"
-
-
 def get_vk_page_data(url: str):
     '''
     Gets url of post page on vk.com
@@ -58,7 +44,7 @@ def get_vk_page_data(url: str):
             title = get_first_sentence(text)
     else:
         title = ''
-    date = convert_to_utc(tree.css_first('time.PostHeaderSubtitle__item').text())
+    date = convert_date_format(tree.css_first('time.PostHeaderSubtitle__item').text())
 
     # print(text, end='\n\n')
     # print(title, end='\n\n')

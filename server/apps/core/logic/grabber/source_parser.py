@@ -158,7 +158,7 @@ def find_rss_urls(source_url, document):
         return []
     links = cssselect.CSSSelector('a')(document)
     links += cssselect.CSSSelector('link')(document)
-    ic(links)
+    # ic(links)
     for link in links:
         url = link.get('href')
         absolute_url = get_absolute_url(source_url, url)
@@ -168,7 +168,7 @@ def find_rss_urls(source_url, document):
 
 
 def is_rss_link(url):
-    ic("is_rss_link")
+    # ic("is_rss_link")
     path = str(urlparse(url).path)
     return 'rss' in path or path.endswith('.xml') or 'feed' in path
 
@@ -182,27 +182,12 @@ def find_articles_urls_in_rss(document):
         return
     links = cssselect.CSSSelector('link')(document)
     for link in links:
-
         text = link.text or ''
         tail = link.tail or ''
         url = (text + tail).strip()
         if url:
             yield url
 
-
-# def extract_rss_urls(source_url, document):
-#     """Extracts article urls using RSS."""
-#     if document is None:
-#         return []
-#     rss_urls = find_rss_urls(source_url, document)
-#     for rss_url in rss_urls:
-#         rss_document = get_document(rss_url)
-#         article_urls = list(find_articles_urls_in_rss(rss_document))
-#         absolute_urls = (get_absolute_url(source_url, url)
-#                          for url in article_urls)
-#         for article_url in absolute_urls:
-#             if is_correct_article_link(article_url):
-#                 yield article_url
 
 def extract_rss_urls(source_url, document):
     """Extracts article urls using RSS"""
@@ -229,7 +214,7 @@ def unquote_urls(urls):
 
 
 def extract_all_news_urls(url: str):
-    ic('extract_all_news_urls')
+    # ic('extract_all_news_urls')
 
     tg_urls = None
     if url.startswith('https://t.me/'):

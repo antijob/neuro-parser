@@ -53,6 +53,6 @@ def grab_news():
     print("APPLY TAGS")
     apply_tags()
 
-    print("DELETE DUPES")
+    print("DELETE INCIDENT DUPES")
     delete_duplicates()
 
