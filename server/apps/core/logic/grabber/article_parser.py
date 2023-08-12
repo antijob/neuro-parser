@@ -1,7 +1,6 @@
 import datetime
 import re
 from collections import namedtuple
-from random import choice
 import dateparser
 import requests
 from lxml import cssselect, etree
@@ -110,7 +109,6 @@ def remove_double_spaces(text):
 def text_content(node, long_text_only=False, include_links=True):
     """Returns text content of node and its children.
     Ignores headings and service tags."""
-
     if node is None:
         return ''
     if node.tag in SERVICE_TAGS:
@@ -257,38 +255,6 @@ def find_node_with_article(tree):
                                                      include_links=True,
                                                      long_text_only=False)))
         return longest
-
-
-# def get_article_old(url):
-    # """Returns title and text of article."""
-
-    # tree = get_document(url, clean=True)
-    # if tree is None:
-    #     return
-
-    # final_url = tree.get("url")
-    # title = extract_heading(tree)
-    # if not title:
-    #     title_tag = tree.find(".//title")
-    #     title = title_tag.text if title_tag is not None else ''
-
-    # # looking by article tag, then by lins of known classes,
-    # # then by article class and then by longest text of node
-    # article = find_article_tag(tree)
-    # if article is None:
-    #     article = find_by_known_class(tree)
-    # if article is None:
-    #     article = find_article_class(tree)
-    # if article is None:
-    #     article = find_node_with_article(tree)
-    # if article is None:
-    #     return
-
-    # text = text_content(article,
-    #                     include_links=True,
-    #                     long_text_only=False).strip()
-    # date = extract_date(tree, article, final_url)
-    # return ArticleData(title, text, date, final_url)
 
 def get_article(url) -> ArticleData:
     """ Get url of article
