@@ -1,15 +1,15 @@
 import os
 import shutil
 
-# from django.conf import settings
+from transformers import AutoTokenizer, BertForSequenceClassification
+
 from django.db import models
 from django.core.files.storage import FileSystemStorage, default_storage
-
-# from server.apps.core.logic.grabber.classificator import (
-#     category, cosine, markers
-# )
-from server.apps.core.logic.files import unpack_file, extract_filename_without_extension, validate_file_extension
-
+from server.apps.core.logic.files import (
+    unpack_file, 
+    extract_filename_without_extension, 
+    validate_file_extension
+)
 from server.settings.components.common import BASE_DIR
 
 
@@ -62,16 +62,19 @@ class IncidentType(models.Model):
 
         super().delete(*args, **kwargs)
 
+    @property
+    def model_directory(self):
+        file_name = extract_filename_without_extension(self.zip_file.name)
+        return self.model_dir.joinpath(file_name)
+
     def get_tokenizer(self):
         if self.tokenizer is None:
-            from transformers import AutoTokenizer
-            self.tokenizer = AutoTokenizer.from_pretrained(self.model_dir.joinpath(self.zip_file.name), use_fast=False)
+            self.tokenizer = AutoTokenizer.from_pretrained(self.model_directory, use_fast=False)
         return self.tokenizer
 
     def get_model(self):
         if self.model is None:
-            from transformers import BertForSequenceClassification
-            self.model = BertForSequenceClassification.from_pretrained(self.model_dir.joinpath(self.zip_file.name))
+            self.model = BertForSequenceClassification.from_pretrained(self.model_directory)
             self.model.eval()
         return self.model
 

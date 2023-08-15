@@ -1,13 +1,11 @@
 import os
+import tqdm
 
 from django.conf import settings
-import joblib
-import pandas as pd
-# import torch
+
+import torch
 from transformers import BertForSequenceClassification, AutoTokenizer
-import argparse
-import logging
-import tqdm
+
 
 DATA_DIR = os.path.join(settings.BASE_DIR, 'server', 'apps',
                         'core', 'logic', 'grabber', 'classificator', 'data')
@@ -23,12 +21,7 @@ def rate(normalized_text):
     return rate_with_model_and_tokenizer(normalized_text, model, tokenizer)
 
 
-# ToDo: rewrite this method:
-# ....predictions overwriting on every step of cycle
-# ....is batch_size=1 right size?
-# ....return torch
 def rate_with_model_and_tokenizer(normalized_text, model, tokenizer):
-    return 1
     encoding = tokenizer(
         normalized_text,
         return_tensors="pt",
@@ -37,9 +30,13 @@ def rate_with_model_and_tokenizer(normalized_text, model, tokenizer):
         max_length=256,
     )
     input_ids = encoding["input_ids"]
-    # dataset = torch.utils.data.TensorDataset(input_ids,)
-    # model_iter = torch.utils.data.DataLoader(dataset, batch_size=1, shuffle=False)
+    dataset = torch.utils.data.TensorDataset(input_ids,)
+    model_iter = torch.utils.data.DataLoader(dataset, batch_size=1, shuffle=False)
+
+    predictions_pos = 0
+    predictions_neg = 0
     for text in tqdm.tqdm(model_iter):
         outputs = model(text[0])
-        predictions = outputs.logits
-    return predictions[0][1].item()- predictions[0][0].item()
+        predictions_pos += outputs.logits[0][1].item()
+        predictions_neg += outputs.logits[0][0].item()
+    return predictions_pos - predictions_neg
