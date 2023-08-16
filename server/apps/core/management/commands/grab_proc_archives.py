@@ -68,7 +68,6 @@ class Command(BaseCommand):
                 grab_archive(
                     source, first_page_url=archive_url, start_date=START_DATE
                 )
-        rate_articles()
         create_incidents()
         apply_tags()
         delete_duplicates()

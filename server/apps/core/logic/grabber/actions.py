@@ -16,17 +16,9 @@ def download_articles():
         article.download()
 
 
-def rate_articles():
-    articles = Article.objects.filter(is_downloaded=True,
-                                      relevance__isnull=True)
-    for article in articles:
-        article.rate_relevance()
-
-
 def create_incidents():
     articles = Article.objects.filter(is_downloaded=True,
-                                      is_incident_created=False,
-                                      relevance__gte=settings.RELEVANCE_TRESHOLD)
+                                      is_incident_created=False)
     for article in articles:
         article.create_incident()
 
@@ -43,9 +35,6 @@ def grab_news():
 
     print("DOWNLOAD ART")
     download_articles()
-
-    print("RATE ART")
-    rate_articles()
 
     print("CREATE INC")
     create_incidents()
