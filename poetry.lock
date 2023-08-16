@@ -811,6 +811,26 @@ arabic = ["nltk"]
 chinese = ["jieba"]
 
 [[package]]
+name = "gunicorn"
+version = "21.2.0"
+description = "WSGI HTTP Server for UNIX"
+optional = false
+python-versions = ">=3.5"
+files = [
+    {file = "gunicorn-21.2.0-py3-none-any.whl", hash = "sha256:3213aa5e8c24949e792bcacfc176fef362e7aac80b76c56f6b5122bf350722f0"},
+    {file = "gunicorn-21.2.0.tar.gz", hash = "sha256:88ec8bff1d634f98e61b9f65bc4bf3cd918a90806c6f5c48bc5603849ec81033"},
+]
+
+[package.dependencies]
+packaging = "*"
+
+[package.extras]
+eventlet = ["eventlet (>=0.24.1)"]
+gevent = ["gevent (>=1.4.0)"]
+setproctitle = ["setproctitle"]
+tornado = ["tornado (>=0.2)"]
+
+[[package]]
 name = "hiredis"
 version = "1.1.0"
 description = "Python wrapper for hiredis"
@@ -2346,4 +2366,4 @@ transformers = ["scikit-learn"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8"
-content-hash = "9aca4d0474ccad72d0bff3af0dc37a35a628b11e7ddf7096cc73167b7ba76c9d"
+content-hash = "4a8ad7c5f9a40eb30ceb1851f0859087329f50efb6268fea1b8f0e62e23a29a4"
