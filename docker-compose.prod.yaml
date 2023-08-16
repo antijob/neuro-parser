@@ -1,3 +1,5 @@
+version: "3.11"
+
 services:
   traefik:
     build:
@@ -20,8 +22,7 @@ services:
       - "traefik.http.middlewares.auth.basicauth.users=testuser:$$apr1$$jIKW.bdS$$eKXe4Lxjgy/rH65wP1iQe1"
     environment:
       - CF_DNS_API_TOKEN=${CF_DNS_API_TOKEN}
-    networks:
-      - djangonetwork
+
   db:
     image: postgres:13.4-alpine
     volumes:
@@ -33,8 +34,25 @@ services:
       - POSTGRES_HOST_AUTH_METHOD=md5
     env_file:
       - .env
-    networks:
-      - djangonetwork
+
+  nginx:
+    image: nginx:1.23-alpine
+    restart: unless-stopped
+    volumes:
+      - type: volume
+        source: staticfiles-data
+        target: /usr/share/nginx/html/static
+        read_only: true
+        volume:
+          nocopy: true
+    depends_on:
+      - web
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.staticfiles.rule=PathPrefix(`/static/`) || PathPrefix(`/media/`)"
+      - "traefik.http.routers.staticfiles.entrypoints=websecure"
+      - "traefik.http.routers.staticfiles.priority=2"
+
   web:
     build:
       context: .
@@ -43,6 +61,7 @@ services:
     volumes:
       - .:/code
       - /home/${USER}/data:/server/apps/core/logic/classificator/data
+      - "staticfiles-data:/code/static"
     expose:
       - 8000
     env_file:
@@ -55,19 +74,17 @@ services:
       - DJANGO_ALLOWED_HOSTS=${HOST}
     depends_on:
       - db
-    networks:
-      - djangonetwork
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.django.rule=Host(`${HOST}`)"
       - "traefik.http.routers.django.tls=true"
       - "traefik.http.routers.django.tls.certresolver=letsencrypt"
+
   redis:
     image: redis:alpine
     expose:
       - "6379"
-    networks:
-      - djangonetwork
+
   celery:
     build: .
     command: celery -A server worker --loglevel=info
@@ -76,12 +93,8 @@ services:
     restart: always
     depends_on:
       - redis
-    networks:
-      - djangonetwork
-networks:
-  djangonetwork:
-    driver: bridge
 
 volumes:
   postgres_data_prod:
   traefik-public-certificates:
+  staticfiles-data:
