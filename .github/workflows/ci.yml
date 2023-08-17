@@ -27,6 +27,24 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v3
 
+      # Build these images only when related files are changed
+      - name: Filter out app changes
+        uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          base: ${{ github.ref }}
+          filters: |
+            traefik:
+              - 'traefik/**'
+              - traefik.*.toml
+              - 'Dockerfile.traefik'
+            web:
+              - 'server/**'
+              - 'Dockerfile.prod'
+              - 'Dockerfile'
+              - '*.py'
+              - 'requirements.txt'
+
       - name: Prepare .env
         run: |
           cp .env.template .env
@@ -45,8 +63,14 @@ jobs:
           TELEGRAM_BOT_TOKEN: "${{ secrets.TELEGRAM_BOT_TOKEN }}"
           DJANGO_KEY: "${{ secrets.DJANGO_KEY}}"
           CF_DNS_API_TOKEN: "${{ secrets.CF_DNS_API_TOKEN }}"
-      - name: Build image
-        run: docker-compose -f docker-compose.prod.yaml build
+
+      - name: Build traefik
+        if: steps.filter.outputs.traefik == 'true'
+        run: docker-compose -f docker-compose.prod.yaml build traefik
+
+      - name: Build python
+        if: steps.filter.outputs.web == 'true'
+        run: docker-compose -f docker-compose.prod.yaml build web celery
 
   start:
     name: Start production
