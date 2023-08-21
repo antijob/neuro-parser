@@ -66,23 +66,3 @@ class CustomLoginForm(LoginForm):
         self.fields['remember'].widget = forms.CheckboxInput(attrs={
             'class': 'custom-control-input',
         })
-
-
-class UserForm(forms.ModelForm):
-    class Meta:
-        model = User
-        fields = ('first_name', 'last_name', 'biography', 'photo')
-        widgets = {
-            'first_name': forms.TextInput(attrs={
-                'class': 'form-control form-control-user',
-                'placeholder': 'Имя',
-            }),
-            'last_name': forms.TextInput(attrs={
-                'class': 'form-control form-control-user',
-                'placeholder': 'Фамилия',
-            }),
-            'biography': forms.Textarea(attrs={
-                'class': 'form-control',
-                'placeholder': 'Короткая биография'
-            }),
-        }
