@@ -49,9 +49,10 @@ services:
       - web
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.staticfiles.rule=PathPrefix(`/static/`) || PathPrefix(`/media/`)"
+      - "traefik.http.routers.staticfiles.rule=Host(`${HOST}`) && PathPrefix(`/static/`)"
       - "traefik.http.routers.staticfiles.entrypoints=websecure"
-      - "traefik.http.routers.staticfiles.priority=2"
+      - "traefik.http.routers.staticfiles.tls=true"
+      - "traefik.http.routers.staticfiles.tls.certresolver=letsencrypt"
 
   web:
     build:
@@ -77,6 +78,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.django.rule=Host(`${HOST}`)"
+      - "traefik.http.routers.django.entrypoints=websecure"
       - "traefik.http.routers.django.tls=true"
       - "traefik.http.routers.django.tls.certresolver=letsencrypt"
 
