@@ -17,7 +17,6 @@ from django.urls import include, path, re_path
 from django.views.generic import TemplateView
 
 from server.apps.core import urls as main_urls
-from server.apps.core.views import IndexView
 from server.apps.users import urls as users_urls
 from server.apps.bot import urls as bot_urls
 
@@ -42,7 +41,6 @@ urlpatterns = [
     path('s/accounts/', include('allauth.urls')),
 
     # It is a good practice to have explicit index view:
-    path('', IndexView.as_view(), name='index'),
 
     # Core URLs:
     path('', include(bot_urls, namespace='bot')),

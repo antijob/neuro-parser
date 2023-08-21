@@ -84,43 +84,6 @@ class ContactFormMixin:
         return context
 
 
-class IndexView(ContactFormMixin, generic.TemplateView):
-    """Index page of website """
-
-    template_name = 'core/landing/index.html'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        posts = (Post.objects
-                     .filter(public=True, is_active=True)
-                     .order_by('-publication_date')[:6])
-        context.update({
-            'form': IncidentCreateForm(),
-            'posts': posts,
-        })
-        return context
-
-
-class ReportsTemplateView(ContactFormMixin, generic.TemplateView):
-    template_name = 'core/landing/reports.html'
-
-
-class CheckDataleakTemplateView(ContactFormMixin, generic.TemplateView):
-    template_name = 'core/landing/check-dataleak.html'
-
-
-class AboutTemplateView(ContactFormMixin, generic.TemplateView):
-    template_name = 'core/landing/about.html'
-
-
-class PrivacyTemplateView(ContactFormMixin, generic.TemplateView):
-    template_name = 'core/landing/privacy.html'
-
-
-class IncidentsTemplateView(ContactFormMixin, generic.TemplateView):
-    template_name = 'core/landing/incidents.html'
-
-
 class MapDataView(generic.View):
     def get(self, request, *args, **kwargs):
         today = timezone.datetime.now().date()
@@ -176,34 +139,6 @@ class IncidentsTableDataView(generic.View):
         return JsonResponse(data)
 
 
-class IncidentCreateView(generic.FormView):
-    form_class = IncidentCreateForm
-    template_name = 'core/landing/index.html'
-    success_url = reverse_lazy('core:public-incident-created')
-
-    def form_valid(self, form):
-        form.save()
-        form.send_slack_message()
-        return super().form_valid(form)
-
-
-class IncidentCreatedView(ContactFormMixin, generic.TemplateView):
-    template_name = 'core/landing/incident_created.html'
-
-    def get(self, request, *args, **kwargs):
-        incident_uuid = kwargs.get("incident_uuid")
-        if not incident_uuid:
-            return render(request, self.template_name)
-
-        incident = UserIncident.objects.get(uuid=incident_uuid)
-        context = {"incident": incident}
-        return render(request, self.template_name, context)
-
-
-class ChartView(ContactFormMixin, generic.TemplateView):
-    template_name = "core/landing/chart.html"
-
-
 class LineChartDataView(generic.View):
     def get(self, request, *args, **kwargs):
         start_date_str = request.GET.get("start_date")
@@ -240,35 +175,6 @@ class PieChartDataView(generic.View):
         )
         return JsonResponse(chart_data)
 
-
-class PublicIncidentDetailView(ContactFormMixin, generic.DeleteView):
-    model = UserIncident
-    template_name = 'core/landing/public_incident.html'
-    context_object_name = 'incident'
-
-
-class PublicMediaIncidentDetailView(ContactFormMixin, generic.DeleteView):
-    model = MediaIncident
-    template_name = 'core/landing/public_incident.html'
-    context_object_name = 'incident'
-
-
-class PostView(ContactFormMixin, generic.DetailView):
-    model = Post
-    template_name = 'core/landing/post_detail.html'
-    context_object_name = 'post'
-
-    def get_context_data(self, *args, **kwargs):
-        context = super().get_context_data(*args, **kwargs)
-        if not self.object.public:
-            raise Http404
-        return context
-
-
-class StageView(ContactFormMixin, generic.DetailView):
-    model = Stage
-    template_name = 'core/landing/stage_detail.html'
-    context_object_name = 'stage'
 
 
 class DashboardMixin(LoginRequiredMixin):
@@ -671,21 +577,6 @@ class UserUpdateView(LoginRequiredMixin, generic.UpdateView):
         return HttpResponseRedirect(self.get_success_url())
 
 
-class ContactFormView(generic.FormView):
-    """Contact us view."""
-
-    form_class = ContactForm
-    success_url = reverse_lazy('core:contact-success')
-    template_name = 'core/landing/contact.html'
-
-    def form_valid(self, form):
-        form.send_email()
-        return super().form_valid(form)
-
-
-class ContactSuccessTemplateView(ContactFormMixin, generic.TemplateView):
-    template_name = 'core/landing/contact_success.html'
-
 
 class CampaignViewMixin(DashboardMixin):
     model = Campaign
@@ -734,135 +625,6 @@ class DashboardCampaignUpdatedView(CampaignViewMixin, generic.UpdateView):
         context = super().get_context_data(*args, **kwargs)
         context['saved'] = "1"
         return context
-
-
-class CampaignDetailView(ContactFormMixin,
-                         generic.edit.FormMixin,
-                         generic.DetailView):
-    model = Campaign
-    form_class = CampaignIncidentForm
-    template_name = 'core/landing/campaign_details.html'
-    context_object_name = 'campaign'
-
-    slug_url_kwarg = 'the_slug'
-    slug_field = 'slug'
-
-    def get_success_url(self):
-        return reverse('core:public-incident-created',
-                       kwargs={'pk': self.object.pk})
-
-    def get_object(self, queryset=None):
-        obj = super(CampaignDetailView, self).get_object(queryset=queryset)
-        if not obj.public and not self.request.user.is_authenticated:
-            raise Http404
-        # form_json should be a string
-        obj.form_json = json.dumps(obj.form_json)
-        return obj
-
-    def get_context_data(self, *args, **kwargs):
-        context = super().get_context_data(*args, **kwargs)
-        if not context.get("form"):
-            context["form"] = CampaignIncidentForm(
-                initial={"campaign": context["campaign"].pk}
-            )
-        return context
-
-    def post(self, *args, **kwargs):
-        form_class = self.get_form_class()
-        form = self.get_form(form_class)
-        if not form.is_valid():
-            self.object = self.get_object()
-            return self.form_invalid(form)
-
-        incident = form.save(commit=False)
-        incident.campaign = self.get_object()
-        if not incident.campaign.description_required:
-            incident.description = incident.campaign.name
-        incident.save()
-
-        files = self.request.FILES.getlist('files')
-        for file in files:
-            UserIncidentFile.objects.create(file=file,
-                                            incident=incident)
-
-        if incident.campaign.notify_email:
-            self.send_email_to_operator(incident)
-
-        if incident.campaign.send_reply_email:
-            self.send_reply_email(incident)
-
-        return redirect(
-            reverse_lazy(
-                'core:public-incident-created-document',
-                kwargs={"incident_uuid": incident.uuid}
-            )
-        )
-
-    def send_email_to_operator(self, incident):
-        if settings.DEBUG:
-            return
-
-        from_email = incident.applicant_email
-        to_email = incident.campaign.notify_email
-
-        html_message = self.html_message_for_operator(incident)
-        message = strip_tags(html_message)
-
-        subject = '[Runet.Report: {campaign}] обращение от {email}'.format(
-            campaign=incident.campaign.name,
-            email=from_email
-        )
-        send_email(
-            subject,
-            from_email,
-            to_email,
-            message,
-            html_message=html_message
-        )
-
-    def html_message_for_operator(self, incident):
-        title = "<h3>Кампания: {}</h3>\n".format(incident.campaign.name)
-        email = "<p>От: {}</p>\n".format(incident.applicant_email)
-        data = "\n".join(self.form_data_to_html_lines(incident.form_data))
-        href = "{scheme}://{host}/dashboard/incident/{pk}/update/".format(
-            scheme=self.request.scheme,
-            host=self.request.get_host(),
-            pk=incident.pk
-        )
-        link = '<p>Открыть в дашборде <a href="{href}">{href}</a></p>'.format(
-            href=href
-        )
-        return title + email + data + link
-
-    def form_data_to_html_lines(self, form_data):
-        template = "<label>{}</label> <div>{}</div>"
-        for field in form_data:
-            user_data = ", ".join(field['userData'])
-            yield template.format(field['label'], user_data)
-
-    def send_reply_email(self, incident):
-        if settings.DEBUG:
-            return
-
-        to_email = incident.applicant_email
-        from_email = settings.DEFAULT_FROM_EMAIL
-        html_message = self.html_reply_message(incident.campaign)
-        message = strip_tags(incident.campaign.reply_email_text)
-        subject = incident.campaign.name
-        send_email(
-            subject,
-            from_email,
-            to_email,
-            message,
-            html_message=html_message
-        )
-
-    def html_reply_message(self, campaign):
-        template = "core/email/reply_email.html"
-        host = self.request.get_host()
-        context = {"campaign": campaign, "host": host}
-        html = render_to_string(template, context=context, request=self.request)
-        return html.replace("&nbsp;", " ")
 
 
 class DashboardCampaignListView(DashboardMixin, generic.ListView):
@@ -1328,13 +1090,6 @@ class DashboardStageSuccessView(LoginRequiredMixin, generic.View):
         return HttpResponse('{"status": 200, "message": "ok"}')
 
 
-class CampaignMapTemplateView(ContactFormMixin, generic.DetailView):
-    template_name = 'core/landing/campaign_map.html'
-    model = Campaign
-    context_object_name = 'campaign'
-    slug_url_kwarg = 'the_slug'
-    slug_field = 'slug'
-
 
 class CampaignMapData(generic.View):
     def get(self, request, *args, **kwargs):
@@ -1452,15 +1207,6 @@ class DashboardCampaignPageUpdatedView(DashboardCampaignPageViewMixin,
         context = super().get_context_data(*args, **kwargs)
         context['saved'] = "1"
         return context
-
-
-class CampaignPageView(ContactFormMixin, generic.DetailView):
-    model = CampaignPage
-    template_name = 'core/landing/campaign_page.html'
-    context_object_name = 'page'
-
-    slug_url_kwarg = 'the_slug'
-    slug_field = 'slug'
 
 
 class DashboardCampaignIncidentsListView(DashboardMixin, generic.DetailView):

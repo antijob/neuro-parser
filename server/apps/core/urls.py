@@ -5,57 +5,6 @@ from django.urls import path
 from server.apps.core import views
 
 urlpatterns = [
-
-    # Landing views
-    path('', views.IndexView.as_view(), name='index'),
-    path('chart/', views.ChartView.as_view(), name='chart'),
-    path('dataleak/', views.DataLeakSearchView.as_view(), name='dataleak_search'),
-    path('chart/line/', views.LineChartDataView.as_view(), name='line-chart-data'),
-    path('chart/pie/', views.PieChartDataView.as_view(), name='pie-chart-data'),
-    path('reports/', views.ReportsTemplateView.as_view(), name='reports'),
-    path('check-deliveryclub/', views.CheckDataleakTemplateView.as_view(), name='check_deliveryclub'),
-    path('about/', views.AboutTemplateView.as_view(), name='about'),
-    path('privacy_policy/', views.PrivacyTemplateView.as_view(), name='privacy_policy'),
-    path('incidents/', views.IncidentsTemplateView.as_view(), name='incidents'),
-    path('incidents/map-data/', views.MapDataView.as_view(), name='incidents-map-data'),
-    path('incidents/table-data/', views.IncidentsTableDataView.as_view(), name='incidents-table-data'),
-    path('incidents/filter-data/', views.FilterDataView.as_view(), name='incidents-filter-data'),
-    path('get-in-touch/', views.ContactFormView.as_view(), name='contact'),
-    path('get-in-touch/success/', views.ContactSuccessTemplateView.as_view(), name='contact-success'),
-    path('incident/<int:pk>/', views.PublicIncidentDetailView.as_view(), name='public-incident-detail'),
-    path('mediaincident/<int:pk>/', views.PublicMediaIncidentDetailView.as_view(), name='public-mediaincident-detail'),
-    path('incident/create/', views.IncidentCreateView.as_view(), name='public-incident-create'),
-    path('incident/created/', views.IncidentCreatedView.as_view(), name='public-incident-created'),
-    path('incident/created/<str:incident_uuid>/',
-         views.IncidentCreatedView.as_view(),
-         name='public-incident-created-document'),
-    path('incidents/export/', views.ExportTableView.as_view(), name='export-table'),
-
-    path('campaign/<int:pk>/',
-         views.CampaignDetailView.as_view(),
-         name='campaign-detail'),
-    path('campaign/<slug:the_slug>/',
-         views.CampaignDetailView.as_view(),
-         name='campaign-detail'),
-    path('campaign/<int:pk>/map/',
-         views.CampaignMapTemplateView.as_view(),
-         name='campaign_map'),
-    path('campaign/<slug:the_slug>/map/',
-         views.CampaignMapTemplateView.as_view(),
-         name='campaign_map'),
-    path('campaign/<int:pk>/map/data/',
-         views.CampaignMapData.as_view(),
-         name='campaign_map_data'),
-    path('campaign/<slug:the_slug>/map/data/',
-         views.CampaignMapData.as_view(),
-         name='campaign_map_data'),
-
-    path('post/<int:pk>/', views.PostView.as_view(), name='post'),
-
-    path('stage/<int:pk>/', views.StageView.as_view(), name='stage'),
-
-    path('document/<str:incident_uuid>/', views.GenerateDocument.as_view(), name='generate-document'),
-
     # Dashboard views
     path('dashboard/', views.DashboardView.as_view(), name='dashboard'),
     path('dashboard/incidents/', views.DashboardIncidentsView.as_view(), name='dashboard-incidents'),
@@ -178,13 +127,6 @@ urlpatterns = [
          views.DashboardCampaignPageUpdateView.as_view(),
          name="dashboard-campaign-page-update"),
 
-
-    path('page/<int:pk>/',
-         views.CampaignPageView.as_view(),
-         name='campaign-page'),
-    path('page/<slug:the_slug>/',
-         views.CampaignPageView.as_view(),
-         name='campaign-page'),
 
     path('grabber/algorithms/', views.GrabberAlogrithmsView.as_view(),
          name='grabber-algorithms'),
