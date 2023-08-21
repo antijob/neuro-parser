@@ -74,6 +74,23 @@ class ArticleAdmin(admin.ModelAdmin):
 class SourceAdmin(admin.ModelAdmin):
     list_display = ('url', 'region', 'is_active')
 
+    def save_model(self, request, obj, form, change):
+        urls = obj.url.split()
+        for url in urls:
+            if not url:
+                continue
+            if Source.objects.filter(url=url).exists():
+                continue
+
+            new_source = Source(
+                url=url, 
+                is_active=obj.is_active, 
+                region=obj.region, 
+                algorithm=obj.algorithm, 
+                banned=obj.banned
+            )
+            new_source.save()
+
 
 class PostAdminForm(forms.ModelForm):
     text = forms.CharField(widget=CKEditorWidget())
