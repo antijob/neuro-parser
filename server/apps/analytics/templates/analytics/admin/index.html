@@ -1,7 +1,0 @@
-{% extends "admin/index.html" %}
-
-{% block content %}
-    <p><a href="{% url 'analytics:dashboard' %}">Перейти на страницу аналитики</a></p>
-    <p><a href="{% url 'records:gov_statistics' %}">Статистика по ведомствам(по месяцам)</a></p>
-    {{block.super}}
-{% endblock %}

@@ -55,7 +55,6 @@ INSTALLED_APPS = (
     # Your apps go here:
     'server.apps.core',
     'server.apps.users',
-    'server.apps.analytics',
     'server.apps.bot',
 )
 

@@ -27,7 +27,6 @@ base_settings = [
     'components/sentry.py',
     "components/ckeditor.py",
     "components/telegram.py",
-    "components/analytics.py",
 
     # You can even use glob:
     # 'components/*.py'

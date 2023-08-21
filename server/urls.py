@@ -16,7 +16,6 @@ from django.contrib import admin
 from django.urls import include, path, re_path
 from django.views.generic import TemplateView
 
-from server.apps.analytics import urls as analytics_urls
 from server.apps.core import urls as main_urls
 from server.apps.core.views import IndexView
 from server.apps.users import urls as users_urls
@@ -49,7 +48,6 @@ urlpatterns = [
     path('', include(bot_urls, namespace='bot')),
     path('', include(main_urls, namespace='core')),
     path('users/', include(users_urls, namespace='users')),
-    path("analytics/", include(analytics_urls, namespace="analytics")),
 ]
 
 # if settings.DEBUG:
