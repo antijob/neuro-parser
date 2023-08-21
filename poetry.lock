@@ -2481,20 +2481,6 @@ files = [
 test = ["pytest (>=6.0.0)", "setuptools (>=65)"]
 
 [[package]]
-name = "whitenoise"
-version = "6.3.0"
-description = "Radically simplified static file serving for WSGI applications"
-optional = false
-python-versions = ">=3.7"
-files = [
-    {file = "whitenoise-6.3.0-py3-none-any.whl", hash = "sha256:cf8ecf56d86ba1c734fdb5ef6127312e39e92ad5947fef9033dc9e43ba2777d9"},
-    {file = "whitenoise-6.3.0.tar.gz", hash = "sha256:fe0af31504ab08faa1ec7fc02845432096e40cc1b27e6a7747263d7b30fb51fa"},
-]
-
-[package.extras]
-brotli = ["Brotli"]
-
-[[package]]
 name = "xlsxwriter"
 version = "1.4.5"
 description = "A Python module for creating Excel XLSX files."
@@ -2511,4 +2497,4 @@ transformers = ["scikit-learn"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8"
-content-hash = "a1cd1bf9e6603292b92bb5ffd8443f4ab10518c94b10d3adba1125a1300ce21f"
+content-hash = "067fd1268258dcf5109283f4281e649bf0f1ae7b885cf118b32cf1065aa9c529"
