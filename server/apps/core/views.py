@@ -27,8 +27,6 @@ from server.apps.core.logic.grabber.compare import rate_articles
 from server.apps.core.logic.united_incidents import UnitedTablesData
 from server.apps.core.models import (
     Article,
-    Campaign,
-    CampaignPage,
     Explanation,
     IncidentType,
     MediaIncident,

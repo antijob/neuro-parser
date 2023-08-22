@@ -6,8 +6,6 @@ from django.contrib import admin
 
 from server.apps.core.models import (
     Article,
-    Campaign,
-    CampaignPage,
     Explanation,
     MediaIncident,
     MediaIncidentFile,
@@ -19,9 +17,6 @@ from server.apps.core.models import (
     UserIncident,
     UserIncidentFile,
 )
-
-admin.site.register(Campaign)
-admin.site.register(CampaignPage)
 admin.site.register(Explanation)
 admin.site.register(MediaIncidentFile)
 admin.site.register(Stage)
