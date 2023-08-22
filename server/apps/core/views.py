@@ -29,7 +29,6 @@ from server.apps.core.models import (
     Article,
     Campaign,
     CampaignPage,
-    Document,
     Explanation,
     IncidentType,
     MediaIncident,

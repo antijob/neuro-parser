@@ -154,7 +154,7 @@ class BaseIncident(models.Model):
         on_delete=models.DO_NOTHING,
     )
     region = models.CharField('Регион', choices=REGIONS, default='RU', max_length=16)
-    incident_type = models.ForeignKey(IncidentType, null=True, on_delete=models.CASCADE) # OnCascade? 
+    incident_type = models.ForeignKey(IncidentType, null=True, on_delete=models.CASCADE) # OnCascade?
     count = models.PositiveIntegerField('Количество ограничений', default=1)
     tags = ArrayField(models.CharField(max_length=32, blank=True, default='', null=True), blank=True, null=True)
     urls = ArrayField(models.URLField(blank=True, default='', null=True), blank=True, null=True)
@@ -578,7 +578,7 @@ class Article(models.Model):
                 create_date=self.publication_date or datetime.date.today(),
                 description=self.text,
                 public_description=self.text,
-                incident_type=incident_type, 
+                incident_type=incident_type,
                 region=region)
         self.is_incident_created = True
         self.save()
@@ -686,7 +686,6 @@ class Post(models.Model):
     def has_title_and_description(self):
         return self.card_type == self.TITLE_IMAGE_DESCRIPTION
 
-
 class Stage(models.Model):
     campaign = models.ForeignKey(
         Campaign,
@@ -716,62 +715,6 @@ class Explanation(models.Model):
 
     def get_absolute_url(self):
         return reverse('core:dashboard-explanation-form-update', kwargs={'pk': self.pk})
-
-
-class Document(models.Model):
-    campaign = models.OneToOneField(
-        Campaign,
-        verbose_name="Кампания",
-        related_name="document",
-        on_delete=models.CASCADE)
-    template = RichTextUploadingField("Текст")
-    instruction = RichTextUploadingField("Инструкция", default="", blank=True)
-
-    def render_html(self, document):
-        today_date = timezone.now().date()
-        today = format_dd_month_yyyy(today_date)
-        today_in_words = date_in_words(today_date).capitalize()
-        variables = {
-            name: format_if_date(variable)
-            for name, variable in document.clean_form_data().items()
-        }
-        context = dict(
-            today=today,
-            today_in_words=today_in_words,
-            **variables
-        )
-        html = self.template.format(**context)
-        html = (
-                   "<html><head>"
-                   "<meta http-equiv='content-type'"
-                   " content='text/html;charset=UTF-8'>"
-                   "</head>"
-                   "<body style='margin:0;padding:0;font-size:1.4em'>"
-                   "<div style='font-family:sans-serif,Liberation;line-height:1.5em;'>"
-               ) + html + "</div></body></html>"
-        return html
-
-    def render_pdf(self, html):
-        options = {
-            'page-size': 'A4',
-            'margin-top': '0.5in',
-            'margin-right': '0.5in',
-            'margin-bottom': '0.5in',
-            'margin-left': '0.7in',
-            'quiet': '',
-        }
-        return pdfkit.from_string(html, False, options=options)
-
-    def render_docx(self, html):
-        html = html.replace("&nbsp;", " ")
-        parser = HtmlToDocx()
-        docx = parser.parse_html_string(html)
-        stream = BytesIO()
-        docx.save(stream)
-        stream.seek(0)
-        string = stream.read()
-        stream.close()
-        return string
 
 
 class CampaignPage(models.Model):
