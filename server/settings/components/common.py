@@ -39,6 +39,7 @@ INSTALLED_APPS = (
 
     # API:
     'rest_framework',
+    'rest_framework.authtoken',
 
     # Auth:
     'allauth',
@@ -53,9 +54,10 @@ INSTALLED_APPS = (
     "tracking",
 
     # Your apps go here:
+    'server.apps.api',
+    'server.apps.bot',
     'server.apps.core',
     'server.apps.users',
-    'server.apps.bot',
 )
 
 MIDDLEWARE = (
@@ -203,15 +205,24 @@ PASSWORD_HASHERS = [
     'django.contrib.auth.hashers.Argon2PasswordHasher',
 ]
 
+# REST API
+
+API_TOKEN = c("API_TOKEN", default=None)
+API_RPS = c("API_RPS", default='1/second')
+
 REST_FRAMEWORK = {
-    'DEFAULT_RENDERER_CLASSES': (
-        'rest_framework.renderers.JSONRenderer',
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'server.apps.api.authentication.EnvTokenAuthentication',
     ),
-    'DEFAULT_PARSER_CLASSES': (
-        'rest_framework.parsers.JSONParser',
-        'rest_framework.parsers.FormParser',
-        'rest_framework.parsers.MultiPartParser',
-    ),
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.UserRateThrottle',
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'user': API_RPS,
+    },
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.IsAuthenticated",
+    ]
 }
 
 CONTACT_FORM_EMAILS = ['agorarights@gmail.com']
