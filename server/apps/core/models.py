@@ -154,7 +154,7 @@ class BaseIncident(models.Model):
         on_delete=models.DO_NOTHING,
     )
     region = models.CharField('Регион', choices=REGIONS, default='RU', max_length=16)
-    incident_type = models.ForeignKey(IncidentType, null=True, on_delete=models.CASCADE) # OnCascade? 
+    incident_type = models.ForeignKey(IncidentType, null=True, on_delete=models.CASCADE) # OnCascade?
     count = models.PositiveIntegerField('Количество ограничений', default=1)
     tags = ArrayField(models.CharField(max_length=32, blank=True, default='', null=True), blank=True, null=True)
     urls = ArrayField(models.URLField(blank=True, default='', null=True), blank=True, null=True)
@@ -249,11 +249,6 @@ class MediaIncident(BaseIncident):
 
 
 class UserIncident(BaseIncident):
-    campaign = models.ForeignKey('Campaign',
-                                 on_delete=models.DO_NOTHING,
-                                 related_name='incidents',
-                                 null=True,
-                                 blank=True)
     form_data = models.JSONField('Данные из формы', null=True, blank=True)
     applicant_messenger = models.CharField(
         'Аккаунт в мессенджере', max_length=128, null=True, blank=True)
@@ -299,110 +294,6 @@ class MediaIncidentFile(models.Model):
     class Meta:
         verbose_name = 'Файлы инцидентов из СМИ'
         verbose_name_plural = 'Файл инцидента из СМИ'
-
-
-class Campaign(models.Model):
-    name = models.CharField('Название', max_length=512)
-    description = RichTextUploadingField('Описание', blank=True, default="")
-    create_date = models.DateField('Дата создания', auto_now_add=True)
-    update_date = models.DateField('Дата обновления', auto_now=True)
-    public = models.BooleanField('Публичная кампания',
-                                 default=False,
-                                 null=False)
-    form_json = models.JSONField('Форма в JSON', null=True, blank=True)
-    author = models.ForeignKey(
-        User, verbose_name='Автор кампании',
-        null=True,
-        blank=True,
-        on_delete=models.DO_NOTHING,
-    )
-    slug = models.SlugField(verbose_name='Название в URL',
-                            blank=False,
-                            unique=True)
-    picture = models.FileField(verbose_name="Изображение кампании",
-                               blank=True,
-                               null=True)
-    is_background = models.BooleanField("Использовать как фон", default=True)
-    is_active = models.BooleanField('Активен', default=True)
-    chart_field = models.CharField("Поле для диаграммы",
-                                   max_length=32,
-                                   blank=True,
-                                   null=True)
-    chart_description = models.CharField("Пояснение диаграммы",
-                                         max_length=150,
-                                         blank=True,
-                                         null=True)
-
-    form_description = models.TextField("Пояснение в форме",
-                                        default="",
-                                        blank=True)
-    applicant_region_required = models.BooleanField(
-        "Спрашивать регион", default=False
-    )
-    applicant_messenger_required = models.BooleanField(
-        "Спрашивать мессенджер", default=False
-    )
-    description_required = models.BooleanField(
-        "Спрашивать описание", default=False
-    )
-    files_required = models.BooleanField("Спрашивать файлы", default=True)
-    form_title = models.CharField("Заголовок формы",
-                                  max_length=128,
-                                  null=True,
-                                  blank=True)
-    submit_button_text = models.CharField(
-        "Текст на кнопке", max_length=128, default="Отправить", blank=True
-    )
-    notify_email = models.EmailField("Email для оповещений",
-                                     default="",
-                                     blank=True)
-
-    send_reply_email = models.BooleanField(
-        "Отправлять ответное письмо", default=False
-    )
-    reply_email_text = RichTextUploadingField(
-        'Текст ответного письма',
-        blank=True,
-        default=""
-    )
-    reply_email_image = models.FileField(
-        verbose_name="Картинка ответного письма",
-        blank=True,
-        null=True
-    )
-
-    background_color = models.CharField(
-        "Цвет фона", max_length=7, default="#FFFFFF"
-    )
-    text_color = models.CharField(
-        "Цвет текста", max_length=7, default="#000000"
-    )
-    use_custom_thanks = models.BooleanField(
-        'Показывать свой текст спасибо-страницы', default=False
-    )
-    thanks_header = models.CharField(
-        'Заголовок', max_length=100, blank=True, default=""
-    )
-    thanks_text = RichTextUploadingField(
-        'Текст спасибо-страницы', blank=True, default=""
-    )
-
-    class Meta:
-        verbose_name = 'Кампания'
-        verbose_name_plural = 'Кампании'
-
-    def get_absolute_url(self):
-        return reverse('core:dashboard-campaign-update', args=[self.pk])
-
-    def ordered_explanations(self):
-        return self.explanations.order_by("create_date")
-
-    def ordered_stages(self):
-        return self.stages.order_by("create_date")
-
-    def __str__(self):
-        return '[{}]'.format(self.name)
-
 
 class Source(models.Model):
     ALGORITHMS = [
@@ -578,7 +469,7 @@ class Article(models.Model):
                 create_date=self.publication_date or datetime.date.today(),
                 description=self.text,
                 public_description=self.text,
-                incident_type=incident_type, 
+                incident_type=incident_type,
                 region=region)
         self.is_incident_created = True
         self.save()
@@ -686,13 +577,7 @@ class Post(models.Model):
     def has_title_and_description(self):
         return self.card_type == self.TITLE_IMAGE_DESCRIPTION
 
-
 class Stage(models.Model):
-    campaign = models.ForeignKey(
-        Campaign,
-        verbose_name="Кампания",
-        on_delete=models.CASCADE,
-        related_name="stages")
     title = models.TextField("Заголовок")
     summary = models.TextField("Краткое описание")
     text = RichTextUploadingField('Текст')
@@ -704,11 +589,6 @@ class Stage(models.Model):
 
 
 class Explanation(models.Model):
-    campaign = models.ForeignKey(
-        Campaign,
-        verbose_name="Кампания",
-        on_delete=models.CASCADE,
-        related_name="explanations")
     title = models.TextField("Заголовок")
     text = models.TextField('Текст')
     emphasized = models.BooleanField("Выделенный", default=False)
@@ -718,86 +598,8 @@ class Explanation(models.Model):
         return reverse('core:dashboard-explanation-form-update', kwargs={'pk': self.pk})
 
 
-class Document(models.Model):
-    campaign = models.OneToOneField(
-        Campaign,
-        verbose_name="Кампания",
-        related_name="document",
-        on_delete=models.CASCADE)
-    template = RichTextUploadingField("Текст")
-    instruction = RichTextUploadingField("Инструкция", default="", blank=True)
-
-    def render_html(self, document):
-        today_date = timezone.now().date()
-        today = format_dd_month_yyyy(today_date)
-        today_in_words = date_in_words(today_date).capitalize()
-        variables = {
-            name: format_if_date(variable)
-            for name, variable in document.clean_form_data().items()
-        }
-        context = dict(
-            today=today,
-            today_in_words=today_in_words,
-            **variables
-        )
-        html = self.template.format(**context)
-        html = (
-                   "<html><head>"
-                   "<meta http-equiv='content-type'"
-                   " content='text/html;charset=UTF-8'>"
-                   "</head>"
-                   "<body style='margin:0;padding:0;font-size:1.4em'>"
-                   "<div style='font-family:sans-serif,Liberation;line-height:1.5em;'>"
-               ) + html + "</div></body></html>"
-        return html
-
-    def render_pdf(self, html):
-        options = {
-            'page-size': 'A4',
-            'margin-top': '0.5in',
-            'margin-right': '0.5in',
-            'margin-bottom': '0.5in',
-            'margin-left': '0.7in',
-            'quiet': '',
-        }
-        return pdfkit.from_string(html, False, options=options)
-
-    def render_docx(self, html):
-        html = html.replace("&nbsp;", " ")
-        parser = HtmlToDocx()
-        docx = parser.parse_html_string(html)
-        stream = BytesIO()
-        docx.save(stream)
-        stream.seek(0)
-        string = stream.read()
-        stream.close()
-        return string
-
-
-class CampaignPage(models.Model):
-    campaign = models.ForeignKey(
-        Campaign,
-        verbose_name="Кампания",
-        on_delete=models.CASCADE,
-        related_name="pages")
-    title = models.CharField(
-        "Заголовок", max_length=150, default="", blank=True
-    )
-    text = models.TextField("Текст")
-    slug = models.SlugField(verbose_name="Название в URL", blank=True, default="")
-    public = models.BooleanField('Опубликовать', default=False)
-
-    def __str__(self):
-        return self.title
-
-    class Meta:
-        verbose_name = 'Доп.страница'
-        verbose_name_plural = 'Доп.страницы'
-
-
 class DataLeak(models.Model):
     phone = models.CharField(max_length=12, null=False, blank=False, db_index=True)
     data = models.JSONField()
-
     def __str__(self):
         return f"{self.__class__.__name__} <{self.phone}>"
