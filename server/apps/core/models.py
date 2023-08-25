@@ -596,10 +596,3 @@ class Explanation(models.Model):
 
     def get_absolute_url(self):
         return reverse('core:dashboard-explanation-form-update', kwargs={'pk': self.pk})
-
-
-class DataLeak(models.Model):
-    phone = models.CharField(max_length=12, null=False, blank=False, db_index=True)
-    data = models.JSONField()
-    def __str__(self):
-        return f"{self.__class__.__name__} <{self.phone}>"

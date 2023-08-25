@@ -1,7 +1,1 @@
 {% extends "admin/index.html" %}
-
-{% block content %}
-    <p><a href="{% url 'core:grabber-algorithms' %}">Сравнение алгоритмов</a></p><br>
-    <p><a href="{% url 'core:grabber-source-statistics' %}">Статистика по источникам</a></p><br>
-    {{block.super}}
-{% endblock %}
