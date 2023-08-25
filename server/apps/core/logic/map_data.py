@@ -1,7 +1,6 @@
 from django.db.models import Count, F, Q, Sum
 
-from server.apps.core.models import (
-    Campaign, MediaIncident, UserIncident, Tag)
+from server.apps.core.models import (MediaIncident, UserIncident, Tag)
 
 
 def incident_table_data(incident_model, start, end, category, tag):
@@ -47,22 +46,6 @@ def incident_map_data(start, end, category, tag):
     for region_data in united_map_data:
         region_data['region'] = region_data['region'].replace('RU-', '').replace('UA-', '')
     return list(united_map_data)
-
-
-def campaign_map_data(campaign):
-    incidents = (campaign.incidents
-                 .exclude(status=MediaIncident.PROCESSED_AND_REJECTED)
-                 .order_by("-create_date"))
-    incidents = list(incidents.values("status", "region", "count", "form_data"))
-
-    # Annotate chart_field value
-    if (campaign.chart_field):
-        for incident in incidents:
-            incident["chart_field"] = chart_field_value(incident["form_data"],
-                                                        campaign.chart_field)
-            incident.pop("form_data")
-    return incidents
-
 
 def chart_field_value(form_data, chart_field):
     if not form_data:

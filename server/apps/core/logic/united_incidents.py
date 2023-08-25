@@ -52,7 +52,6 @@ class UnitedTablesData:
         self.filter_kwargs = {}
         self.values = self.VALUES
         self.exclude_private = False
-        self.exclude_campaigns = False
 
     def assigned_to(self, user):
         if user:
@@ -74,17 +73,10 @@ class UnitedTablesData:
             url = (row["urls"][0]
                    if row["urls"]
                    else "")
-            category = IncidentType.objects.get(id=row["incident_type"]) 
+            category = IncidentType.objects.get(id=row["incident_type"])
             count = row["count"]
             date = row["create_date"]
             yield (title, region, url, category, count, date)
-
-    def export_campaign_incidents(self):
-        queries_list = [self._filter(model)
-                        for model in self.incident_models]
-        incidents_union = self._union(queries_list).order_by('-create_date', '-pk')
-        for row in incidents_union:
-            yield (row["email"], row["create_date"])
 
     def fetch(self):
         """Return data fetched with built query"""
@@ -122,14 +114,6 @@ class UnitedTablesData:
             self.incident_models = [UserIncident]
         return self
 
-    def filter_by_campaign_pk(self, campaign_pk):
-        if campaign_pk:
-            self.filter_kwargs.update(campaign__pk=campaign_pk)
-        return self
-
-    def exclude_campaign_incidents(self, exclude_campaign_incidents=True):
-        self.exclude_campaigns = exclude_campaign_incidents
-        return self
 
     def exclude_private_data(self, exclude_private_data=True):
         if exclude_private_data:
@@ -228,8 +212,7 @@ class UnitedTablesData:
                     "", CharField(max_length=1, null=True)))
                 .values(*self.values))
         else:
-            if self.exclude_campaigns:
-                incidents = incidents.filter(campaign__isnull=True)
+
             values = (
                 incidents
                 .annotate(duplicate_pks=Value(

@@ -7,8 +7,15 @@ import string
 import nltk
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
-nltk.download('punkt')
-nltk.download('stopwords')
+
+
+_nltk_initialized = False
+def initialize_nltk_resources():
+    global _nltk_initialized
+    if not _nltk_initialized:
+        nltk.download('punkt')
+        nltk.download('stopwords')
+        _nltk_initialized = True
 
 
 USEFULL_GRAMMEMES = ['NOUN', 'VERB', 'ADJF', 'ADJS', 'INFN',
@@ -17,6 +24,7 @@ morphy = pymorphy3.MorphAnalyzer().parse
 
 
 def normalize_words(words):
+    initialize_nltk_resources()
     normalized_words = []
     for word in words:
         if not word:
@@ -27,6 +35,7 @@ def normalize_words(words):
 
 
 def normalize_text(text):
+    initialize_nltk_resources()
     text = text.translate(str.maketrans('', '', string.punctuation))
 
     # Токенизировать текст

@@ -16,6 +16,7 @@ from django.contrib import admin
 from django.urls import include, path, re_path
 from django.views.generic import TemplateView
 
+from server.apps.api import urls as api_urls
 from server.apps.core import urls as main_urls
 from server.apps.users import urls as users_urls
 from server.apps.bot import urls as bot_urls
@@ -43,6 +44,7 @@ urlpatterns = [
     # It is a good practice to have explicit index view:
 
     # Core URLs:
+    path('', include(api_urls, namespace='api')),
     path('', include(bot_urls, namespace='bot')),
     path('', include(main_urls, namespace='core')),
     path('users/', include(users_urls, namespace='users')),
