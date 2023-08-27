@@ -4,7 +4,6 @@ import zipfile
 import tarfile
 
 from django.core.exceptions import ValidationError
-from pathlib import Path
 
 
 class UnsupportedFileFormatError(Exception):

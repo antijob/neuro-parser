@@ -3,7 +3,6 @@ import os
 import datetime
 import re
 import uuid
-import shutil
 
 from ckeditor_uploader.fields import RichTextUploadingField
 from django.conf import settings
@@ -13,16 +12,6 @@ from django.db.models import Q
 from django.urls import reverse
 from django.utils import timezone
 
-from htmldocx import HtmlToDocx
-from io import BytesIO
-import pdfkit
-
-from server.apps.core.logic.banned_organizations import (
-    annotate_banned_organizations
-)
-from server.apps.core.logic.documents import (
-    date_in_words, format_dd_month_yyyy, format_if_date
-)
 from server.apps.core.logic.grabber import article_parser, source_parser
 from server.apps.core.logic.grabber.classificator import (
     category, cosine, markers
