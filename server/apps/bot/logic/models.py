@@ -5,9 +5,6 @@ from django.core.validators import URLValidator
 from telegram import Update
 
 from server.apps.bot.logic.keyboard import edit_incident_markup
-from server.apps.core.logic.banned_organizations import (
-    annotate_banned_organizations,
-)
 from server.apps.core.models import Article, MediaIncident
 
 
@@ -52,7 +49,6 @@ def create_incident(update: Optional[Update] = None, **kwargs: Any):
             count = 1
 
         public_title = title
-        annotated_title = annotate_banned_organizations(public_title)
 
         if annotated_title:
             public_title = annotated_title
