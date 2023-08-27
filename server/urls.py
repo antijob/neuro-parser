@@ -13,7 +13,7 @@ files serving technique in development.
 
 from django.conf import settings
 from django.contrib import admin
-from django.urls import include, path, re_path
+from django.urls import include, path
 from django.views.generic import TemplateView
 
 from server.apps.api import urls as api_urls
