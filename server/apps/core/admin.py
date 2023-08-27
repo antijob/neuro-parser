@@ -9,7 +9,6 @@ from server.apps.core.models import (
     Explanation,
     MediaIncident,
     MediaIncidentFile,
-    Post,
     Source,
     Stage,
     Tag,
@@ -82,20 +81,3 @@ class SourceAdmin(admin.ModelAdmin):
                 banned=obj.banned
             )
             new_source.save()
-
-
-class PostAdminForm(forms.ModelForm):
-    text = forms.CharField(widget=CKEditorWidget())
-
-    class Meta:
-        model = Post
-        fields = '__all__'
-
-
-class PostAdmin(admin.ModelAdmin):
-    form = PostAdminForm
-    list_display = ('title', 'create_date', 'public')
-    ordering = ['-create_date']
-
-
-admin.site.register(Post, PostAdmin)
