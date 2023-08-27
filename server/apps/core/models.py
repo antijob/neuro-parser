@@ -565,17 +565,6 @@ class Post(models.Model):
     def has_title_and_description(self):
         return self.card_type == self.TITLE_IMAGE_DESCRIPTION
 
-class Stage(models.Model):
-    title = models.TextField("Заголовок")
-    summary = models.TextField("Краткое описание")
-    text = RichTextUploadingField('Текст')
-    create_date = models.DateTimeField("Дата создания",
-                                       default=timezone.now)
-
-    def get_absolute_url(self):
-        return reverse('core:dashboard-stage-form-update', kwargs={'pk': self.pk})
-
-
 class Explanation(models.Model):
     title = models.TextField("Заголовок")
     text = models.TextField('Текст')
