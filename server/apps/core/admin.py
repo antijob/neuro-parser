@@ -10,7 +10,6 @@ from server.apps.core.models import (
     MediaIncident,
     MediaIncidentFile,
     Source,
-    Stage,
     Tag,
     IncidentType,
     UserIncident,
@@ -18,7 +17,6 @@ from server.apps.core.models import (
 )
 admin.site.register(Explanation)
 admin.site.register(MediaIncidentFile)
-admin.site.register(Stage)
 admin.site.register(Tag)
 admin.site.register(UserIncidentFile)
 

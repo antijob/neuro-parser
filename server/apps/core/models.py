@@ -495,16 +495,6 @@ class Tag(models.Model):
     def __str__(self):
         return 'Tag <{}>'.format(self.name)
 
-class Stage(models.Model):
-    title = models.TextField("Заголовок")
-    summary = models.TextField("Краткое описание")
-    text = RichTextUploadingField('Текст')
-    create_date = models.DateTimeField("Дата создания",
-                                       default=timezone.now)
-
-    def get_absolute_url(self):
-        return reverse('core:dashboard-stage-form-update', kwargs={'pk': self.pk})
-
 
 class Explanation(models.Model):
     title = models.TextField("Заголовок")
