@@ -256,34 +256,6 @@ class UserIncident(BaseIncident):
         verbose_name = 'Инцидент'
         verbose_name_plural = 'Инциденты'
 
-
-class UserIncidentFile(models.Model):
-    file = models.FileField(upload_to="documents")
-    incident = models.ForeignKey(UserIncident,
-                                 on_delete=models.CASCADE,
-                                 related_name='files')
-
-    def __str__(self):
-        return str(self.file)
-
-    class Meta:
-        verbose_name = 'Файлы инцидентов по заявкам'
-        verbose_name_plural = 'Файл инцидента по заявке'
-
-
-class MediaIncidentFile(models.Model):
-    file = models.FileField(upload_to="documents")
-    incident = models.ForeignKey(MediaIncident,
-                                 on_delete=models.CASCADE,
-                                 related_name='files')
-
-    def __str__(self):
-        return str(self.file)
-
-    class Meta:
-        verbose_name = 'Файлы инцидентов из СМИ'
-        verbose_name_plural = 'Файл инцидента из СМИ'
-
 class Source(models.Model):
     ALGORITHMS = [
         ('marker', 'По маркерам'),

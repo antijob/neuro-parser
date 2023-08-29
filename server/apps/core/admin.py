@@ -8,17 +8,13 @@ from server.apps.core.models import (
     Article,
     Explanation,
     MediaIncident,
-    MediaIncidentFile,
     Source,
     Tag,
     IncidentType,
     UserIncident,
-    UserIncidentFile,
 )
 admin.site.register(Explanation)
-admin.site.register(MediaIncidentFile)
 admin.site.register(Tag)
-admin.site.register(UserIncidentFile)
 
 @admin.register(IncidentType)
 class IncidentTypeAdmin(admin.ModelAdmin):
