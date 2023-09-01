@@ -446,8 +446,6 @@ class Article(models.Model):
         if region == 'RU':
             region = region_code("{} {}".format(self.title, self.text))
         public_title = self.any_title()
-        if annotated_title:
-            public_title = annotated_title
         for incident_type in incident_types:
             self.incident = MediaIncident.objects.create(
                 urls=[self.url],
