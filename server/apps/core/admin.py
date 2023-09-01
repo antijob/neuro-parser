@@ -7,18 +7,14 @@ from django.contrib import admin
 from server.apps.core.models import (
     Article,
     MediaIncident,
-    MediaIncidentFile,
     Source,
     Tag,
     IncidentType,
     UserIncident,
-    UserIncidentFile,
 )
 from server.apps.core.forms import IncidentTypeForm
 
-admin.site.register(MediaIncidentFile)
 admin.site.register(Tag)
-admin.site.register(UserIncidentFile)
 
 @admin.register(IncidentType)
 class IncidentTypeAdmin(admin.ModelAdmin):
