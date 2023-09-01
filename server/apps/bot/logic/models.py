@@ -50,9 +50,6 @@ def create_incident(update: Optional[Update] = None, **kwargs: Any):
 
         public_title = title
 
-        if annotated_title:
-            public_title = annotated_title
-
         incident = MediaIncident.objects.create(
             urls=[url],
             status=MediaIncident.UNPROCESSED,

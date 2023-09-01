@@ -15,6 +15,10 @@ from server.apps.core.models import (
     UserIncident,
     UserIncidentFile,
 )
+
+from server.apps.core.forms import IncidentTypeForm
+
+
 admin.site.register(Explanation)
 admin.site.register(MediaIncidentFile)
 admin.site.register(Tag)
@@ -22,7 +26,8 @@ admin.site.register(UserIncidentFile)
 
 @admin.register(IncidentType)
 class IncidentTypeAdmin(admin.ModelAdmin):
-    list_display = ('description', 'zip_file')
+    list_display = ('description', 'model_path')
+    form = IncidentTypeForm
 
     actions=['really_delete_selected']
 

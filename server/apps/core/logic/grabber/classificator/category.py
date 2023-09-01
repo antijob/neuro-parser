@@ -22,7 +22,9 @@ def predict_is_incident(normalized_text, incident_type):
 
 def predict_incident_type(normalized_text):
     types = []
-    for incident_type in IncidentType.objects.exclude(zip_file__in=['',None]):
+    for incident_type in IncidentType.objects.all():
+        if not incident_type.model_path:
+            continue
         if predict_is_incident(normalized_text, incident_type):
             types.append(incident_type)
     return types
