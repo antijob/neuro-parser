@@ -1,71 +1,23 @@
-import os
-import shutil
-
 from transformers import AutoTokenizer, BertForSequenceClassification
-
 from django.db import models
-from django.core.files.storage import FileSystemStorage, default_storage
-from server.apps.core.logic.files import (
-    unpack_file, 
-    extract_filename_without_extension, 
-    validate_file_extension
-)
-from server.settings.components.common import BASE_DIR
-
-
-class OverwriteStorage(FileSystemStorage):
-    def get_available_name(self, name, max_length=None):
-        self.delete(name)
-        return name
+from server.settings.components.common import BASE_DIR, MODELS_DIR
 
 
 class IncidentType(models.Model):
-    zip_dir   = 'models_archives' # inside settings.MEDIA_ROOT
-    model_dir = BASE_DIR.joinpath('server', 'apps',
-                    'core', 'logic', 'grabber', 'classificator', 'data')
-
-    description = models.CharField('Вид ограничения', max_length=128, null=True, blank=True)
-    zip_file = models.FileField('Архив с моделью', 
-                    help_text = "архивы .zip, .tar, .tar.gz",
-                    upload_to=zip_dir, 
-                    null=True, blank=True, 
-                    storage=OverwriteStorage(), 
-                    validators=[validate_file_extension])
+    model_path = models.CharField(max_length=100, null=True)
     treshold = models.PositiveIntegerField('Treshold для модели', default=1)
+    description = models.CharField('Вид ограничения', max_length=128, null=True, blank=True)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.tokenizer = None
         self.model = None
 
-    def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
-
-        # Unpack the uploaded file
-        if self.zip_file:
-            file_path = self.zip_file.path
-
-            # assume that unpacked directory has the same name
-            unpack_file(file_path, self.model_dir)
-
-    def delete(self, *args, **kwargs):
-        file_name = extract_filename_without_extension(self.zip_file.name)
-        unpacked_files_path = self.model_dir.joinpath(file_name)
-
-        if os.path.exists(unpacked_files_path):
-            shutil.rmtree(unpacked_files_path)
-
-        if self.zip_file:
-            storage_path = self.zip_file.path
-            if default_storage.exists(storage_path):
-                default_storage.delete(storage_path)
-
-        super().delete(*args, **kwargs)
-
     @property
     def model_directory(self):
-        file_name = extract_filename_without_extension(self.zip_file.name)
-        return self.model_dir.joinpath(file_name)
+        if not self.model_path:
+            return None
+        return MODELS_DIR.joinpath(self.model_path)
 
     def get_tokenizer(self):
         if self.tokenizer is None:
