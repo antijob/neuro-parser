@@ -418,8 +418,6 @@ class Article(models.Model):
         if region == 'RU':
             region = region_code("{} {}".format(self.title, self.text))
         public_title = self.any_title()
-        if annotated_title:
-            public_title = annotated_title
         for incident_type in incident_types:
             self.incident = MediaIncident.objects.create(
                 urls=[self.url],
@@ -466,13 +464,3 @@ class Tag(models.Model):
 
     def __str__(self):
         return 'Tag <{}>'.format(self.name)
-
-
-class Explanation(models.Model):
-    title = models.TextField("Заголовок")
-    text = models.TextField('Текст')
-    emphasized = models.BooleanField("Выделенный", default=False)
-    create_date = models.DateTimeField("Дата создания", auto_now_add=True)
-
-    def get_absolute_url(self):
-        return reverse('core:dashboard-explanation-form-update', kwargs={'pk': self.pk})

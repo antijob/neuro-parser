@@ -16,6 +16,10 @@ from decouple import config as c
 
 from server.settings.components import BASE_DIR
 
+
+MODELS_DIR = BASE_DIR.joinpath('models')
+
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
 c.path = '../../../.env'

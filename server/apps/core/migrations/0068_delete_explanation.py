@@ -6,9 +6,11 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0066_delete_post'),
-        ('core', '0066_delete_stage'),
+        ('core', '0067_merge_0066_delete_post_0066_delete_stage'),
     ]
 
     operations = [
+        migrations.DeleteModel(
+            name='Explanation',
+        ),
     ]
