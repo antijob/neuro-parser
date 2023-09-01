@@ -6,7 +6,6 @@ from django.contrib import admin
 
 from server.apps.core.models import (
     Article,
-    Explanation,
     MediaIncident,
     MediaIncidentFile,
     Source,
@@ -15,11 +14,8 @@ from server.apps.core.models import (
     UserIncident,
     UserIncidentFile,
 )
-
 from server.apps.core.forms import IncidentTypeForm
 
-
-admin.site.register(Explanation)
 admin.site.register(MediaIncidentFile)
 admin.site.register(Tag)
 admin.site.register(UserIncidentFile)

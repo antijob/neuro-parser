@@ -492,13 +492,3 @@ class Tag(models.Model):
 
     def __str__(self):
         return 'Tag <{}>'.format(self.name)
-
-
-class Explanation(models.Model):
-    title = models.TextField("Заголовок")
-    text = models.TextField('Текст')
-    emphasized = models.BooleanField("Выделенный", default=False)
-    create_date = models.DateTimeField("Дата создания", auto_now_add=True)
-
-    def get_absolute_url(self):
-        return reverse('core:dashboard-explanation-form-update', kwargs={'pk': self.pk})
