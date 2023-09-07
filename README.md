@@ -1,5 +1,4 @@
-UPD on 06.07.23
-I deleted almost all previous stuff cause it's not very usable now
+A neural parser is a tool for parsing and analyzing news and content to search for incidents related to a specific topic.
 
 ## Development
 
@@ -22,22 +21,38 @@ poetry export --format requirements.txt --without-hashes --output requirements.t
 docker still use generated requirements.txt file
 git should contain both pyproject.toml and poetry.lock files 
 
-## Running
+
+## Running local
 
 Firstly modify `config/.env` and create database and replase to apps.
 
+Run `docker-compose up -d` inside root directory for start local container.
 
-After that run migrations:
-
-```
-~ ./manage migrate
-```
-
-If you want to run it on local machine, just:
+After that run migrations inside container:
 
 ```
-~ make runserver
+docker <PYTHON_CONTAINER_ID> python manage.py migrate
 ```
 
-**Note**: Don't forget about migrations.
+Add for you `/etc/hosts` file record which resolve domain for local traefik
 
+```
+127.0.0.1 report.local
+```
+
+Open admin panel in `http://report.local:8008/s/ecret/admin`
+
+Or use api `http://report.local:8008/api`
+
+
+## Running production
+
+Firstly modify `config/.env` and create database and replase to apps.
+
+Run `docker-compose -f docker-compose.prod.yaml up -d` inside root directory for start local container.
+
+After that run migrations inside container:
+
+```
+docker <PYTHON_CONTAINER_ID> python manage.py migrate
+```
