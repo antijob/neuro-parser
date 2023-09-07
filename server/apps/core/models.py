@@ -256,34 +256,6 @@ class UserIncident(BaseIncident):
         verbose_name = 'Инцидент'
         verbose_name_plural = 'Инциденты'
 
-
-class UserIncidentFile(models.Model):
-    file = models.FileField(upload_to="documents")
-    incident = models.ForeignKey(UserIncident,
-                                 on_delete=models.CASCADE,
-                                 related_name='files')
-
-    def __str__(self):
-        return str(self.file)
-
-    class Meta:
-        verbose_name = 'Файлы инцидентов по заявкам'
-        verbose_name_plural = 'Файл инцидента по заявке'
-
-
-class MediaIncidentFile(models.Model):
-    file = models.FileField(upload_to="documents")
-    incident = models.ForeignKey(MediaIncident,
-                                 on_delete=models.CASCADE,
-                                 related_name='files')
-
-    def __str__(self):
-        return str(self.file)
-
-    class Meta:
-        verbose_name = 'Файлы инцидентов из СМИ'
-        verbose_name_plural = 'Файл инцидента из СМИ'
-
 class Source(models.Model):
     ALGORITHMS = [
         ('marker', 'По маркерам'),
@@ -446,8 +418,6 @@ class Article(models.Model):
         if region == 'RU':
             region = region_code("{} {}".format(self.title, self.text))
         public_title = self.any_title()
-        if annotated_title:
-            public_title = annotated_title
         for incident_type in incident_types:
             self.incident = MediaIncident.objects.create(
                 urls=[self.url],
@@ -494,13 +464,3 @@ class Tag(models.Model):
 
     def __str__(self):
         return 'Tag <{}>'.format(self.name)
-
-
-class Explanation(models.Model):
-    title = models.TextField("Заголовок")
-    text = models.TextField('Текст')
-    emphasized = models.BooleanField("Выделенный", default=False)
-    create_date = models.DateTimeField("Дата создания", auto_now_add=True)
-
-    def get_absolute_url(self):
-        return reverse('core:dashboard-explanation-form-update', kwargs={'pk': self.pk})

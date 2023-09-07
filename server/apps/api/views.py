@@ -65,22 +65,24 @@ class CheckLinkForIncident(CreateAPIView):
         try:
             article = None
             if link:
-                article = Article.objects.create(url=link)
+                article = Article.objects.create(url=link) # get_or)create if url field will be prime field 
                 article.download()
                 incident = article.create_incident()
             else:
                 incident = None
             
-            data = {'incident': None}
+            data = None
             if incident:
-                data = {'incident': incident}
+                data = MediaIncidentSerializer(incident).data
             if not incident or not create_incident:
                 if article:
                     article.delete()
+                if incident:
+                    incident.delete()
 
-            return Response(data, status=status.HTTP_200_OK)#incident
+            return Response({'incident': data}, status=status.HTTP_200_OK)#incident
         except Exception as e:
-            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'incident': None, 'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class CheckTextForIncident(GenericAPIView):
