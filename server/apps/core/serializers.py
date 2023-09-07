@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import BaseIncident, MediaIncident, UserIncident, IncidentType
+from .models import BaseIncident, MediaIncident, IncidentType
 
 
 class IncidentTypeSerializer(serializers.ModelSerializer):
@@ -15,18 +15,18 @@ class BaseIncidentSerializer(serializers.ModelSerializer):
         model = BaseIncident
         fields = '__all__'
         fields = [
-            'title', 
-            'description', 
-            'status', 
-            'create_date', 
-            'update_date', 
+            'title',
+            'description',
+            'status',
+            'create_date',
+            'update_date',
             # 'assigned_to', # exclude
-            'region', 
-            'incident_type', 
-            'count', 
-            'tags', 
-            'urls', 
-            'public_title', 
+            'region',
+            'incident_type',
+            'count',
+            'tags',
+            'urls',
+            'public_title',
             'public_description'
         ]
 
@@ -34,9 +34,3 @@ class MediaIncidentSerializer(BaseIncidentSerializer):
     class Meta:
         model = MediaIncident
         fields = BaseIncidentSerializer.Meta.fields
-
-class UserIncidentSerializer(BaseIncidentSerializer):
-    class Meta:
-        model = UserIncident
-        fields = BaseIncidentSerializer.Meta.fields
-        

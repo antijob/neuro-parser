@@ -6,9 +6,8 @@ from rest_framework.generics import CreateAPIView, GenericAPIView
 
 from server.apps.core.models import (
     Article,
-    MediaIncident, 
-    IncidentType,
-    UserIncident,
+    MediaIncident,
+    IncidentType
 )
 from server.apps.core.serializers import MediaIncidentSerializer, IncidentTypeSerializer
 
@@ -21,21 +20,21 @@ from server.apps.core.logic.grabber.classificator.category import predict_incide
 
 
 class GetLastMediaIncidents(generics.ListAPIView):
-    throttle_scope = 'user' 
+    throttle_scope = 'user'
     serializer_class = MediaIncidentSerializer
 
     def get_queryset(self):
-        days_count = int(self.request.query_params.get('days', 0)) 
-        incident_type = int(self.request.query_params.get('type', -1)) 
+        days_count = int(self.request.query_params.get('days', 0))
+        incident_type = int(self.request.query_params.get('type', -1))
 
         if days_count == 0:
-            days_condition = Q() 
+            days_condition = Q()
         else:
             start_date = timezone.now() - timezone.timedelta(days=days_count)
             days_condition = Q(create_date__gte=start_date)
 
         if  incident_type == -1:
-            incident_condition = Q() 
+            incident_condition = Q()
         else:
             incident_condition = Q(incident_type_id=incident_type)
 
@@ -47,7 +46,7 @@ class GetLastMediaIncidents(generics.ListAPIView):
 
 
 class GetIncidentTypes(generics.ListAPIView):
-    throttle_scope = 'user' 
+    throttle_scope = 'user'
     serializer_class = IncidentTypeSerializer
 
     def get_queryset(self):
@@ -55,7 +54,7 @@ class GetIncidentTypes(generics.ListAPIView):
 
 
 class CheckLinkForIncident(CreateAPIView):
-    throttle_scope = 'user' 
+    throttle_scope = 'user'
     serializer_class = MediaIncidentSerializer
 
     def create(self, request, *args, **kwargs):
@@ -65,13 +64,13 @@ class CheckLinkForIncident(CreateAPIView):
         try:
             article = None
             if link:
-                article = Article.objects.create(url=link)
+                article = Article.objects.create(url=link) # get_or)create if url field will be prime field
                 article.download()
                 incident = article.create_incident()
             else:
                 incident = None
-            
-            data = {'incident': None}
+
+            data = None
             if incident:
                 data = {'incident': incident}
             if not incident or not create_incident:
@@ -84,7 +83,7 @@ class CheckLinkForIncident(CreateAPIView):
 
 
 class CheckTextForIncident(GenericAPIView):
-    throttle_scope = 'user' 
+    throttle_scope = 'user'
     serializer_class = IncidentTypeSerializer
 
     def post(self, request, format=None):

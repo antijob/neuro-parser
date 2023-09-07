@@ -237,25 +237,6 @@ class MediaIncident(BaseIncident):
         verbose_name_plural = 'Инциденты из СМИ'
 
 
-class UserIncident(BaseIncident):
-    form_data = models.JSONField('Данные из формы', null=True, blank=True)
-    applicant_messenger = models.CharField(
-        'Аккаунт в мессенджере', max_length=128, null=True, blank=True)
-    applicant_email = models.CharField('Email', max_length=128)
-    uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
-
-    def clean_form_data(self):
-        data = {field["name"]: field["userData"][0]
-                for field in self.form_data}
-        return data
-
-    def get_absolute_url(self):
-        return reverse('core:dashboard-incident-update', args=[self.pk])
-
-    class Meta:
-        verbose_name = 'Инцидент'
-        verbose_name_plural = 'Инциденты'
-
 class Source(models.Model):
     ALGORITHMS = [
         ('marker', 'По маркерам'),
@@ -454,11 +435,6 @@ class Tag(models.Model):
 
     def apply(self):
         incidents = MediaIncident.objects.filter(
-            Q(status__in=MediaIncident.ACTIVE_STATUSES) |
-            Q(status=MediaIncident.UNPROCESSED))
-        for incident in incidents:
-            incident.apply_tag(self)
-        incidents = UserIncident.objects.filter(
             Q(status__in=MediaIncident.ACTIVE_STATUSES) |
             Q(status=MediaIncident.UNPROCESSED))
         for incident in incidents:

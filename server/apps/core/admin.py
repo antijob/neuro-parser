@@ -11,7 +11,6 @@ from server.apps.core.models import (
     Source,
     Tag,
     IncidentType,
-    UserIncident,
 )
 admin.site.register(Explanation)
 admin.site.register(Tag)
@@ -42,13 +41,6 @@ class IncidentTypeAdmin(admin.ModelAdmin):
 @admin.register(MediaIncident)
 class MediaIncidentAdmin(admin.ModelAdmin):
     list_display = ('any_title', 'status')
-
-
-@admin.register(UserIncident)
-class UserIncidentAdmin(admin.ModelAdmin):
-    readonly_fields = ('uuid',)
-    list_display = ('any_title', 'status')
-
 
 @admin.register(Article)
 class ArticleAdmin(admin.ModelAdmin):

@@ -7,7 +7,6 @@ from mimesis import Generic
 from mimesis.builtins import RussiaSpecProvider
 from mimesis.enums import Gender
 
-from server.apps.core.models import UserIncident
 from server.apps.users.models import User
 
 
@@ -45,11 +44,3 @@ class Command(BaseCommand):
 
         print('Verifying email addresses for all accounts...')
         EmailAddress.objects.all().update(verified=True)
-
-        print('Generating 40 incidents...')
-        for i in range(50):
-            UserIncident.objects.create(
-                title=russia.generate_sentence(),
-                description=''.join(russia.generate_sentence() for _ in range(3)),
-                status=0,
-            )
