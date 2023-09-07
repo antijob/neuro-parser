@@ -1,8 +1,12 @@
+# Neural Parser
+
 A neural parser is a tool for parsing and analyzing news and content to search for incidents related to a specific topic.
 
 ## Development
 
-For managing python packages we use ['poetry'](https://python-poetry.org/docs/)
+### Managing Python Packages
+
+For managing Python packages, we use [Poetry](https://python-poetry.org/docs/):
 
 ```
 # install everything
@@ -56,3 +60,13 @@ After that run migrations inside container:
 ```
 docker <PYTHON_CONTAINER_ID> python manage.py migrate
 ```
+
+## Contributing
+
+We welcome contributions from the community. If you would like to contribute to this project, please follow the guidelines in the [CONTRIBUTING.md] file.
+
+## Contact
+
+If you have questions or need further assistance, please contact us at [antijob@riseup.net].
+
+Thank you for your contributions to the Neural Parser project!
