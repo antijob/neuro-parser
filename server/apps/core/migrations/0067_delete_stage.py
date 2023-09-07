@@ -6,7 +6,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0065_delete_dataleak'),
+        ('core', '0066_delete_post'),
     ]
 
     operations = [
