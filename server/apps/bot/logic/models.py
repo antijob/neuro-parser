@@ -4,7 +4,7 @@ from django.core.exceptions import ValidationError
 from django.core.validators import URLValidator
 from telegram import Update
 
-from server.apps.bot.logic.keyboard import edit_incident_markup
+# from server.apps.bot.logic.keyboard import edit_incident_markup
 from server.apps.core.models import Article, MediaIncident
 
 
