@@ -1,4 +1,4 @@
-# Contributing to [Your Project Name]
+# Contributing to Neural Parser
 
 Thank you for considering contributing to our project! We welcome contributions from the community. Please take a moment to review this document for guidelines on how to contribute.
 
@@ -28,7 +28,7 @@ If you would like to contribute code to the project, please follow these steps:
 
 ### Documentation
 
-Improvements to project documentation are always appreciated. If you find a typo or want to clarify instructions, please submit a PR to the [documentation repository](https://github.com/your-username/your-project-name-docs).
+Improvements to project documentation are always appreciated. If you find a typo or want to clarify instructions, please submit a PR.
 
 ## Development Setup
 
@@ -40,6 +40,6 @@ If you're interested in running the project locally for development purposes, fo
 
 ## Contact
 
-If you have questions or need further assistance, please contact us at [antijob@riseup.net].
+If you have questions or need further assistance, please contact us at antijob@riseup.net.
 
 Thank you for your contributions to Neuro-parser!
