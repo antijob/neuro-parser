@@ -67,6 +67,6 @@ We welcome contributions from the community. If you would like to contribute to 
 
 ## Contact
 
-If you have questions or need further assistance, please contact us at [antijob@riseup.net].
+If you have questions or need further assistance, please contact us at antijob@riseup.net.
 
 Thank you for your contributions to the Neural Parser project!
