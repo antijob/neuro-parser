@@ -31,10 +31,6 @@ class IncidentType(models.Model):
         return self.model
 
     @classmethod
-    def types_list(cls):
-        return [(it.id, it.description) for it in cls.objects.all()]
-
-    @classmethod
     def get_choices(cls):
         return [(incident_type.id, incident_type.description) for incident_type in cls.objects.all()]
 
