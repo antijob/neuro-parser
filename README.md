@@ -41,3 +41,19 @@ If you want to run it on local machine, just:
 
 **Note**: Don't forget about migrations.
 
+## Telegram bot
+You can use telegram bot to receive notifications about new incidents.
+
+To install it you need to register new bot with BotFather
+Then add settings to .env file
+```
+TELEGRAM_BOT_TOKEN=
+TELEGRAM_BOT_NAME=
+TELEGRAM_BOT_URL=
+```
+Token from BotFather, name that you gave to the bot and url for web hooks. Default url - yoursite.com/bot
+After that you need to create new telegram bot and and add bot there. That's all bot remember that group 
+and will send notifications there. If you want recieve notifications only for some of existing categories
+use command ```/categ``` for bot settings. 
+Also you can go to Django admin and check Bot section to explore what channels are saved. 
+
