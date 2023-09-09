@@ -28,7 +28,7 @@ git should contain both pyproject.toml and poetry.lock files
 
 ## Running local
 
-Firstly modify `config/.env` and create database and replase to apps.
+Firstly modify `config/.env`, create database and replace to apps.
 
 Run `docker-compose up -d` inside root directory for start local container.
 
@@ -51,7 +51,7 @@ Or use api `http://report.local:8008/api`
 
 ## Running production
 
-Firstly modify `config/.env` and create database and replase to apps.
+Firstly modify `config/.env` and create database and replace to apps.
 
 Run `docker-compose -f docker-compose.prod.yaml up -d` inside root directory for start local container.
 
@@ -63,10 +63,10 @@ docker <PYTHON_CONTAINER_ID> python manage.py migrate
 
 ## Contributing
 
-We welcome contributions from the community. If you would like to contribute to this project, please follow the guidelines in the [CONTRIBUTING.md] file.
+We welcome contributions from the community. If you would like to contribute to this project, please follow the guidelines in the [CONTRIBUTING.md](CONTRIBUTING.md) file.
 
 ## Contact
 
-If you have questions or need further assistance, please contact us at [antijob@riseup.net].
+If you have questions or need further assistance, please contact us at antijob@riseup.net.
 
 Thank you for your contributions to the Neural Parser project!
