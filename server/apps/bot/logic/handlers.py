@@ -1,22 +1,14 @@
-from django.core.exceptions import ValidationError
-from django.core.validators import URLValidator
 from telegram import Update
 from telegram.ext import CallbackContext
 
 from server.apps.bot.logic.messages import (
     HELP_COMMAND_MESSAGE,
-    MANUAL_INCIDENT_CREATION_MESSAGE_TEMPLATE,
     CATEGORIES_MESSAGE,
+    ADD_MESSAGE,
 )
-from server.apps.bot.logic.models import create_incident
-from server.apps.bot.logic.parsers import (
-    extract_text_and_url,
-    incident_message_to_dict,
-)
-
-
-class UnknownError(Exception):
-    pass
+from server.apps.bot.logic.keyboard import create_inline_keyboard
+from server.apps.bot.models import Channel
+from server.settings.components.telegram import TELEGRAM_BOT_NAME
 
 
 def help_callback(update, _context: CallbackContext) -> None:
@@ -24,57 +16,36 @@ def help_callback(update, _context: CallbackContext) -> None:
         text=HELP_COMMAND_MESSAGE, parse_mode="HTML", disable_web_page_preview=True
     )
 
+def new_chat_members(update: Update, context: CallbackContext):
+    chat_id = update.message.chat_id
+    new_chat_members = update.message.new_chat_members
 
-def create_template_incident(update: Update, _context: CallbackContext) -> None:
-    update.message.reply_text(
-        "Скопируйте шаблон и начните заполнение."
-    )
-    update.message.reply_text(MANUAL_INCIDENT_CREATION_MESSAGE_TEMPLATE, parse_mode='HTML')
+    message = f'Бот добавлен в чат - {update.message.chat.title}.' + ADD_MESSAGE
 
+    for member in new_chat_members:
+        if member.username == TELEGRAM_BOT_NAME and member.is_bot == True:
+            chn = Channel(channel_id=chat_id)
+            chn.save()
+            update.message.reply_text(message)
 
-def categories_list(update: Update, _context: CallbackContext) -> None:
-    update.message.reply_text(
-        "Скопируйте шаблон и начните заполнение."
-    )
-    update.message.reply_text(CATEGORIES_MESSAGE, parse_mode='HTML')
+def categ(update, context):
+    chat_id = update.message.chat_id
 
+    try:
+        # check if this chanel exist in db
+        cats = Channel.objects.get(channel_id__exact=chat_id)
+        print(cats)
 
-def any_message_callback(update: Update, _context: CallbackContext):
-    validate = URLValidator()
-
-    if update.message and update.message.forward_from_chat:
-        username = update.message.forward_from_chat.username
-        message_id = update.message.forward_from_message_id
-        description = update.message.text
-        if not description and update.message.caption:
-            description = update.message.caption
-
-        message = f"https://t.me/{username}/{message_id}"
-    else:
-        description = None
-        message = update.message.text.strip()
-
-    if message.startswith("+"):
-        try:
-            return create_incident(update, **incident_message_to_dict(message))
-        except UnknownError:
-            return update.message.reply_text("Произошла неизвестная ошибка при ручном создании инцидента")
-
-    if message.startswith(";") or message.startswith("@"):
-        return
-
-    if message.startswith("http"):
-        create_incident(update, url=message, text=description)
-    else:
-        text, url = extract_text_and_url(message)
-
-        if url and text:
-            try:
-                validate(url)
-                create_incident(update, url=url, text=text)
-            except ValidationError:
-                update.message.reply_text(
-                    "Ошибка при создании инцидента, некорректный URL-адрес."
+        # Create and send the inline keyboard
+        keyboard = create_inline_keyboard(cats)
+        context.bot.send_message(
+                                    chat_id=chat_id,
+                                    text=CATEGORIES_MESSAGE,
+                                    parse_mode = 'HTML',
+                                    reply_markup=keyboard
+                                 )
+    except:
+        context.bot.send_message(
+                chat_id=chat_id,
+                text="Проверьте настройки бота, что-то пошло не так"
                 )
-        else:
-            update.message.reply_text("Не удалось создать инцидент.")

@@ -16,7 +16,7 @@ class Command(BaseCommand):
         response = requests.get(
             TELEGRAM_API_BOT_URL,
             params={
-                "url": "https://runet.report/bot/",
+                "url": settings.TELEGRAM_BOT_URL,
                 "drop_pending_updates": True,
             },
         )
