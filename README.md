@@ -85,6 +85,5 @@ and will send notifications there. If you want recieve notifications only for so
 use command ```/categ``` for bot settings. 
 Also you can go to Django admin and check Bot section to explore what channels are saved. 
 
-=======
 Thank you for your contributions to the Neural Parser project!
 
