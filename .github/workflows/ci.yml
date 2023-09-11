@@ -83,7 +83,7 @@ jobs:
         uses: trstringer/manual-approval@v1
         with:
           secret: ${{ github.TOKEN }}
-          approvers: Vldln,person63846
+          approvers: Vldln
           minimum-approvals: 1
 
       - name: Start the app
@@ -91,4 +91,3 @@ jobs:
           docker-compose -f docker-compose.prod.yaml up -d
           docker-compose -f docker-compose.prod.yaml exec -T web python manage.py migrate
           docker-compose -f docker-compose.prod.yaml exec -T web python manage.py collectstatic --noinput
-          docker system prune -a
