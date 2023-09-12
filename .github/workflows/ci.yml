@@ -4,6 +4,17 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
+    inputs:
+      runType:
+        description: "How to run this build?"
+        required: true
+        default: "default"
+        type: choice
+        options:
+          - Force build
+          - Default
+
 
 jobs:
   check-secrets:
@@ -65,11 +76,11 @@ jobs:
           CF_DNS_API_TOKEN: "${{ secrets.CF_DNS_API_TOKEN }}"
 
       - name: Build traefik
-        if: steps.filter.outputs.traefik == 'true'
+        if: ${{ steps.filter.outputs.traefik == 'true' || github.event.inputs.runType == 'Force build' }}
         run: docker-compose -f docker-compose.prod.yaml build traefik
 
       - name: Build python
-        if: steps.filter.outputs.web == 'true'
+        if: ${{ steps.filter.outputs.web == 'true' || github.event.inputs.runType == 'Force build' }}
         run: docker-compose -f docker-compose.prod.yaml build web celery
 
   start:
