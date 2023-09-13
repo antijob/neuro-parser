@@ -9,7 +9,6 @@ from server.apps.core.models import (
     MediaIncident,
     Source,
     IncidentType,
-    UserIncident,
 )
 from server.apps.core.forms import IncidentTypeForm
 
@@ -41,13 +40,6 @@ class IncidentTypeAdmin(admin.ModelAdmin):
 @admin.register(MediaIncident)
 class MediaIncidentAdmin(admin.ModelAdmin):
     list_display = ('any_title', 'status')
-
-
-@admin.register(UserIncident)
-class UserIncidentAdmin(admin.ModelAdmin):
-    readonly_fields = ('uuid',)
-    list_display = ('any_title', 'status')
-
 
 @admin.register(Article)
 class ArticleAdmin(admin.ModelAdmin):

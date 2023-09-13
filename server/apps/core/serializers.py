@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import BaseIncident, MediaIncident, UserIncident, IncidentType
+from .models import BaseIncident, MediaIncident, IncidentType
 
 
 class IncidentTypeSerializer(serializers.ModelSerializer):
@@ -33,9 +33,3 @@ class MediaIncidentSerializer(BaseIncidentSerializer):
     class Meta:
         model = MediaIncident
         fields = BaseIncidentSerializer.Meta.fields
-
-class UserIncidentSerializer(BaseIncidentSerializer):
-    class Meta:
-        model = UserIncident
-        fields = BaseIncidentSerializer.Meta.fields
-
