@@ -21,13 +21,11 @@ from server.apps.core import urls as main_urls
 from server.apps.users import urls as users_urls
 from server.apps.bot import urls as bot_urls
 
-admin.site.index_template = 'core/admin/index.html'
 admin.autodiscover()
 
 urlpatterns = [
     path('s/ecret/admin/doc/', include('django.contrib.admindocs.urls')),
     path('s/ecret/admin/', admin.site.urls),
-    path('ckeditor/', include('ckeditor_uploader.urls')),
 
     # Text and xml static files:
     path('robots.txt', TemplateView.as_view(
