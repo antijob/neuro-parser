@@ -614,20 +614,6 @@ requests = "*"
 requests-oauthlib = ">=0.3.0"
 
 [[package]]
-name = "django-ckeditor"
-version = "6.0.0"
-description = "Django admin CKEditor integration."
-optional = false
-python-versions = "*"
-files = [
-    {file = "django-ckeditor-6.0.0.tar.gz", hash = "sha256:29fd1a333cb9741ac2c3fd4e427a5c00115ed33a2389716a09af7656022dcdde"},
-    {file = "django_ckeditor-6.0.0-py2.py3-none-any.whl", hash = "sha256:cc2d377f1bdcd4ca1540caeebe85f7e2cd006198d57328ef6c718d3eaa5a0846"},
-]
-
-[package.dependencies]
-django-js-asset = ">=1.2.2"
-
-[[package]]
 name = "django-js-asset"
 version = "2.1.0"
 description = "script tag with additional attributes for django.forms.Media"

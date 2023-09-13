@@ -50,10 +50,6 @@ INSTALLED_APPS = (
     'allauth.account',
     'allauth.socialaccount',
 
-    # WYSIWYG:
-    "ckeditor",
-    "ckeditor_uploader",
-
     # Tracking:
     "tracking",
 
@@ -182,9 +178,6 @@ ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
 SOCIALACCOUNT_QUERY_EMAIL = True
 USERNAME_FIELD = 'email'
-
-# django-crispy-forms
-CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
 # Media files
 # Media-root is commonly changed in production

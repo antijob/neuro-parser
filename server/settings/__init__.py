@@ -25,7 +25,6 @@ base_settings = [
     'components/celery.py',
     'components/grabber.py',
     'components/sentry.py',
-    "components/ckeditor.py",
     "components/telegram.py",
 
     # You can even use glob:
