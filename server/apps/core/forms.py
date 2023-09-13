@@ -17,7 +17,10 @@ class IncidentTypeForm(forms.ModelForm):
         self.fields['model_path'].choices = self.get_model_folders()
 
     def get_model_folders(self):
-        folders = [(folder, folder) for folder in os.listdir(MODELS_DIR) if os.path.isdir(os.path.join(MODELS_DIR, folder))]
-        folders.insert(0, ('', 'Без модели'))
+        try:
+            folders = [(folder, folder) for folder in os.listdir(MODELS_DIR) if os.path.isdir(os.path.join(MODELS_DIR, folder))]
+        except Exception as e:
+            folders = [] 
 
+        folders.insert(0, ('', 'Без модели'))
         return folders
