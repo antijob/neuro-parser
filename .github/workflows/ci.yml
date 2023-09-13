@@ -74,6 +74,9 @@ jobs:
           DJANGO_KEY: "${{ secrets.DJANGO_KEY}}"
           CF_DNS_API_TOKEN: "${{ secrets.CF_DNS_API_TOKEN }}"
 
+      - name: Clean unused images
+        run: docker image prune -a
+
       - name: Build traefik
         if: ${{ steps.filter.outputs.traefik == 'true' || github.event.inputs.runType == 'Force build' }}
         run: docker-compose -f docker-compose.prod.yaml build traefik
