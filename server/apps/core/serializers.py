@@ -24,7 +24,6 @@ class BaseIncidentSerializer(serializers.ModelSerializer):
             'region',
             'incident_type',
             'count',
-            'tags',
             'urls',
             'public_title',
             'public_description'

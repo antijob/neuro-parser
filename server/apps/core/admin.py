@@ -6,18 +6,17 @@ from django.contrib import admin
 
 from server.apps.core.models import (
     Article,
-    Explanation,
     MediaIncident,
     Source,
-    Tag,
     IncidentType,
 )
-admin.site.register(Explanation)
-admin.site.register(Tag)
+from server.apps.core.forms import IncidentTypeForm
+
 
 @admin.register(IncidentType)
 class IncidentTypeAdmin(admin.ModelAdmin):
-    list_display = ('description', 'zip_file')
+    list_display = ('description', 'model_path')
+    form = IncidentTypeForm
 
     actions=['really_delete_selected']
 

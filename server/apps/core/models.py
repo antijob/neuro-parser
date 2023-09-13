@@ -145,7 +145,6 @@ class BaseIncident(models.Model):
     region = models.CharField('Регион', choices=REGIONS, default='RU', max_length=16)
     incident_type = models.ForeignKey(IncidentType, null=True, on_delete=models.CASCADE) # OnCascade?
     count = models.PositiveIntegerField('Количество ограничений', default=1)
-    tags = ArrayField(models.CharField(max_length=32, blank=True, default='', null=True), blank=True, null=True)
     urls = ArrayField(models.URLField(blank=True, default='', null=True), blank=True, null=True)
     public_title = models.CharField('Публичное название', max_length=512, null=True, blank=True)
     public_description = models.TextField('Публичное описание', null=True, blank=True)
@@ -181,22 +180,6 @@ class BaseIncident(models.Model):
                     'success', 'success', 'secondary'][self.status]
         except IndexError:
             return ''
-
-    def apply_tag(self, tag):
-        if self.tags and tag.name.lower() in self.tags:
-            return
-        if not tag.markers:
-            return
-        text = self.description or self.public_description or ''
-        words = set(re.split(r'[^\w]', text))
-        normalized_words = normalize_words(words)
-        if not (set(normalized_words).intersection(tag.markers)):
-            return
-        if self.tags:
-            self.tags.append(tag.name.lower())
-        else:
-            self.tags = [tag.name.lower()]
-        self.save()
 
     def region_name(self):
         return dict(self.REGIONS).get(self.region)
@@ -399,8 +382,6 @@ class Article(models.Model):
         if region == 'RU':
             region = region_code("{} {}".format(self.title, self.text))
         public_title = self.any_title()
-        if annotated_title:
-            public_title = annotated_title
         for incident_type in incident_types:
             self.incident = MediaIncident.objects.create(
                 urls=[self.url],
@@ -415,40 +396,3 @@ class Article(models.Model):
         self.is_incident_created = True
         self.save()
         return self.incident
-
-
-class Tag(models.Model):
-    name = models.CharField('Имя тега', max_length=32,
-                            null=False, blank=False, unique=True)
-    markers = ArrayField(models.CharField(max_length=32, blank=True, null=True),
-                         verbose_name='Маркеры в тексте', blank=True, null=True)
-    is_active = models.BooleanField(verbose_name='Активен', default=True)
-    create_date = models.DateField('Дата создания', auto_now_add=True)
-
-    class Meta:
-        verbose_name = 'Тег'
-        verbose_name_plural = 'Теги'
-
-    def save(self, *args, **kwargs):
-        self.markers = list(normalize_words(self.markers))
-        super().save(*args, **kwargs)
-
-    def apply(self):
-        incidents = MediaIncident.objects.filter(
-            Q(status__in=MediaIncident.ACTIVE_STATUSES) |
-            Q(status=MediaIncident.UNPROCESSED))
-        for incident in incidents:
-            incident.apply_tag(self)
-
-    def __str__(self):
-        return 'Tag <{}>'.format(self.name)
-
-
-class Explanation(models.Model):
-    title = models.TextField("Заголовок")
-    text = models.TextField('Текст')
-    emphasized = models.BooleanField("Выделенный", default=False)
-    create_date = models.DateTimeField("Дата создания", auto_now_add=True)
-
-    def get_absolute_url(self):
-        return reverse('core:dashboard-explanation-form-update', kwargs={'pk': self.pk})

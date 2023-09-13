@@ -8,14 +8,7 @@ from django.core.management import call_command
 
 from server import celery_app
 from server.apps.core.logic.grabber import duplicates
-from server.apps.core.models import Article, Tag
-
-
-@celery_app.task
-def apply_tag_task(tag_id):
-    tag = Tag.objects.get(pk=tag_id)
-    tag.apply()
-
+from server.apps.core.models import Article
 
 @celery_app.task
 def grab_news():

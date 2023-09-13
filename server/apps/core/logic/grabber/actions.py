@@ -1,6 +1,6 @@
 from django.conf import settings
 
-from server.apps.core.models import Article, Source, Tag
+from server.apps.core.models import Article, Source
 
 from .duplicates import delete_duplicates
 
@@ -23,12 +23,6 @@ def create_incidents():
         article.create_incident()
 
 
-def apply_tags():
-    tags = Tag.objects.filter(is_active=True)
-    for tag in tags:
-        tag.apply()
-
-
 def grab_news():
     print("UPDATE SOURCES")
     update_sources()
@@ -38,9 +32,6 @@ def grab_news():
 
     print("CREATE INC")
     create_incidents()
-
-    print("APPLY TAGS")
-    apply_tags()
 
     print("DELETE INCIDENT DUPES")
     delete_duplicates()
