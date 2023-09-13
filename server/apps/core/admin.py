@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from ckeditor.widgets import CKEditorWidget
-from django import forms
 from django.contrib import admin
 
 from server.apps.core.models import (
