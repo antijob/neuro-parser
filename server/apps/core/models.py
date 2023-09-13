@@ -4,7 +4,6 @@ import datetime
 import re
 import uuid
 
-from ckeditor_uploader.fields import RichTextUploadingField
 from django.conf import settings
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
