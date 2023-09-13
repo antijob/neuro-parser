@@ -15,7 +15,6 @@ on:
           - Force build
           - Default
 
-
 jobs:
   check-secrets:
     name: Check for exposed secrets
@@ -90,12 +89,12 @@ jobs:
     runs-on: ["self-hosted", "antijob-report", "production"]
     if: github.ref == 'refs/heads/main'
     steps:
-      - name: Approve deployment
-        uses: trstringer/manual-approval@v1
-        with:
-          secret: ${{ github.TOKEN }}
-          approvers: Vldln
-          minimum-approvals: 1
+      # - name: Approve deployment
+      #   uses: trstringer/manual-approval@v1
+      #   with:
+      #     secret: ${{ github.TOKEN }}
+      #     approvers: Vldln
+      #     minimum-approvals: 1
 
       - name: Start the app
         run: |
