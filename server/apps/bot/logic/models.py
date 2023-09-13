@@ -13,7 +13,6 @@ def create_incident(update: Optional[Update] = None, **kwargs: Any):
     text = kwargs.get("text")
     title = kwargs.get("title")
     date = kwargs.get("date")
-    tags = kwargs.get("tags")
     count = kwargs.get("count")
     region = kwargs.get("region")
     incident_type = kwargs.get("incident_type")
@@ -60,7 +59,6 @@ def create_incident(update: Optional[Update] = None, **kwargs: Any):
             create_date=date,
             region=region,
             count=count,
-            tags=tags,
         )
         incident.incident_type = incident_type
         article.is_incident_created = True
@@ -74,7 +72,6 @@ def create_incident(update: Optional[Update] = None, **kwargs: Any):
             "<b>Количество:</b> {count}\n"
             "<b>Дата:</b> {date}\n"
             "<b>Регион:</b> {region}\n"
-            "<b>Теги:</b> {tags}\n"
             "<b>Категория:</b> {incident_type}\n"
             "<b>Источник:</b> {url}\n\n"
         ).format(
@@ -86,7 +83,6 @@ def create_incident(update: Optional[Update] = None, **kwargs: Any):
             edit_url=incident.get_absolute_url(),
             count=incident.count,
             incident_type=incident.get_incident_type_display(),
-            tags=", ".join(incident.tags),
         )
         update.message.reply_text(
             message,
