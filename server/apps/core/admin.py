@@ -8,13 +8,11 @@ from server.apps.core.models import (
     Article,
     MediaIncident,
     Source,
-    Tag,
     IncidentType,
     UserIncident,
 )
 from server.apps.core.forms import IncidentTypeForm
 
-admin.site.register(Tag)
 
 @admin.register(IncidentType)
 class IncidentTypeAdmin(admin.ModelAdmin):

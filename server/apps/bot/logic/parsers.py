@@ -40,7 +40,6 @@ def handle_date(message: str) -> str:
 def incident_message_to_dict(message: str):
     keywords = {
         "Дата": "date",
-        "Теги": "tags",
         "Регион": "region",
         "Описание": "description",
         "Категория": "incident_type",
@@ -64,8 +63,6 @@ def incident_message_to_dict(message: str):
 
         if real_key == "region":
             result[real_key] = region_codes(value)[0]
-        elif real_key == "tags":
-            result[real_key] = [tag.strip() for tag in value.split(",")]
         elif real_key == "date":
             result[real_key] = handle_date(value)
         elif real_key == "incident_type":
