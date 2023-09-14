@@ -44,10 +44,6 @@ jobs:
         with:
           base: ${{ github.ref }}
           filters: |
-            traefik:
-              - 'traefik/**'
-              - traefik.*.toml
-              - 'Dockerfile.traefik'
             web:
               - 'server/**'
               - 'Dockerfile.prod'
@@ -76,10 +72,6 @@ jobs:
 
       - name: Clean unused images
         run: docker image prune -a
-
-      - name: Build traefik
-        if: ${{ steps.filter.outputs.traefik == 'true' || github.event.inputs.runType == 'Force build' }}
-        run: docker-compose -f docker-compose.prod.yaml build traefik
 
       - name: Build python
         if: ${{ steps.filter.outputs.web == 'true' || github.event.inputs.runType == 'Force build' }}

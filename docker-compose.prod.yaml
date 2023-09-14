@@ -2,9 +2,19 @@ version: "3.11"
 
 services:
   traefik:
-    build:
-      context: .
-      dockerfile: Dockerfile.traefik
+    image: traefik:${TRAEFIK_VERSION}
+    command:
+      - "--accessLog=true"
+      - "--api.dashboard=false"
+      - "--certificatesResolvers.letsencrypt.acme.dnsChallenge.delayBeforeCheck=0"
+      - "--certificatesResolvers.letsencrypt.acme.dnsChallenge.provider=cloudflare"
+      - "--certificatesResolvers.letsencrypt.acme.email=info@antijob.net"
+      - "--certificatesResolvers.letsencrypt.acme.storage=/certificates/acme.json"
+      - "--entrypoints.web.http.redirections.entryPoint.scheme=websecure"
+      - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
+      - "--entrypoints.websecure.address=:443"
+      - "--log.level=DEBUG"
+      - "--providers.docker.exposedByDefault=false"
     container_name: "traefik"
     ports:
       - 80:80
