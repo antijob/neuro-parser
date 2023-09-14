@@ -248,3 +248,4 @@ cleanup-docker.sh
 
 tmp/docker-compose.yml
 data
+models
