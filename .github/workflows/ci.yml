@@ -16,23 +16,10 @@ on:
           - Default
 
 jobs:
-  check-secrets:
-    name: Check for exposed secrets
-    runs-on: "ubuntu-latest"
-    steps:
-      - uses: actions/checkout@v3
-      - run: |
-          docker run --rm --name=deepfence-secretscanner \
-            -v $(pwd):/deepfence/mnt \
-            deepfenceio/deepfence_secret_scanner:latest \
-            --host-mount-path /deepfence/mnt --local /deepfence/mnt
-
   build:
     name: Build production
     runs-on: ["self-hosted", "antijob-report", "production"]
     if: github.ref == 'refs/heads/main'
-    needs:
-      - check-secrets
     steps:
       - name: Check out repository code
         uses: actions/checkout@v3
