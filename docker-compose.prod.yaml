@@ -70,7 +70,7 @@ services:
       dockerfile: Dockerfile.prod
     command: bash -c 'while !</dev/tcp/db/5432; do sleep 1;done; gunicorn --bind 0.0.0.0:8000 server.wsgi'
     volumes:
-      - ./models:/home/github-actions/code/models
+      - /root/models:/home/github-actions/code/models
       - "staticfiles-data:/code/static"
     expose:
       - 8000
