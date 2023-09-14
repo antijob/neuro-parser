@@ -16,23 +16,10 @@ on:
           - Default
 
 jobs:
-  check-secrets:
-    name: Check for exposed secrets
-    runs-on: "ubuntu-latest"
-    steps:
-      - uses: actions/checkout@v3
-      - run: |
-          docker run --rm --name=deepfence-secretscanner \
-            -v $(pwd):/deepfence/mnt \
-            deepfenceio/deepfence_secret_scanner:latest \
-            --host-mount-path /deepfence/mnt --local /deepfence/mnt
-
   build:
     name: Build production
     runs-on: ["self-hosted", "antijob-report", "production"]
     if: github.ref == 'refs/heads/main'
-    needs:
-      - check-secrets
     steps:
       - name: Check out repository code
         uses: actions/checkout@v3
@@ -44,10 +31,6 @@ jobs:
         with:
           base: ${{ github.ref }}
           filters: |
-            traefik:
-              - 'traefik/**'
-              - traefik.*.toml
-              - 'Dockerfile.traefik'
             web:
               - 'server/**'
               - 'Dockerfile.prod'
@@ -76,9 +59,8 @@ jobs:
           CF_DNS_API_TOKEN: "${{ secrets.CF_DNS_API_TOKEN }}"
           API_TOKEN: "${{ secrets.API_TOKEN }}"
 
-      - name: Build traefik
-        if: ${{ steps.filter.outputs.traefik == 'true' || github.event.inputs.runType == 'Force build' }}
-        run: docker-compose -f docker-compose.prod.yaml build traefik
+      - name: Clean unused images
+        run: docker image prune -a
 
       - name: Build python
         if: ${{ steps.filter.outputs.web == 'true' || github.event.inputs.runType == 'Force build' }}

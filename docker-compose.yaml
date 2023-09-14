@@ -1,7 +1,13 @@
 services:
   traefik:
-    image: "traefik:v2.4"
+    image: traefik:${TRAEFIK_VERSION}
     container_name: "traefik"
+    command:
+      - "--accessLog=true"
+      - "--api.insecure=true"
+      - "--entrypoints.web.address=:80"
+      - "--log.level=DEBUG"
+      - "--providers.docker.exposedByDefault=false"
     ports:
       - 8008:80
       - 8081:8080
