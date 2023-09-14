@@ -65,6 +65,7 @@ jobs:
             -e s,^TELEGRAM_BOT_TOKEN=.*,TELEGRAM_BOT_TOKEN=$TELEGRAM_BOT_TOKEN, \
             -e s,^DJANGO_KEY=.*,DJANGO_KEY=$DJANGO_KEY, \
             -e s,^CF_DNS_API_TOKEN=.*,CF_DNS_API_TOKEN=$CF_DNS_API_TOKEN, \
+            -e s,^API_TOKEN=.*,API_TOKEN=$API_TOKEN, \
             .env
         env:
           POSTGRES_USER: "${{ secrets.POSTGRES_USER }}"
@@ -73,6 +74,7 @@ jobs:
           TELEGRAM_BOT_TOKEN: "${{ secrets.TELEGRAM_BOT_TOKEN }}"
           DJANGO_KEY: "${{ secrets.DJANGO_KEY}}"
           CF_DNS_API_TOKEN: "${{ secrets.CF_DNS_API_TOKEN }}"
+          API_TOKEN: "${{ secrets.API_TOKEN }}"
 
       - name: Build traefik
         if: ${{ steps.filter.outputs.traefik == 'true' || github.event.inputs.runType == 'Force build' }}
