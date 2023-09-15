@@ -97,7 +97,7 @@ services:
 
   celery:
     build: .
-    command: celery -A server worker --loglevel=debug --uid=github-actions -E
+    command: celery -A server worker --loglevel=debug -E
     volumes:
       - .:/code
     restart: always
