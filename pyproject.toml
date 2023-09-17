@@ -9,17 +9,16 @@ packages = [{include = "neuro_parser"}]
 [tool.poetry.dependencies]
 python = "^3.8"
 beautifulsoup4 = "==4.10.0"
-celery = "==5.2.3"
+celery = {extras = ["redis"], version = "^5.3.4"}
 django = "==3.2.21"
 django-allauth = "==0.47.0"
 django-split-settings = "==1.1.0"
 django-tracking2 = "==0.5.0"
-django-redis-cache = "==3.0.0"
 djangorestframework = "==3.13.1"
 hiredis = "==1.1.0"
 pandas = "==1.5.2"
 psycopg2-binary = "^2.9.6"
-redis = "==3.5.3"
+redis = "4.6.0"
 python-decouple = "==3.6"
 sentry-sdk = "==1.5.4"
 htmldocx = "==0.0.5"
@@ -44,6 +43,7 @@ selectolax = "*"
 scikit-learn = { version = "==1.2.0", optional = false }
 gunicorn = "^21.2.0"
 icecream = "*"
+django-redis = "^5.3.0"
 [tool.poetry.extras]
 transformers = ["scikit-learn"]
 
