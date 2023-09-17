@@ -68,7 +68,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.prod
-    command: bash -c 'while !</dev/tcp/db/5432; do sleep 1;done; gunicorn --bind 0.0.0.0:8000 server.wsgi'
+    command: /bin/bash -c "chmod +x ./entrypoint-prod.sh && ./entrypoint-prod.sh"
     volumes:
       - /root/models:/home/github-actions/code/models
       - "staticfiles-data:/code/static"
