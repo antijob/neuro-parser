@@ -62,17 +62,6 @@ services:
     networks:
       - djangonetwork
 
-  # celery:
-  #   build: .
-  #   command: celery -A server worker --loglevel=info
-  #   volumes:
-  #     - .:/code
-  #   restart: always
-  #   depends_on:
-  #     - redis
-  #   networks:
-  #     - djangonetwork
-
 networks:
   djangonetwork:
     driver: bridge

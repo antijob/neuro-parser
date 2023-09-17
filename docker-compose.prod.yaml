@@ -95,15 +95,6 @@ services:
     expose:
       - "6379"
 
-  celery:
-    build: .
-    command: celery -A server worker --loglevel=debug -E
-    volumes:
-      - .:/code
-    restart: always
-    depends_on:
-      - redis
-
 volumes:
   postgres_data_prod:
   traefik-public-certificates:
