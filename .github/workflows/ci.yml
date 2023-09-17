@@ -64,7 +64,7 @@ jobs:
 
       - name: Build python
         if: ${{ steps.filter.outputs.web == 'true' || github.event.inputs.runType == 'Force build' }}
-        run: docker-compose -f docker-compose.prod.yaml build web celery
+        run: docker-compose -f docker-compose.prod.yaml build web
 
   start:
     name: Start production
