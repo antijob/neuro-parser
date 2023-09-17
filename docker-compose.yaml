@@ -1,6 +1,6 @@
 services:
   traefik:
-    image: traefik:${TRAEFIK_VERSION}
+    image: traefik:latest
     container_name: "traefik"
     command:
       - "--accessLog=true"

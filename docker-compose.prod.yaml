@@ -2,7 +2,7 @@ version: "3.11"
 
 services:
   traefik:
-    image: traefik:${TRAEFIK_VERSION}
+    image: traefik:latest
     command:
       - "--accessLog=true"
       - "--api.dashboard=false"
