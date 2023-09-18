@@ -37,7 +37,8 @@ def get_vk_page_data(url: str):
 
     page = requests.get(url, headers=random_headers())
     tree = HTMLParser(page.text)
-    text = tree.css_first('div.wall_post_text').text()
+    wall_post = tree.css_first('div.wall_post_text')
+    text = wall_post.text() if wall_post else None
     if text:
         title = text.split(sep='\n')[0]
         if len(title) > 100:
