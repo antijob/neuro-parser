@@ -8,19 +8,26 @@ from .duplicates import delete_duplicates
 def update_sources():
     sources = Source.objects.filter(is_active=True)
     for source in sources:
-        source.update()
-
+        try:
+            source.update()
+        except Exception as e:
+            print(f"An error occurred while updating source: {e}")
 
 def download_articles():
     for article in Article.objects.filter(is_downloaded=False):
-        article.download()
-
+        try:
+            article.download()
+        except Exception as e:
+            print(f"An error occurred while downloading article: {e}")
 
 def create_incidents():
-    articles = Article.objects.filter(is_downloaded=True,
-                                      is_incident_created=False)
+    articles = Article.objects.filter(is_downloaded=True, is_incident_created=False)
     for article in articles:
-        article.create_incident()
+        try:
+            article.create_incident()
+        except Exception as e:
+            print(f"An error occurred while creating incident for article: {e}")
+
 
 
 def grab_news():
