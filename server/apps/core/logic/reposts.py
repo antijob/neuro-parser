@@ -21,9 +21,10 @@ def check_repost(article_text_to_check: str):
     articles = todays_articles()
     for art in articles:
         match = SequenceMatcher(None, article_text_to_check, art.text)
-        sim_ratio = match.ratio()
-        if sim_ratio > 0.7:
-            return True
+        if match.get_matching_blocks():
+            sim_ratio = match.ratio()
+            if sim_ratio > 0.7:
+                return True
     return False
 
 
