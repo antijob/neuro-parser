@@ -7,6 +7,7 @@ class IncidentType(models.Model):
     model_path = models.CharField(max_length=100, null=True)
     treshold = models.PositiveIntegerField('Treshold для модели', default=1)
     description = models.CharField('Название модели', max_length=128, null=True, blank=True)
+    chat_gpt_prompt = models.TextField('Chat-GPR промпт', null=True, blank=True)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

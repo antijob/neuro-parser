@@ -222,6 +222,8 @@ REST_FRAMEWORK = {
     ]
 }
 
+CHAT_GPT_KEY = c('CHAT_GPT_KEY')
+
 CONTACT_FORM_EMAILS = ['agorarights@gmail.com']
 
 MAX_UPLOAD_SIZE = 20971520
