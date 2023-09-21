@@ -13,13 +13,6 @@ MIN_TERMS_COUNT = 4
 MIN_INTERSECTION_LENGTH = 3
 SIMILARITY_PERCENT = 34
 VALUABLE_TEXT_SIZE = 3000
-COMMON_TERMS = [
-    ('рф',),
-    ('россия',),
-    ('российский', 'федерация'),
-    ('интернет',),
-    ('россия',),
-]
 
 DATA_DIR = os.path.join(
     settings.BASE_DIR,
@@ -34,9 +27,7 @@ def extract_terms(text):
     markup = ner(text)
     terms = {tuple(normalize_text(text[span.start: span.stop]))
              for span in markup.spans}
-    return {term
-            for term in terms
-            if term not in COMMON_TERMS}
+    return terms
 
 
 def are_similar_sets(s1, s2):

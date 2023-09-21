@@ -23,7 +23,6 @@ base_settings = [
     'components/logging.py',
     'components/caches.py',
     'components/celery.py',
-    'components/grabber.py',
     'components/sentry.py',
     "components/telegram.py",
 
