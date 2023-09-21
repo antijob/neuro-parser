@@ -1,4 +1,3 @@
-from rest_framework.views import APIView
 from rest_framework import generics
 from rest_framework import status
 from rest_framework.response import Response
@@ -12,7 +11,6 @@ from server.apps.core.models import (
 from server.apps.core.serializers import MediaIncidentSerializer, IncidentTypeSerializer
 
 from django.utils import timezone
-from django.conf import settings
 from django.db.models import Q
 
 
@@ -87,12 +85,11 @@ class CheckTextForIncident(GenericAPIView):
     throttle_scope = 'user'
     serializer_class = IncidentTypeSerializer
 
-    def post(self, request, format=None):
+    def post(self, request):
         text = request.data.get('text', '')
 
         if text:
             incident_type = predict_incident_type(text)
-            data = {'incident_type': incident_type}
         else:
             incident_type = None
 

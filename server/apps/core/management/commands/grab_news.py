@@ -9,4 +9,3 @@ from server.apps.core.logic.grabber.actions import grab_news
 class Command(BaseCommand):
     def handle(self, *args, **options):
         grab_news()
-        call_command('mark_banned_mi')

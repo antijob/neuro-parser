@@ -1,22 +1,17 @@
 # -*- coding: utf-8 -*-
-import os
 import datetime
 import re
-import uuid
 
-from django.conf import settings
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
-from django.db.models import Q
 from django.urls import reverse
-from django.utils import timezone
 
 from server.apps.core.logic.grabber import article_parser, source_parser
 from server.apps.core.logic.grabber.classificator import (
-    category, cosine, markers
+    category
 )
 from server.apps.core.logic.grabber.region import region_code
-from server.apps.core.logic.morphy import normalize_text, normalize_words
+from server.apps.core.logic.morphy import normalize_text
 from server.apps.core.incident_types import IncidentType
 from server.apps.users.models import User
 from server.apps.core.logic.reposts import check_repost
@@ -220,16 +215,7 @@ class MediaIncident(BaseIncident):
 
 
 class Source(models.Model):
-    ALGORITHMS = [
-        ('marker', 'По маркерам'),
-        ('cosine', 'Косинусные расстояния'),
-        # ('cossmi', 'Косинусные расстояния для СМИ'),
-    ]
-    DEFAULT_ALGORITHM = 'cosine'
-    ALGORITHMS_MAP = {
-        'marker': markers,
-        'cosine': cosine,
-    }
+
     url = models.TextField(verbose_name='URL списка новостей',
                            null=False,
                            unique=True)
@@ -238,15 +224,6 @@ class Source(models.Model):
                               choices=BaseIncident.REGIONS,
                               default='RU',
                               max_length=6)
-    algorithm = models.CharField('Алгоритм оценки',
-                                 choices=ALGORITHMS,
-                                 default=DEFAULT_ALGORITHM,
-                                 max_length=6)
-
-    banned = models.BooleanField(
-        'Запрещенная на территории РФ организация',
-        default=False,
-    )
 
     class Meta:
         verbose_name = 'Источник'
@@ -337,33 +314,6 @@ class Article(models.Model):
         if first_sentence_end > 20:
             return self.text[:first_sentence_end]
         return self.text[:200] + '...'
-
-    def rate_relevance(self):
-        is_duplicate = Article.objects.filter(text=self.text,
-                                              pk__lt=self.pk).exists()
-        if is_duplicate:
-            self.relevance = -1
-            self.save()
-            return
-        words = normalize_text(self.text)
-
-
-        if not words:
-            self.relevance = -1
-        else:
-
-            algorithm = (Source.ALGORITHMS_MAP.get(
-                self.source.algorithm, 'cosine')
-                         if self.source
-                         else cosine)
-            if(self.source.algorithm == 'cosine'):
-                self.relevance = (
-                        algorithm.rate(self.text) * settings.RELEVANCE_TRESHOLD)
-            else:
-                self.relevance = (
-                        algorithm.rate(words) * settings.RELEVANCE_TRESHOLD)
-        self.save()
-
 
     # ToDo: made self.incident field contain multiple incidents
     def create_incident(self):
