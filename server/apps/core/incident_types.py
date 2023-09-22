@@ -9,6 +9,8 @@ class IncidentType(models.Model):
     description = models.CharField('Название модели', max_length=128, null=True, blank=True)
     chat_gpt_prompt = models.TextField('Chat-GPR промпт', null=True, blank=True)
 
+    should_sent_to_bot = models.BooleanField(default=True, verbose_name='Показывать в боте')
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.tokenizer = None
