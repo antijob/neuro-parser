@@ -12,4 +12,11 @@ def predict_is_incident(text, prompt, positive_result):
             {"role": "assistant", "content": text},
         ],
     )
-    return ( response['choices'][0]['message']['content'] == positive_result )
+
+    result = response['choices'][0]['message']['content']
+
+    # postprocess rules
+    if result.endswith('.'):
+        result = result[:-1]
+
+    return ( result == positive_result )
