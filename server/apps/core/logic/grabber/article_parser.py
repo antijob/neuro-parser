@@ -15,6 +15,9 @@ from .tg_parser import get_tg_page_data, parse_tg_raw_data
 from .vk_parser import get_vk_page_data, parse_vk_raw_data
 from .ok_parser import get_ok_page_data, parse_ok_raw_data
 
+import trafilatura
+# from trafilatura import fetch_url, fetch_json
+
 
 MIN_WORDS_IN_SENTENCE = 5
 MIN_WORDS_IN_ARTICLE = 50
@@ -305,15 +308,25 @@ def parse_article_raw_data(url, data) -> ArticleData:
     if one_week_ago > date:
         return ArticleData(None, None, date, url)
 
-    config = Configuration()
-    config.strict = False
+    # config = Configuration()
+    # config.strict = False
 
-    with Goose(config) as g:
-        article = g.extract(raw_html=data)
-        title = article.title
-        text = article.cleaned_text
-        final_url = article.final_url
-        date = convert_date_format(article.publish_date)
+    # with Goose(config) as g:
+    #     article = g.extract(raw_html=data)
+    #     title = article.title
+    #     text = article.cleaned_text
+    #     final_url = article.final_url
+    #     date = convert_date_format(article.publish_date)
+
+    article = trafilatura.bare_extraction(data)
+
+    if not article:
+        return None
+
+    # Extract title, text, and date
+    title = article['title']
+    text = article['text']
+    date = article['date']
 
     # ToDo: add final_url resolve into fetcher
     return ArticleData(title, text, date, url)

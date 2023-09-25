@@ -293,7 +293,13 @@ class Article(models.Model):
         verbose_name_plural = 'Статьи'
 
     def save(self, *args, **kwargs):
-        self.title = self.title or self.text[:200]
+        if not self.text:
+            self.text = ''
+        if self.text:
+            self.title = self.title or self.text[:200]
+        else:
+            self.title = self.title or ''
+
         super().save(*args, **kwargs)
 
     def download(self):
