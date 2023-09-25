@@ -16,6 +16,15 @@ on:
           - Default
 
 jobs:
+  clean:
+    name: Clean images
+    runs-on: ["self-hosted", "antijob-report", "production"]
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Clean unused images and network
+        run: |
+          docker image prune -a -f
+          docker network prune -f
   build:
     name: Build production
     runs-on: ["self-hosted", "antijob-report", "production"]
