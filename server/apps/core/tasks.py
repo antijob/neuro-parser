@@ -10,9 +10,15 @@ from server import celery_app
 from server.apps.core.logic.grabber import duplicates
 from server.apps.core.models import Article
 
+
 @celery_app.task
 def grab_news():
     call_command('grab_news')
+
+
+@celery_app.task
+def process_news():
+    call_command('process_news')
 
 
 @celery_app.task

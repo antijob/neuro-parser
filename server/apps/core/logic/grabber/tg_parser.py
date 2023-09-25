@@ -50,11 +50,13 @@ def get_tg_page_data(url):
     Then parse data on [url]?embed=1
     Returns data from this page - text, title, date, url
     '''
-    # ic(url)
     params = {'embed': '1'}
     page = requests.get(url, params)
+    return parse_tg_raw_data(page)
+
+
+def parse_tg_raw_data(page):
     tree = HTMLParser(page.text)
-    # text = tree.css_first('div.tgme_widget_message_text').text()
     text_tag = tree.css_first('div.tgme_widget_message_text')
     if text_tag is not None:
         text = text_tag.text()

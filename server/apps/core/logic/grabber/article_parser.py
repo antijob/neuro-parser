@@ -10,9 +10,9 @@ from goose3.configuration import Configuration
 from icecream import ic
 from .user_agent import random_headers
 from .utils import convert_date_format
-from .tg_parser import get_tg_page_data
-from .vk_parser import get_vk_page_data
-from .ok_parser import get_ok_page_data
+from .tg_parser import get_tg_page_data, parse_tg_raw_data
+from .vk_parser import get_vk_page_data, parse_vk_raw_data
+from .ok_parser import get_ok_page_data, parse_ok_raw_data
 
 
 MIN_WORDS_IN_SENTENCE = 5
@@ -287,111 +287,28 @@ def get_article(url) -> ArticleData:
 
     return ArticleData(title, text, date, final_url)
 
-def find_article_tag(node):
-    if node is None:
-        return
-    articles = cssselect.CSSSelector('article')(node)
-    if len(articles) == 1:
-        return articles[0]
+
+def parse_article_raw_data(url, data) -> ArticleData:
+
+    if url.startswith('https://t.me/'):
+        return parse_tg_raw_data(url)
+
+    if url.startswith('https://vk.com/'):
+        return parse_vk_raw_data(url)
+
+    if url.startswith('https://ok.ru/'):
+        return parse_ok_raw_data(url)
 
 
-def find_article_class(node):
-    if node is None:
-        return
-    for subnode in node:
-        if subnode.tag in SERVICE_TAGS or subnode.tag is etree.Comment:
-            continue
-        class_ = subnode.get('class', '').split()
-        if 'article' in class_:
-            return subnode
-    for subnode in node:
-        article = find_article_class(subnode)
-        if article is not None:
-            return article
+    config = Configuration()
+    config.strict = False
 
+    with Goose(config) as g:
+        article = g.extract(raw_html=data)
+        title = article.title
+        text = article.cleaned_text
+        final_url = article.final_url
+        date = convert_date_format(article.publish_date)
 
-def find_by_known_class(node):
-    for klass in KNOWN_ARTICLE_CLASSES:
-        article = cssselect.CSSSelector('.{}'.format(klass))(node)
-        if article:
-            return article[0]
+    return ArticleData(title, text, date, final_url)
 
-
-def is_date(node):
-    text = (node.text or '') + (node.tail or '')
-    descriptions = [
-        'Опубликовано:', 'Создано:', 'Дата публикации:', 'Время публикации:', 'года']
-    for description in descriptions:
-        text = (text.replace(description, ''))
-    try:
-        parsed_date = dateparser.parse(text, languages=['ru'])
-    except RecursionError:
-        # TODO: Refactoring
-        return False
-    if parsed_date:
-        return parsed_date.date()
-
-
-def extract_date(tree, article_node, url):
-    date = find_date_in_url(url)
-    if date:
-        return date
-    date = find_date_by_class(tree)
-    if date:
-        return date
-    date = find_date_in_siblings(article_node)
-    if date:
-        return date
-    date = find_date_in_subnodes(article_node)
-    if date and date <= datetime.date.today():
-        return date
-
-
-def find_date_in_url(url):
-    match = re.search(r'\/(\d{4}([\/\-])\d{2}\2\d{2})(\/.*)?$', url)
-    if match:
-        return dateparser.parse(match.groups()[0])
-
-
-def find_date_by_class(tree):
-    classes = ["feeds-page__info_item"]
-    for klass in classes:
-        elements = cssselect.CSSSelector(".%s" % klass)(tree)
-        if elements:
-            return find_date_in_subnodes(elements[0])
-
-
-def find_date_in_subnodes(node):
-    if node is None:
-        return
-    date = is_date(node)
-    if date:
-        return date
-
-    for subnode in node:
-        date = find_date_in_subnodes(subnode)
-        if date:
-            return date
-
-
-def find_date_in_siblings(node):
-    if node is None:
-        return
-
-    previous = node.getprevious()
-    while True:
-        if previous is None:
-            break
-        date = find_date_in_subnodes(previous)
-        if date:
-            return date
-        previous = previous.getprevious()
-
-    next_ = node.getnext()
-    while True:
-        if next_ is None:
-            break
-        date = find_date_in_subnodes(next_)
-        if date:
-            return date
-        next_ = next_.getnext()
