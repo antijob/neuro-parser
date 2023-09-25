@@ -52,11 +52,11 @@ def get_tg_page_data(url):
     '''
     params = {'embed': '1'}
     page = requests.get(url, params)
-    return parse_tg_raw_data(page)
+    return parse_tg_raw_data(page.text, url)
 
 
-def parse_tg_raw_data(page):
-    tree = HTMLParser(page.text)
+def parse_tg_raw_data(raw_data, url):
+    tree = HTMLParser(raw_data)
     text_tag = tree.css_first('div.tgme_widget_message_text')
     if text_tag is not None:
         text = text_tag.text()

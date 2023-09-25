@@ -11,7 +11,10 @@ from .user_agent import random_headers
 
 
 async def fetch_url(session, url):
-    async with session.get(url, headers=random_headers()) as response:
+    params = {}
+    if url.startswith('https://t.me/'):
+        params = {'embed': '1'}
+    async with session.get(url, params=params, headers=random_headers()) as response:
         if response.status == 200:
             return await response.text()
         else:
@@ -31,21 +34,35 @@ class Fetcher(object):
 
     async def coroutine(self, source, articles):
         rps = 5 #source.rps
-        print("Запускаем корутинку")
+        print("Start coroutine")
         async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(ssl=False)) as session:
             delay = 1 / rps 
             start_time = time.time()
+            total_fetch_time = 0
+            total_postprocess_time = 0
 
             for article in articles:
+                fetch_start_time = time.time()
+
                 content = await fetch_url(session, article['url'])
+
+                fetch_end_time = time.time()
+                total_fetch_time += fetch_end_time - fetch_start_time
+
                 if content is not None:
+                    postprocess_start_time = time.time()
+
                     await sync_to_async(article["article"].get_html_and_postprocess)(content)
+
+                    postprocess_end_time = time.time()
+                    total_postprocess_time += postprocess_end_time - postprocess_start_time
 
                 await asyncio.sleep(delay)
 
             end_time = time.time()
             elapsed_time = end_time - start_time
-            ic(f"Из источника {source.url} было прокачано {len(articles)} статей за {elapsed_time:.2f} секунд")
+            print(f"Source {source.url}: {len(articles)} articles by {elapsed_time:.2f}s. Fetch: {total_fetch_time:.2f}s, Parse:{total_postprocess_time:.2f}s")
+
 
     def add_coroutine(self, source, articles):
         articles = [{'url': a.url, 'article':a} for a in articles]

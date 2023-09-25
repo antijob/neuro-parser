@@ -36,11 +36,11 @@ def get_vk_page_data(url: str):
     '''
 
     page = requests.get(url, headers=random_headers())
-    return parse_vk_raw_data(page)
+    return parse_vk_raw_data(page.text, url)
 
 
-def parse_vk_raw_data(page):
-    tree = HTMLParser(page.text)
+def parse_vk_raw_data(raw_data, url):
+    tree = HTMLParser(raw_data)
     wall_post = tree.css_first('div.wall_post_text')
     text = wall_post.text() if wall_post else None
     if text:

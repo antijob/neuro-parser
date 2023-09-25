@@ -291,13 +291,13 @@ def get_article(url) -> ArticleData:
 def parse_article_raw_data(url, data) -> ArticleData:
 
     if url.startswith('https://t.me/'):
-        return parse_tg_raw_data(url)
+        return parse_tg_raw_data(data, url)
 
     if url.startswith('https://vk.com/'):
-        return parse_vk_raw_data(url)
+        return parse_vk_raw_data(data, url)
 
     if url.startswith('https://ok.ru/'):
-        return parse_ok_raw_data(url)
+        return parse_ok_raw_data(data, url)
 
 
     config = Configuration()

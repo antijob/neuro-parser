@@ -26,7 +26,8 @@ def fetch_sources():
     sources = Source.objects.filter(is_active=True)
     for source in sources:
         articles = Article.objects.filter(source=source, is_downloaded=False)
-        fetcher.add_coroutine(source, articles)
+        if articles.exists():
+            fetcher.add_coroutine(source, articles)
     fetcher.await_all_coroutines()
 
 

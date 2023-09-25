@@ -36,11 +36,11 @@ def get_ok_page_data(url: str):
     '''
 
     page = requests.get(url, headers=random_headers())
-    return parse_ok_raw_data(page)
+    return parse_ok_raw_data(page.text, url)
 
 
-def parse_ok_raw_data(page):
-    tree = HTMLParser(page.text)
+def parse_ok_raw_data(raw_data, url):
+    tree = HTMLParser(raw_data)
     text = tree.css_first('div.media-text_cnt_tx').text()
     if text:
         title = text.split(sep='\n')[0]
