@@ -27,6 +27,8 @@ jobs:
           docker network prune -f
   build:
     name: Build production
+    needs:
+      - clean
     runs-on: ["self-hosted", "antijob-report", "production"]
     if: github.ref == 'refs/heads/main'
     steps:
