@@ -156,7 +156,8 @@ def is_correct_article_link(url):
 def find_rss_urls(source_url, document):
     """Finds URLs to rss-files on page."""
     ic('find_rss_urls')
-    ic(source_url, document)
+    # ic(source_url, document)
+    ic(source_url)
     if document is None:
         ic('return empty')
         return []

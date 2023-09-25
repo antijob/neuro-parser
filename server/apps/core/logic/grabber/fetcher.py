@@ -5,16 +5,15 @@ import aiohttp
 import time
 from icecream import ic
 
-from server.apps.core.models import Article
 from asgiref.sync import sync_to_async
-from .user_agent import random_headers
+from .user_agent import session_random_headers
 
 
 async def fetch_url(session, url):
     params = {}
     if url.startswith('https://t.me/'):
         params = {'embed': '1'}
-    async with session.get(url, params=params, headers=random_headers()) as response:
+    async with session.get(url, params=params) as response:
         if response.status == 200:
             return await response.text()
         else:
@@ -33,19 +32,27 @@ class Fetcher(object):
     
 
     async def coroutine(self, source, articles):
-        rps = 5 #source.rps
+        rps = 1 #source.rps
+        if '.ok.ru' in source.url or 't.me' in source.url:
+            rps = .1
+
         print("Start coroutine")
-        async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(ssl=False)) as session:
+        async with aiohttp.ClientSession(
+            trust_env = True, 
+            connector=aiohttp.TCPConnector(ssl=False), 
+            headers=session_random_headers()
+        ) as session:
             delay = 1 / rps 
             start_time = time.time()
             total_fetch_time = 0
             total_postprocess_time = 0
 
             try:
-                for article in articles:
+                for url, article in articles.items():
+                    print(url)
                     fetch_start_time = time.time()
 
-                    content = await fetch_url(session, article['url'])
+                    content = await fetch_url(session, url)
 
                     fetch_end_time = time.time()
                     total_fetch_time += fetch_end_time - fetch_start_time
@@ -53,7 +60,7 @@ class Fetcher(object):
                     if content is not None:
                         postprocess_start_time = time.time()
 
-                        await sync_to_async(article["article"].get_html_and_postprocess)(content)
+                        await sync_to_async(article.get_html_and_postprocess)(content)
 
                         postprocess_end_time = time.time()
                         total_postprocess_time += postprocess_end_time - postprocess_start_time
@@ -68,13 +75,13 @@ class Fetcher(object):
 
 
     def add_coroutine(self, source, articles):
-        articles = [{'url': a.url, 'article':a} for a in articles]
+        articles = {a.url:a for a in articles}
         coro = self.coroutine(source, articles)
+
         self.coroutines.append(coro)
 
     async def _await(self):
         await asyncio.gather(*self.coroutines)
-
 
     def await_all_coroutines(self):
         asyncio.run(self._await())

@@ -1,10 +1,11 @@
-import datetime
+from datetime import datetime, timedelta
 import re
 from collections import namedtuple
 import dateparser
 import requests
 from lxml import cssselect, etree
 from lxml.html.clean import Cleaner
+from htmldate import find_date
 from goose3 import Goose
 from goose3.configuration import Configuration
 from icecream import ic
@@ -299,6 +300,10 @@ def parse_article_raw_data(url, data) -> ArticleData:
     if url.startswith('https://ok.ru/'):
         return parse_ok_raw_data(data, url)
 
+    date = datetime.strptime(find_date(data), "%Y-%m-%d")
+    one_week_ago = datetime.now() - timedelta(days=7)
+    if one_week_ago > date:
+        return ArticleData(None, None, date, url)
 
     config = Configuration()
     config.strict = False
@@ -310,5 +315,6 @@ def parse_article_raw_data(url, data) -> ArticleData:
         final_url = article.final_url
         date = convert_date_format(article.publish_date)
 
-    return ArticleData(title, text, date, final_url)
+    # ToDo: add final_url resolve into fetcher
+    return ArticleData(title, text, date, url)
 

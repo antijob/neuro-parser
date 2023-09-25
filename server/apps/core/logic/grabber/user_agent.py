@@ -30,3 +30,9 @@ def random_headers():
             'Accept-Language': 'ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7',
             }
     return head
+
+
+def session_random_headers():
+    head = random_headers()
+    head['Connection'] = 'keep-alive'
+    return head
