@@ -36,7 +36,11 @@ def get_vk_page_data(url: str):
     '''
 
     page = requests.get(url, headers=random_headers())
-    tree = HTMLParser(page.text)
+    return parse_vk_raw_data(page.text, url)
+
+
+def parse_vk_raw_data(raw_data, url):
+    tree = HTMLParser(raw_data)
     wall_post = tree.css_first('div.wall_post_text')
     text = wall_post.text() if wall_post else None
     if text:
@@ -46,10 +50,6 @@ def get_vk_page_data(url: str):
     else:
         title = ''
     date = convert_date_format(tree.css_first('time.PostHeaderSubtitle__item').text())
-
-    # print(text, end='\n\n')
-    # print(title, end='\n\n')
-    # print(date, end='\n\n')
 
     return ArticleData(title, text, date, url)
 

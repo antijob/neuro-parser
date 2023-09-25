@@ -98,7 +98,7 @@ def extract_html_urls(source_url, document):
         if is_path_ignored(url):
             continue
         if not is_rss_link(url):
-            print(url)
+            # print(url)
             yield url
 
 

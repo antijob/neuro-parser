@@ -307,6 +307,17 @@ class Article(models.Model):
             self.is_duplicate = True
         self.save()
 
+    def get_html_and_postprocess(self, data):
+        data = article_parser.parse_article_raw_data(self.url, data)
+        if data:
+            self.title, self.text, publication_date, self.url = data
+            if publication_date:
+                self.publication_date = publication_date
+        self.is_downloaded = True
+        if check_repost(self.text):
+            self.is_duplicate = True
+        self.save()
+
     def any_title(self):
         if self.title:
             return self.title

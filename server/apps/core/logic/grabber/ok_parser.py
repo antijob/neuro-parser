@@ -36,7 +36,11 @@ def get_ok_page_data(url: str):
     '''
 
     page = requests.get(url, headers=random_headers())
-    tree = HTMLParser(page.text)
+    return parse_ok_raw_data(page.text, url)
+
+
+def parse_ok_raw_data(raw_data, url):
+    tree = HTMLParser(raw_data)
     text = tree.css_first('div.media-text_cnt_tx').text()
     if text:
         title = text.split(sep='\n')[0]
@@ -45,10 +49,5 @@ def get_ok_page_data(url: str):
     else:
         title = ''
     date = convert_date_format(tree.css_first('div.ucard_add-info_i').text())
-
-    # print(text, end='\n\n')
-    # print(title, end='\n\n')
-    # print(date, end='\n\n')
-
     return ArticleData(title, text, date, url)
 

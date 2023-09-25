@@ -60,7 +60,5 @@ class SourceAdmin(admin.ModelAdmin):
                 url=url,
                 is_active=obj.is_active,
                 region=obj.region,
-                algorithm=obj.algorithm,
-                banned=obj.banned
             )
             new_source.save()
