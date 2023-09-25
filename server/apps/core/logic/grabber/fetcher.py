@@ -41,23 +41,26 @@ class Fetcher(object):
             total_fetch_time = 0
             total_postprocess_time = 0
 
-            for article in articles:
-                fetch_start_time = time.time()
+            try:
+                for article in articles:
+                    fetch_start_time = time.time()
 
-                content = await fetch_url(session, article['url'])
+                    content = await fetch_url(session, article['url'])
 
-                fetch_end_time = time.time()
-                total_fetch_time += fetch_end_time - fetch_start_time
+                    fetch_end_time = time.time()
+                    total_fetch_time += fetch_end_time - fetch_start_time
 
-                if content is not None:
-                    postprocess_start_time = time.time()
+                    if content is not None:
+                        postprocess_start_time = time.time()
 
-                    await sync_to_async(article["article"].get_html_and_postprocess)(content)
+                        await sync_to_async(article["article"].get_html_and_postprocess)(content)
 
-                    postprocess_end_time = time.time()
-                    total_postprocess_time += postprocess_end_time - postprocess_start_time
+                        postprocess_end_time = time.time()
+                        total_postprocess_time += postprocess_end_time - postprocess_start_time
 
-                await asyncio.sleep(delay)
+                    await asyncio.sleep(delay)
+            except Exception as e:
+                print(f"Coroutine {source.url} exception: {e}")
 
             end_time = time.time()
             elapsed_time = end_time - start_time

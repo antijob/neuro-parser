@@ -17,6 +17,10 @@ from .tg_parser import extract_tg_urls
 from .vk_parser import extract_vk_urls
 from .ok_parser import extract_ok_urls
 
+# ToDo: move this part to proper place
+ic.configureOutput(prefix='')
+
+
 IGNORED_PATHS = [
     'about', 'stat', 'statistics', 'statistika', 'statisticheskie-dannyie',
     'contacts', 'kontakty', 'search', 'feedback',
