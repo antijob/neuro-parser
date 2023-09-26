@@ -320,8 +320,8 @@ class Article(models.Model):
             if publication_date:
                 self.publication_date = publication_date
         self.is_downloaded = True
-        if check_repost(self.text):
-            self.is_duplicate = True
+        # if check_repost(self.text):
+        #     self.is_duplicate = True
         self.save()
 
     def any_title(self):
