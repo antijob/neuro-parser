@@ -293,13 +293,7 @@ class Article(models.Model):
         verbose_name_plural = 'Статьи'
 
     def save(self, *args, **kwargs):
-        if not self.text:
-            self.text = ''
-        if self.text:
-            self.title = self.title or self.text[:200]
-        else:
-            self.title = self.title or ''
-
+        self.title = self.title or self.text[:200]
         super().save(*args, **kwargs)
 
     def download(self):
@@ -320,8 +314,8 @@ class Article(models.Model):
             if publication_date:
                 self.publication_date = publication_date
         self.is_downloaded = True
-        # if check_repost(self.text):
-        #     self.is_duplicate = True
+        if check_repost(self.text):
+            self.is_duplicate = True
         self.save()
 
     def any_title(self):

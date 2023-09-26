@@ -9,24 +9,15 @@ from asgiref.sync import sync_to_async
 from .user_agent import session_random_headers
 
 
-async def fetch_url(url):
-    async with aiohttp.ClientSession(
-            trust_env = True, 
-            connector=aiohttp.TCPConnector(ssl=False), 
-            headers=session_random_headers()
-            ) as session:
-        params   = {}
-        if url.startswith('https://t.me/'):
-            params = {'embed': '1'}
-        try:
-            async with session.get(url, params=params) as response:
-                if response.status == 200:
-                    return await response.text()
-                else:
-                    print(f"Ошибка при запросе {url}: {response.status}")
-                    return None
-        except Exception as e:
-            print(f"Fetcher {source.url} exception: {e}")
+async def fetch_url(session, url):
+    params = {}
+    if url.startswith('https://t.me/'):
+        params = {'embed': '1'}
+    async with session.get(url, params=params) as response:
+        if response.status == 200:
+            return await response.text()
+        else:
+            print(f"Ошибка при запросе {url}: {response.status}")
             return None
 
 
@@ -45,7 +36,7 @@ class Fetcher(object):
         if '.ok.ru' in source.url or 't.me' in source.url:
             rps = .1
 
-        print(f"Start coroutine: {source.url}, {len(articles)} urls")
+        print("Start coroutine")
         async with aiohttp.ClientSession(
             trust_env = True, 
             connector=aiohttp.TCPConnector(ssl=False), 
@@ -61,7 +52,7 @@ class Fetcher(object):
                     print(url)
                     fetch_start_time = time.time()
 
-                    content = await fetch_url(url)
+                    content = await fetch_url(session, url)
 
                     fetch_end_time = time.time()
                     total_fetch_time += fetch_end_time - fetch_start_time
