@@ -320,7 +320,9 @@ class Article(models.Model):
         first_sentence_end = self.text.index(".")
         if first_sentence_end > 20:
             return self.text[:first_sentence_end]
-        return self.text[:200] + '...'
+        if len(self.text) > 200:
+            return self.text[:200] + '...'
+        return self.text
 
     # ToDo: made self.incident field contain multiple incidents
     def create_incident(self):

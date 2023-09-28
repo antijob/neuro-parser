@@ -141,6 +141,7 @@ def get_absolute_url(source_url, url):
         url = urljoin(source_url, url)
     if source_domain == link_domain:
         return url
+    return None
 
 
 def is_correct_article_link(url):

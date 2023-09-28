@@ -18,6 +18,9 @@ def check_repost(article_text_to_check: str):
     on more than 70% and False otherwise
     '''
 
+    if not article_text_to_check:
+        return False
+
     articles = todays_articles()
     for art in articles:
         match = SequenceMatcher(None, article_text_to_check, art.text)
