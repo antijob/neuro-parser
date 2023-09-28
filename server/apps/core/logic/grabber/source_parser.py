@@ -134,6 +134,8 @@ def is_path_ignored(url):
 
 
 def get_absolute_url(source_url, url):
+    if not url:
+        return None
     source_domain = urlparse(source_url).netloc
     link_domain = urlparse(url).netloc
     if not link_domain:

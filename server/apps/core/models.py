@@ -264,8 +264,8 @@ class Article(models.Model):
                                null=True,
                                blank=True)
     url = models.TextField(primary_key=True, verbose_name='URL', default='', blank=True)
-    title = models.TextField(verbose_name='Заголовок', default='', blank=True)
-    text = models.TextField(verbose_name='Текст', default='', blank=True)
+    title = models.TextField(verbose_name='Заголовок', default='', blank=True, null=True)
+    text = models.TextField(verbose_name='Текст', default='', blank=True, null=True)
     is_downloaded = models.BooleanField(verbose_name='Скачана', default=False)
     is_incident_created = models.BooleanField(verbose_name='Инцидент создан',
                                               default=False)
@@ -293,7 +293,7 @@ class Article(models.Model):
         verbose_name_plural = 'Статьи'
 
     def save(self, *args, **kwargs):
-        self.title = self.title or self.text[:200]
+        self.title = self.any_title()
         super().save(*args, **kwargs)
 
     def download(self):
@@ -317,12 +317,14 @@ class Article(models.Model):
     def any_title(self):
         if self.title:
             return self.title
-        first_sentence_end = self.text.index(".")
-        if first_sentence_end > 20:
-            return self.text[:first_sentence_end]
-        if len(self.text) > 200:
-            return self.text[:200] + '...'
-        return self.text
+        if self.text:
+            first_sentence_end = self.text.index(".")
+            if first_sentence_end > 20:
+                return self.text[:first_sentence_end]
+            if len(self.text) > 200:
+                return self.text[:200] + '...'
+            return self.text
+        return ''
 
     # ToDo: made self.incident field contain multiple incidents
     def create_incident(self):

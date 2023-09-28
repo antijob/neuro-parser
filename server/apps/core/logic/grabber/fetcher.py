@@ -47,8 +47,8 @@ class Fetcher(object):
             total_fetch_time = 0
             total_postprocess_time = 0
 
-            try:
-                for url, article in articles.items():
+            for url, article in articles.items():
+                try:
                     print(url)
                     fetch_start_time = time.time()
 
@@ -66,8 +66,9 @@ class Fetcher(object):
                         total_postprocess_time += postprocess_end_time - postprocess_start_time
 
                     await asyncio.sleep(delay)
-            except Exception as e:
-                print(f"Coroutine {source.url} exception: {e}")
+                except Exception as e:
+                    print(f"Coroutine {source.url} exception: {e}")
+                    # ToDo: collect bad codes here. Log it and save to Source debug field
 
             end_time = time.time()
             elapsed_time = end_time - start_time
