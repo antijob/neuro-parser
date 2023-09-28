@@ -84,7 +84,7 @@ def get_document(url, clean=False):
     except ValueError:
         document = etree.HTML(response.content)
 
-     if document is not None:
+    if document is not None:
         document.set("url", response.url)
 
     return document
