@@ -62,7 +62,7 @@ class CheckLinkForIncident(CreateAPIView):
         try:
             article = None
             if link:
-                article = Article.objects.create(url=link) # get_or)create if url field will be prime field
+                article, created = Article.objects.get_or_create(url=link)
                 article.download()
                 incident = article.create_incident()
             else:

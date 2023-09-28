@@ -137,7 +137,7 @@ class BaseIncident(models.Model):
         on_delete=models.DO_NOTHING,
     )
     region = models.CharField('Регион', choices=REGIONS, default='RU', max_length=16)
-    incident_type = models.ForeignKey(IncidentType, null=True, on_delete=models.CASCADE) # OnCascade?
+    incident_type = models.ForeignKey(IncidentType, null=True, on_delete=models.SET_NULL)
     count = models.PositiveIntegerField('Количество ограничений', default=1)
     urls = ArrayField(models.URLField(blank=True, default='', null=True), blank=True, null=True)
     public_title = models.CharField('Публичное название', max_length=512, null=True, blank=True)
@@ -260,10 +260,10 @@ class Article(models.Model):
     source = models.ForeignKey(Source,
                                verbose_name='Источник',
                                related_name='articles',
-                               on_delete=models.DO_NOTHING,
+                               on_delete=models.SET_NULL,
                                null=True,
                                blank=True)
-    url = models.TextField(verbose_name='URL', default='', blank=True)
+    url = models.TextField(primary_key=True, verbose_name='URL', default='', blank=True)
     title = models.TextField(verbose_name='Заголовок', default='', blank=True)
     text = models.TextField(verbose_name='Текст', default='', blank=True)
     is_downloaded = models.BooleanField(verbose_name='Скачана', default=False)
@@ -297,18 +297,14 @@ class Article(models.Model):
         super().save(*args, **kwargs)
 
     def download(self):
-        data = article_parser.get_article(self.url)
-        if data:
-            self.title, self.text, publication_date, self.url = data
-            if publication_date:
-                self.publication_date = publication_date
-        self.is_downloaded = True
-        if check_repost(self.text):
-            self.is_duplicate = True
-        self.save()
+        raw_data = article_parser.get_article(self.url)
+        self.postprocess_raw_data(raw_data)
 
     def get_html_and_postprocess(self, data):
-        data = article_parser.parse_article_raw_data(self.url, data)
+        raw_data = article_parser.parse_article_raw_data(self.url, data)
+        self.postprocess_raw_data(raw_data)
+
+    def postprocess_raw_data(self, data):
         if data:
             self.title, self.text, publication_date, self.url = data
             if publication_date:
