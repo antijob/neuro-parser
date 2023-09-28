@@ -16,24 +16,6 @@ class IncidentTypeAdmin(admin.ModelAdmin):
     list_display = ('description', 'model_path')
     form = IncidentTypeForm
 
-    actions=['really_delete_selected']
-
-    def get_actions(self, request):
-        actions = super(IncidentTypeAdmin, self).get_actions(request)
-        del actions['delete_selected']
-        return actions
-
-    def really_delete_selected(self, request, queryset):
-        for obj in queryset:
-            obj.delete()
-
-        if queryset.count() == 1:
-            message_bit = "1 IncidentType entry was"
-        else:
-            message_bit = "%s IncidentTypes entries were" % queryset.count()
-        self.message_user(request, "%s successfully deleted." % message_bit)
-    really_delete_selected.short_description = "Delete selected entries"
-
 
 @admin.register(MediaIncident)
 class MediaIncidentAdmin(admin.ModelAdmin):
@@ -47,6 +29,7 @@ class ArticleAdmin(admin.ModelAdmin):
 @admin.register(Source)
 class SourceAdmin(admin.ModelAdmin):
     list_display = ('url', 'region', 'is_active')
+    actions=['activate', 'deactivate']
 
     def save_model(self, request, obj, form, change):
         urls = obj.url.split()
@@ -62,3 +45,18 @@ class SourceAdmin(admin.ModelAdmin):
                 region=obj.region,
             )
             new_source.save()
+
+    def activate(self, request, queryset):
+        for obj in queryset:
+            obj.is_active = True
+            obj.save()
+        self.message_user(request, f"{queryset.count()} sources were deactivate.")
+
+    def deactivate(self, request, queryset):
+        for obj in queryset:
+            obj.is_active = False
+            obj.save()
+        self.message_user(request, f"{queryset.count()} sources were deactivate.")
+
+    activate.short_description = "Activate sources"
+    deactivate.short_description = "Deactivate sources"
