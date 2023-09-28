@@ -50,19 +50,13 @@ class Fetcher(object):
             for url, article in articles.items():
                 try:
                     fetch_start_time = time.time()
-
                     content = await fetch_url(session, url)
-
                     fetch_end_time = time.time()
                     total_fetch_time += fetch_end_time - fetch_start_time
 
                     if content is not None:
-                        postprocess_start_time = time.time()
-
-                        await sync_to_async(article.get_html_and_postprocess)(content)
-
-                        postprocess_end_time = time.time()
-                        total_postprocess_time += postprocess_end_time - postprocess_start_time
+                        postprocess_time = await sync_to_async(article.get_html_and_postprocess)(content)
+                        total_postprocess_time += postprocess_time
 
                     await asyncio.sleep(delay)
                 except Exception as e:

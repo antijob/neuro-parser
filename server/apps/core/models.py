@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 import datetime
 import re
+import time
+
 
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
@@ -301,8 +303,11 @@ class Article(models.Model):
         self.postprocess_raw_data(raw_data)
 
     def get_html_and_postprocess(self, data):
+        postprocess_start_time = time.time()
         raw_data = article_parser.parse_article_raw_data(self.url, data)
         self.postprocess_raw_data(raw_data)
+        postprocess_end_time = time.time()
+        return postprocess_end_time - postprocess_start_time
 
     def postprocess_raw_data(self, data):
         if data:
@@ -337,7 +342,7 @@ class Article(models.Model):
     def create_incident(self):
         if self.is_incident_created:
             return self.incident
-        if not self.text.strip():
+        if not self.text or self.text.strip():
             return
         normalized_text = normalize_text(self.text)
         incident_types = category.predict_incident_type(normalized_text)
