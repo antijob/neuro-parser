@@ -83,7 +83,10 @@ def get_document(url, clean=False):
         document = etree.HTML(html)
     except ValueError:
         document = etree.HTML(response.content)
-    document.set("url", response.url)
+
+     if document is not None:
+        document.set("url", response.url)
+
     return document
 
 
@@ -300,7 +303,11 @@ def parse_article_raw_data(url, data) -> ArticleData:
     if url.startswith('https://ok.ru/'):
         return parse_ok_raw_data(data, url)
 
-    date = datetime.strptime(find_date(data), "%Y-%m-%d")
+    # exception if no date
+    raw_data = find_date(data)
+    if not raw_data:
+        return ArticleData(None, None, date, url)
+    date = datetime.strptime(raw_data, "%Y-%m-%d")
     one_week_ago = datetime.now() - timedelta(days=7)
     if one_week_ago > date:
         return ArticleData(None, None, date, url)

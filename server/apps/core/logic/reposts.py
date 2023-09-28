@@ -7,10 +7,14 @@
 from datetime import datetime, timedelta
 from difflib import SequenceMatcher
 
-def todays_articles():
+def latest_unique_articles():
     from server.apps.core.models import Article
     start_date = datetime.now().date() - timedelta(days=3)
-    return Article.objects.filter(publication_date__gte=start_date)
+    return Article.objects.filter(
+        publication_date__gte=start_date, 
+        is_duplicate=False, 
+        is_downloaded=True
+        )
 
 def check_repost(article_text_to_check: str):
     '''
@@ -21,7 +25,7 @@ def check_repost(article_text_to_check: str):
     if not article_text_to_check:
         return False
 
-    articles = todays_articles()
+    articles = latest_unique_articles()
     for art in articles:
         match = SequenceMatcher(None, article_text_to_check, art.text)
         if match.get_matching_blocks():

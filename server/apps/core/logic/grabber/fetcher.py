@@ -36,7 +36,7 @@ class Fetcher(object):
         if '.ok.ru' in source.url or 't.me' in source.url:
             rps = .1
 
-        print("Start coroutine")
+        print(f"Start coroutine. Source {source.url}: {len(articles)} articles")
         async with aiohttp.ClientSession(
             trust_env = True, 
             connector=aiohttp.TCPConnector(ssl=False), 
@@ -49,7 +49,6 @@ class Fetcher(object):
 
             for url, article in articles.items():
                 try:
-                    print(url)
                     fetch_start_time = time.time()
 
                     content = await fetch_url(session, url)

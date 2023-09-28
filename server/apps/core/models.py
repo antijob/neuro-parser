@@ -317,14 +317,21 @@ class Article(models.Model):
     def any_title(self):
         if self.title:
             return self.title
-        if self.text:
+        if not self.text:
+            return ''
+            # exception here
+
+        try:
             first_sentence_end = self.text.index(".")
-            if first_sentence_end > 20:
-                return self.text[:first_sentence_end]
-            if len(self.text) > 200:
-                return self.text[:200] + '...'
-            return self.text
-        return ''
+        except ValueError:
+            first_sentence_end = 0
+
+        if first_sentence_end > 20:
+            return self.text[:first_sentence_end]
+        if len(self.text) > 200:
+            return self.text[:200] + '...'
+
+        return self.text
 
     # ToDo: made self.incident field contain multiple incidents
     def create_incident(self):

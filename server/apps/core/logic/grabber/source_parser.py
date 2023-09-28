@@ -158,11 +158,11 @@ def is_correct_article_link(url):
 
 def find_rss_urls(source_url, document):
     """Finds URLs to rss-files on page."""
-    ic('find_rss_urls')
+    # ic('find_rss_urls')
     # ic(source_url, document)
-    ic(source_url)
+    # ic(source_url)
     if document is None:
-        ic('return empty')
+        # ic('return empty')
         return []
     links = cssselect.CSSSelector('a')(document)
     links += cssselect.CSSSelector('link')(document)
@@ -171,7 +171,6 @@ def find_rss_urls(source_url, document):
         url = link.get('href')
         absolute_url = get_absolute_url(source_url, url)
         if is_rss_link(absolute_url):
-            ic(absolute_url)
             yield absolute_url
 
 
@@ -199,7 +198,7 @@ def find_articles_urls_in_rss(document):
 
 def extract_rss_urls(source_url, document):
     """Extracts article urls using RSS"""
-    ic('extract_rss_urls')
+    # ic('extract_rss_urls')
     if document is None:
         return []
     rss_urls = find_rss_urls(source_url, document)
@@ -218,27 +217,27 @@ def extract_rss_urls(source_url, document):
 
 
 def unquote_urls(urls):
-    return (unquote(url) for url in urls if url)
+    return set(unquote(url) for url in urls if url)
 
 
 def extract_all_news_urls(url: str):
-    # ic('extract_all_news_urls')
+    print(f'extract_all_news_urls for source {url}')
 
     tg_urls = None
     if url.startswith('https://t.me/'):
-        tg_urls = set(unquote_urls(extract_tg_urls(url)))
+        tg_urls = unquote_urls(extract_tg_urls(url))
     if tg_urls:
         return tg_urls
 
     vk_urls = None
     if url.startswith('https://vk.com/'):
-        vk_urls = set(unquote_urls(extract_vk_urls(url)))
+        vk_urls = unquote_urls(extract_vk_urls(url))
     if vk_urls:
         return vk_urls
 
     ok_urls = None
     if url.startswith('https://ok.ru/'):
-        ok_urls = set(unquote_urls(extract_ok_urls(url)))
+        ok_urls = unquote_urls(extract_ok_urls(url))
     if ok_urls:
         return ok_urls
 
@@ -246,11 +245,11 @@ def extract_all_news_urls(url: str):
     if document is None:
         return
 
-    rss_urls = set(unquote_urls(extract_rss_urls(url, document)))
+    rss_urls = unquote_urls(extract_rss_urls(url, document))
     if rss_urls:
         return rss_urls
 
-    html_urls = set(unquote_urls(extract_html_urls(url, document)))
+    html_urls = unquote_urls(extract_html_urls(url, document))
     return html_urls
 
 
