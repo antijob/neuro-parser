@@ -36,7 +36,7 @@ def grab_news(self):
             call_command('grab_news')
 
 
-@celery_app.task
+@celery_app.task(bind=True)
 def process_news():
     with memcache_lock('process_news_lock', self.app.oid) as acquired:
         if acquired:
