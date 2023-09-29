@@ -25,7 +25,7 @@ def memcache_lock(lock_id, oid):
     try:
         yield status
     finally:
-        if time.monotonic() < timeout_at and status:
+        if status:
             cache.delete(lock_id)
 
 
