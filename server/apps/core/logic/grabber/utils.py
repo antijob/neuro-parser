@@ -16,5 +16,5 @@ def convert_date_format(date_string: str) -> str:
         utc_date = date_obj.strftime('%Y-%m-%d')
         return utc_date
     else:
-        print("Invalid date format: ", date_string)
+        print(f"Invalid date format: {date_string}")
         return current_date
