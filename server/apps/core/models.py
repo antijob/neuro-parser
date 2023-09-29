@@ -244,7 +244,7 @@ class Source(models.Model):
             try:
                 added += [Article.objects.create(url=url, source=self)]
             except Exception as e:
-                raise type(e)(f'When add_articles with {url} exception happend: ' + e.message)
+                raise type(e)(f'When add_articles with {url} exception happend: ' + e)
         return added
 
     def update(self):
