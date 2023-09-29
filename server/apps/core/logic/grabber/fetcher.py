@@ -85,10 +85,10 @@ class Fetcher(object):
         def __str__(self):
             codes_str = "Bad codes info: "
             for code, count in self.codes.items():
-                codes_str += f"{code}: {count}, "
+                codes_str += f"\"{code}\": {count}, "
             return (f"Coroutine finished. Source: {self.source}: {self.len} articles by {self.elapsed_time:.2f}s.\n"
                     f"Fetch time: {self.fetch_time:.2f}s, Parse time:{self.postprocess_time:.2f}s\n"
-                    f"Succeded: {self.success}, Fetched: {self.fetches}, Bad Codes: \"{self.bad_codes}\", Exceptions: {self.exceptions}\n"
+                    f"Succeded: {self.success}, Fetched: {self.fetches}, Bad Codes: {self.bad_codes}, Exceptions: {self.exceptions}\n"
                     f"{codes_str}"
                     )
     

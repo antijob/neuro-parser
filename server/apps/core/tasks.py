@@ -10,10 +10,10 @@ from server import celery_app
 from server.apps.core.logic.grabber import duplicates
 from server.apps.core.models import Article
 
+import time
 from contextlib import contextmanager
 from django.core.cache import cache
 
-import time
 
 
 LOCK_EXPIRE = 60 * 60 * 6 # 6 hours
@@ -38,7 +38,9 @@ def grab_news(self):
 
 @celery_app.task
 def process_news():
-    call_command('process_news')
+    with memcache_lock('process_news_lock', self.app.oid) as acquired:
+        if acquired:
+            call_command('process_news')
 
 
 @celery_app.task

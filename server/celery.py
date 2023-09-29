@@ -15,7 +15,7 @@ app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
 app.conf.beat_schedule = {
     "grab-news": {
         "task": "server.apps.core.tasks.grab_news",
-        "schedule": crontab(minute=0, hour="*/3"),
+        "schedule": crontab(minute=0, hour="*"),
     },
     "process-news": {
         "task": "server.apps.core.tasks.process_news",
