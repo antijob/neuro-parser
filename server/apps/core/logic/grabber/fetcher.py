@@ -60,7 +60,7 @@ class Fetcher(object):
 
                     await asyncio.sleep(delay)
                 except Exception as e:
-                    print(f"Coroutine {source.url} exception: {e}")
+                    print(f"Coroutine {source.url}: {url} exception: {e}")
                     # ToDo: collect bad codes here. Log it and save to Source debug field
 
             end_time = time.time()

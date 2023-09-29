@@ -9,12 +9,22 @@ from difflib import SequenceMatcher
 
 def latest_unique_articles():
     from server.apps.core.models import Article
+
     start_date = datetime.now().date() - timedelta(days=3)
     return Article.objects.filter(
         publication_date__gte=start_date, 
         is_duplicate=False, 
         is_downloaded=True
         )
+
+
+def calc_ratio(a: str, b: str):
+    match = SequenceMatcher(None, a, b)
+    if match.get_matching_blocks():
+        sim_ratio = match.ratio()
+        return match.ratio()
+    return 0
+
 
 def check_repost(article_text_to_check: str):
     '''
@@ -27,11 +37,9 @@ def check_repost(article_text_to_check: str):
 
     articles = latest_unique_articles()
     for art in articles:
-        match = SequenceMatcher(None, article_text_to_check, art.text)
-        if match.get_matching_blocks():
-            sim_ratio = match.ratio()
-            if sim_ratio > 0.7:
-                return True
+        if not art.text:
+            continue
+        ratio = calc_ratio(article_text_to_check, art.text)
+        if ratio > 0.7:
+            return True
     return False
-
-

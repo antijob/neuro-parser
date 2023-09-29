@@ -241,7 +241,10 @@ class Source(models.Model):
             url_without_method = match.group('url_without_method')
             if Article.objects.filter(url__iendswith=url_without_method).exists():
                 continue
-            added += [Article.objects.create(url=url, source=self)]
+            try:
+                added += [Article.objects.create(url=url, source=self)]
+            except Exception as e:
+                raise type(e)(f'When add_articles with {url} exception happend: ' + e.message)
         return added
 
     def update(self):
