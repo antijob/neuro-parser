@@ -19,4 +19,5 @@ def predict_is_incident(text, prompt, positive_result):
     if result.endswith('.'):
         result = result[:-1]
 
+    # May be look if result contains positive_result?
     return ( result == positive_result )

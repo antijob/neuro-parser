@@ -63,8 +63,9 @@ class CheckLinkForIncident(CreateAPIView):
             article = None
             if link:
                 article, created = Article.objects.get_or_create(url=link)
-                article.download()
-                incident = article.create_incident()
+                if not created or not article.is_downloaded:
+                    article.download()
+                incident = article.create_incident(force=True)
             else:
                 incident = None
             data = None

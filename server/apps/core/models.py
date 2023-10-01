@@ -342,14 +342,13 @@ class Article(models.Model):
         return self.text
 
     # ToDo: made self.incident field contain multiple incidents
-    def create_incident(self):
-        if self.is_incident_created:
+    def create_incident(self, force=False):
+        if self.is_incident_created and not force:
             return self.incident
-        if not self.text or self.text.strip():
+        if not self.text or not self.text.strip():
             return
         normalized_text = normalize_text(self.text)
         incident_types = category.predict_incident_type(normalized_text)
-
         if not incident_types:
             return None
 
