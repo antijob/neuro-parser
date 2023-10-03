@@ -23,6 +23,7 @@ jobs:
     steps:
       - name: Clean unused images and network
         run: |
+          docker image prune -a -f
           docker network prune -f
   build:
     name: Build production
@@ -70,9 +71,6 @@ jobs:
           CF_DNS_API_TOKEN: "${{ secrets.CF_DNS_API_TOKEN }}"
           API_TOKEN: "${{ secrets.API_TOKEN }}"
           CHAT_GPT_KEY: "${{ secrets.CHAT_GPT_KEY }}"
-      - name: Clean unused images
-        run: docker image prune -a
-
       - name: Build python
         if: ${{ steps.filter.outputs.web == 'true' || github.event.inputs.runType == 'Force build' }}
         run: docker-compose -f docker-compose.prod.yaml build web
@@ -96,5 +94,4 @@ jobs:
           docker-compose -f docker-compose.prod.yaml up -d
           docker-compose -f docker-compose.prod.yaml exec -T web python manage.py migrate
           docker-compose -f docker-compose.prod.yaml exec -T web python manage.py collectstatic --noinput
-          docker image prune -a -f
-          docker network prune -f
+
