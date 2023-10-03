@@ -6,8 +6,10 @@ from server.apps.bot.logic.messages import (
     CATEGORIES_MESSAGE,
     ADD_MESSAGE,
 )
-from server.apps.bot.logic.keyboard import create_inline_keyboard
+from server.apps.bot.logic.keyboard import create_inline_keyboard, get_categ_list
 from server.apps.bot.models import Channel
+from server.apps.bot.models import TypeStatus
+from server.apps.core.incident_types import IncidentType
 from server.settings.components.telegram import TELEGRAM_BOT_NAME
 
 
@@ -24,8 +26,13 @@ def new_chat_members(update: Update, context: CallbackContext):
 
     for member in new_chat_members:
         if member.username == TELEGRAM_BOT_NAME and member.is_bot == True:
-            chn = Channel(channel_id=chat_id)
-            chn.save()
+            chn = Channel.objects.create(channel_id=chat_id)
+            for it in IncidentType.objects.all():
+                type_status = TypeStatus.objects.create(
+                    incident_type = it,
+                    channel = chn,
+                    status = True,
+                    )
             update.message.reply_text(message)
 
 def categ(update, context):
@@ -34,18 +41,19 @@ def categ(update, context):
     try:
         # check if this chanel exist in db
         cats = Channel.objects.get(channel_id__exact=chat_id)
-        print(cats)
 
-        # Create and send the inline keyboard
-        keyboard = create_inline_keyboard(cats)
-        context.bot.send_message(
-                                    chat_id=chat_id,
-                                    text=CATEGORIES_MESSAGE,
-                                    parse_mode = 'HTML',
-                                    reply_markup=keyboard
-                                 )
     except:
         context.bot.send_message(
                 chat_id=chat_id,
                 text="Проверьте настройки бота, что-то пошло не так"
                 )
+
+    # Create and send the inline keyboard
+    keyboard = create_inline_keyboard(cats)
+
+    context.bot.send_message(
+                                chat_id=chat_id,
+                                text=get_categ_list(),
+                                parse_mode = 'HTML',
+                                reply_markup=keyboard
+                             )
