@@ -3,7 +3,7 @@ from django.http import HttpRequest, JsonResponse
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
-from telegram import Update, Bot
+from telegram import Update
 from telegram.ext import (
                             CommandHandler,
                             Filters,
@@ -29,13 +29,6 @@ dispatcher.add_handler(CallbackQueryHandler(button))
 dispatcher.add_handler(MessageHandler(Filters.status_update.new_chat_members, new_chat_members))
 dispatcher.add_handler(MessageHandler(Filters.all, help_callback))
 
-bot = Bot(token=TELEGRAM_BOT_TOKEN)
-
-def send_message(user_id, message):
-    try:
-        bot.send_message(chat_id=user_id, text=message)
-    except Exception as e:
-        print('An error occurred: ', e)
 
 @method_decorator(csrf_exempt, name="dispatch")
 class TelegramBotWebhookView(View):
