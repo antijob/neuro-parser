@@ -19,7 +19,7 @@ class IncidentTypeAdmin(admin.ModelAdmin):
 
 @admin.register(MediaIncident)
 class MediaIncidentAdmin(admin.ModelAdmin):
-    list_display = ('any_title', 'status')
+    list_display = ('any_title', 'incident_type','status')
 
 @admin.register(Article)
 class ArticleAdmin(admin.ModelAdmin):
