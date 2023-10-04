@@ -23,8 +23,7 @@ jobs:
     steps:
       - name: Clean unused images and network
         run: |
-          docker image prune -a -f
-          docker network prune -f
+          docker system prune -f
   build:
     name: Build production
     needs:
@@ -94,4 +93,3 @@ jobs:
           docker-compose -f docker-compose.prod.yaml up -d
           docker-compose -f docker-compose.prod.yaml exec -T web python manage.py migrate
           docker-compose -f docker-compose.prod.yaml exec -T web python manage.py collectstatic --noinput
-
