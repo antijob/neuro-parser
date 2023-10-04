@@ -9,13 +9,15 @@ from server.apps.core.logic.grabber.actions import process_news
 from simhash import SimhashIndex, Simhash
 from server.apps.core.models import Article
 import re
-from server.apps.core.logic.reposts import get_reposts, calc_ratio
-
+from server.apps.core.logic.reposts import get_orig, calc_ratio
+import logging
 
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
-        index = SimhashIndex([], k=12)
+        logging.basicConfig()
+        sh_log = logging.getLogger().setLevel(logging.INFO)
+        index = SimhashIndex([], k=12, log=sh_log)
 
         art = Article.objects.filter(is_downloaded=True, is_duplicate=False) 
         for a in art:
@@ -30,8 +32,11 @@ class Command(BaseCommand):
                 print(a.url)
 
                 for x in near:
-                    ratio = calc_ratio(Article.objects.get(url=x).text, a.text)
-                    print(x, ratio)
+                    near_text = Article.objects.get(url=x).text
+                    # near_text_no_links = re.sub(r'http\S+', '', near_text)
+                    ratio = calc_ratio(near_text, a.text)
+                    # nourl_ratio = calc_ratio(near_text_no_links, text)
+                    print(x, ratio, self.compare(a.url, x))
 
             index.add(a.url, sh)
 
@@ -47,11 +52,15 @@ class Command(BaseCommand):
             if len(near) == 0:
                 print("Missed in simhash dub:")
                 print(a.url)
-                _, repost = get_reposts(a.text)
+                _, repost = get_orig(a.text)
                 if repost:
                     print(repost.url, self.compare(repost.url, a.url))
 
     def compare(self, url1, url2):
-        sh1 = Simhash(Article.objects.get(url=url1).text)
-        sh2 = Simhash(Article.objects.get(url=url2).text)
+        text1 = Article.objects.get(url=url1).text
+        text2 = Article.objects.get(url=url2).text
+        text1 = re.sub(r'http\S+', '', text1)
+        text2 = re.sub(r'http\S+', '', text2)
+        sh1 = Simhash(text1)
+        sh2 = Simhash(text2)
         return sh1.distance(sh2)
