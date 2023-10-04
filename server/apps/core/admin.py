@@ -24,7 +24,7 @@ class MediaIncidentAdmin(admin.ModelAdmin):
 @admin.register(Article)
 class ArticleAdmin(admin.ModelAdmin):
     list_display = ('url', 'publication_date', 'is_downloaded', 'is_duplicate', 'title', 'relevance')
-
+    ordering = ('-publication_date',)
 
 @admin.register(Source)
 class SourceAdmin(admin.ModelAdmin):
