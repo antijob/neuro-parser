@@ -48,9 +48,8 @@ class Command(BaseCommand):
                 print("Missed in simhash dub:")
                 print(a.url)
                 _, repost = get_reposts(a.text)
-                print(repost.url, self.compare(repost.url, a.url))
-
-
+                if repost:
+                    print(repost.url, self.compare(repost.url, a.url))
 
     def compare(self, url1, url2):
         sh1 = Simhash(Article.objects.get(url=url1).text)
