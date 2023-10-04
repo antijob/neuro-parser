@@ -43,3 +43,18 @@ def check_repost(article_text_to_check: str):
         if ratio > 0.7:
             return True
     return False
+
+
+# ToDo: remove this. It's only for test
+def get_reposts(article_text_to_check: str):
+    if not article_text_to_check:
+        return False, None
+
+    articles = latest_unique_articles()
+    for art in articles:
+        if not art.text:
+            continue
+        ratio = calc_ratio(article_text_to_check, art.text)
+        if ratio > 0.7:
+            return True, art
+    return False, None
