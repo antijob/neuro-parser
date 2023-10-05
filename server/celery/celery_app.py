@@ -18,16 +18,16 @@ app.autodiscover_tasks(['server.celery.crawler', 'server.celery.parser',], force
 app.conf.beat_schedule = {
     "crawl": {
         "task": "crawl_chain",
-        "schedule": crontab(minute=0, hour="*"),
+        "schedule": crontab(minute="*/15", hour="*"),
         "options": {
-            "expires": 3600,
+            "expires": 60*15,
         },
     },
     "parse": {
         "task": "parse_chain",
-        "schedule": crontab(minute=0, hour="*"),
+        "schedule": crontab(minute="*/15", hour="*"),
         "options": {
-            "expires": 3600,
+            "expires": 60*15,
         },
     },
 }

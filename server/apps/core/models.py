@@ -16,7 +16,6 @@ from server.apps.core.logic.grabber.region import region_code
 from server.apps.core.logic.morphy import normalize_text
 from server.apps.core.incident_types import IncidentType
 from server.apps.users.models import User
-from server.apps.core.logic.reposts import check_repost
 
 
 class BaseIncident(models.Model):
@@ -250,9 +249,10 @@ class Source(models.Model):
     def update(self):
         urls = source_parser.extract_all_news_urls(self.url)
         if not urls:
-            return
-        self.add_articles(urls)
+            return 0
+        added = self.add_articles(urls)
         self.save()
+        return len(added)
 
     def grab_archive(self, first_page_url=None, first_page=1):
         return source_parser.grab_archive(self, first_page_url, first_page)
@@ -319,8 +319,6 @@ class Article(models.Model):
             if publication_date:
                 self.publication_date = publication_date
         self.is_downloaded = True
-        if check_repost(self.text):
-            self.is_duplicate = True
         self.save()
 
     def any_title(self):
@@ -328,7 +326,6 @@ class Article(models.Model):
             return self.title
         if not self.text:
             return ''
-            # exception here
 
         try:
             first_sentence_end = self.text.index(".")

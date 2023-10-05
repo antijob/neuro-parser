@@ -6,6 +6,7 @@
 # And then we shouldn't count them futher
 from datetime import datetime, timedelta
 from difflib import SequenceMatcher
+from . import simhash_index 
 
 def latest_unique_articles():
     from server.apps.core.models import Article
@@ -13,10 +14,9 @@ def latest_unique_articles():
     start_date = datetime.now().date() - timedelta(days=3)
     return Article.objects.filter(
         publication_date__gte=start_date, 
-        is_duplicate=False, 
-        is_downloaded=True
+        is_duplicate=False,
+        is_parsed=True,
         )
-
 
 def calc_ratio(a: str, b: str):
     match = SequenceMatcher(None, a, b)
@@ -45,21 +45,44 @@ def check_repost(article_text_to_check: str):
     return False
 
 
-# ToDo: remove this. It's only for test
-def get_orig(article_text_to_check: str):
+def check_repost_query(query):
     from server.apps.core.models import Article
-    import re
+    index = simhash_index.get_index()
+    if index is None:
+        index_articles = latest_unique_articles()
+        index = simhash_index.create_index(index_articles)
 
-    if not article_text_to_check:
-        return False, None
-
-    articles = Article.objects.filter(is_duplicate=False, is_downloaded=True)
-    for art in articles:
+    for art in query:
         if not art.text:
+            art.is_duplicate = True
+            art.save()
             continue
-        text1 = re.sub(r'http\S+', '', article_text_to_check)
-        text2 = re.sub(r'http\S+', '', art.text)
-        ratio = calc_ratio(text1, text2)
-        if ratio > 0.7:
-            return True, art
-    return False, None
+
+        neighbours = simhash_index.neighbours(art, index)
+        if neighbours and len(neighbours) > 0:
+            is_unique = False
+            for url in neighbours:
+                dist = simhash_index.compare(url, art.url)
+
+                # check if close in simhash index
+                if dist < 4:
+                    continue
+
+                # check if close by calc ratio
+                text = Article.objects.get(url=url).text
+                if not text:
+                    continue
+                if calc_ratio(text, art.text) > .5:
+                    continue
+
+                # okay, you are unique
+                is_unique = True
+                simhash_index.add(art, index)
+                break
+        else:
+            is_unique = True
+
+        art.is_duplicate = not is_unique
+        art.save()
+
+    simhash_index.store_index(index)

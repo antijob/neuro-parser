@@ -14,11 +14,13 @@ def crawl_chain():
 @app.task(queue="crawler")
 def update_sources():
     sources = Source.objects.filter(is_active=True)
+    urls_count = 0
     for source in sources:
         try:
-            source.update()
+            urls_count += source.update()
         except Exception as e:
             print(f"An error occurred while updating source: {e}")
+    return f"Urls extracted: {urls_count}"
 
 
 @app.task(queue="crawler")
@@ -30,3 +32,4 @@ def fetch_sources(status):
         if articles.exists():
             fetcher.add_coroutine(source, articles)
     fetcher.await_all_coroutines()
+    return "Fetcher fetched some amount of urls"
