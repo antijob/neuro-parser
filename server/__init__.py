@@ -1,3 +1,3 @@
 # -*- coding: utf-8 -*-
 
-from .celery import app as celery_app
+from server.celery.celery_app import app as celery_app

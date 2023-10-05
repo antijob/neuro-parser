@@ -6,19 +6,28 @@ from django.conf import settings
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "server.settings")
 
+import django
+django.setup()
+
 app = Celery("server")
 app.config_from_object("django.conf:settings", namespace="CELERY")
 app.conf.timezone = 'UTC'
-app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
+app.autodiscover_tasks(['server.celery.crawler', 'server.celery.parser',], force=True)
 
 
 app.conf.beat_schedule = {
-    "grab-news": {
-        "task": "server.apps.core.tasks.grab_news",
+    "crawl": {
+        "task": "crawl_chain",
         "schedule": crontab(minute=0, hour="*"),
+        "options": {
+            "expires": 3600,
+        },
     },
-    "process-news": {
-        "task": "server.apps.core.tasks.process_news",
-        "schedule": crontab(minute=30, hour="*"),
+    "parse": {
+        "task": "parse_chain",
+        "schedule": crontab(minute=0, hour="*"),
+        "options": {
+            "expires": 3600,
+        },
     },
 }

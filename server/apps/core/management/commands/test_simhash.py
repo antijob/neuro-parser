@@ -3,9 +3,6 @@
 from django.core.management.base import BaseCommand
 from django.core.management import call_command
 
-from server.apps.core.logic.grabber.actions import process_news
-
-
 from simhash import SimhashIndex, Simhash
 from server.apps.core.models import Article
 import re

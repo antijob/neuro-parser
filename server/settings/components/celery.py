@@ -7,4 +7,4 @@ Celery module
 c.path='../../../.env'
 
 
-CELERY_BROKER_URL = 'redis://{host}:6379/0'.format(host=c('REDIS_HOST'))
+CELERY_BROKER_URL = '{host}/0'.format(host=c('REDIS_HOST'))

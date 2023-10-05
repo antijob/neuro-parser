@@ -34,7 +34,7 @@ services:
 
   web:
     build: .
-    command: /bin/bash -c "chmod +x ./entrypoint.sh && ./entrypoint.sh"
+    command: bash -c 'while !</dev/tcp/db/5432; do sleep 1;done; python manage.py runserver 0.0.0.0:8000'
     volumes:
       - ./models:/code/models
       - .:/code
@@ -53,6 +53,34 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.django.rule=Host(`${HOST}`)"
+
+  celery:
+    build: .
+    command: /bin/bash -c "chmod +x ./celery-start.sh && ./celery-start.sh"
+    volumes:
+      - .:/code
+    restart: always
+    depends_on:
+      - redis
+    networks:
+      - djangonetwork
+
+  flower:
+    image : mher/flower
+    container_name: flower
+    command: celery flower
+    environment:
+      - FLOWER_PORT=50
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    ports:
+      - 50:50
+    networks:
+      - djangonetwork
+    restart: always
+    depends_on:
+      - redis
+      - web
 
   redis:
     image: redis:alpine

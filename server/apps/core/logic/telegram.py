@@ -10,7 +10,7 @@ from django.core.exceptions import ValidationError
 from django.core.validators import URLValidator
 
 from server.apps.core.models import Article
-from server.apps.core.tasks import search_duplicates
+from server.celery.parser import search_duplicates
 
 PRINTABLE_CHARS = frozenset(string.printable)
 
