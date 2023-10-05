@@ -23,8 +23,16 @@ class MediaIncidentAdmin(admin.ModelAdmin):
 
 @admin.register(Article)
 class ArticleAdmin(admin.ModelAdmin):
-    list_display = ('url', 'publication_date', 'is_downloaded', 'is_duplicate', 'title', 'relevance')
+    list_display = ('url', 'publication_date', 'is_downloaded', 'is_parsed', 'is_duplicate', 'title', 'relevance')
     ordering = ('-publication_date',)
+    actions=['force_parse']
+
+    def force_parse(self, request, queryset):
+        for obj in queryset:
+            obj.is_parsed = False
+            obj.save()
+        self.message_user(request, f"{queryset.count()} articles will be parsed.")
+    force_parse.short_description = "Force parse"
 
 @admin.register(Source)
 class SourceAdmin(admin.ModelAdmin):

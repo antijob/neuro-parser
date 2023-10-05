@@ -2,6 +2,8 @@ from .celery_app import app
 from server.apps.core.logic.grabber import duplicates
 from server.apps.core.models import Article, Source
 
+from datetime import datetime, timedelta
+
 
 @app.task(queue="parser", name='parse_chain')
 def parse_chain():
@@ -20,11 +22,17 @@ def delete_duplicate_articles():
 
 @app.task(queue="parser")
 def create_incidents(status):
-    # ToDo: get only unparsed articles for last 3 days
-    articles = Article.objects.filter(is_downloaded=True, is_incident_created=False)
+    start_date = datetime.now().date() - timedelta(days=3)
+    articles = Article.objects.filter(
+        is_downloaded=True, 
+        is_parsed=False,
+        publication_date__gte=start_date)
+
     for article in articles:
         try:
             article.create_incident()
+            article.is_parsed = True
+            article.save()
         except Exception as e:
             print(f"An error occurred while creating incident for article: {e}")
 

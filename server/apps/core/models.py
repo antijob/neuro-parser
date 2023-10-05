@@ -272,6 +272,7 @@ class Article(models.Model):
     title = models.TextField(verbose_name='Заголовок', default='', blank=True, null=True)
     text = models.TextField(verbose_name='Текст', default='', blank=True, null=True)
     is_downloaded = models.BooleanField(verbose_name='Скачана', default=False)
+    is_parsed = models.BooleanField(verbose_name='Обработана', default=False)
     is_incident_created = models.BooleanField(verbose_name='Инцидент создан',
                                               default=False)
     is_duplicate = models.BooleanField(verbose_name='Дубликат', default=False)
