@@ -16,8 +16,8 @@ import logging
 class Command(BaseCommand):
     def handle(self, *args, **options):
         logging.basicConfig()
-        sh_log = logging.getLogger().setLevel(logging.INFO)
-        index = SimhashIndex([], k=12, log=sh_log)
+        sh_log = logging.getLogger().setLevel(logging.ERROR)
+        index = SimhashIndex([], k=10, log=sh_log)
 
         art = Article.objects.filter(is_downloaded=True, is_duplicate=False) 
         for a in art:
@@ -50,10 +50,10 @@ class Command(BaseCommand):
 
             near = index.get_near_dups(sh)
             if len(near) == 0:
-                print("Missed in simhash dub:")
-                print(a.url)
                 _, repost = get_orig(a.text)
                 if repost:
+                    print("Missed in simhash dub:")
+                    print(a.url)
                     print(repost.url, self.compare(repost.url, a.url))
 
     def compare(self, url1, url2):
