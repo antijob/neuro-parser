@@ -23,7 +23,7 @@ jobs:
     steps:
       - name: Clean unused images and network
         run: |
-          docker system prune -f
+          docker images prune -f
   build:
     name: Build production
     needs:
