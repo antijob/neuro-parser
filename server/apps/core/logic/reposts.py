@@ -80,6 +80,7 @@ def check_repost_query(query):
                 simhash_index.add(art, index)
                 break
         else:
+            simhash_index.add(art, index)
             is_unique = True
 
         art.is_duplicate = not is_unique
