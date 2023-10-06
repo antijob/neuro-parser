@@ -64,6 +64,42 @@ services:
       - "traefik.http.routers.staticfiles.tls=true"
       - "traefik.http.routers.staticfiles.tls.certresolver=letsencrypt"
 
+  celery:
+    build: .
+    command: /bin/bash -c "chmod +x ./celery-start.sh && ./celery-start.sh"
+    volumes:
+      - .:/code
+    restart: always
+    depends_on:
+      - redis
+    networks:
+      - djangonetwork
+
+  flower:
+    image: mher/flower
+    container_name: flower
+    command: celery flower
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - FLOWER_BASIC_AUTH=${FLOWER_USER}:${FLOWER_PASSWORD}
+    ports:
+      - 5555:5555
+    networks:
+      - djangonetwork
+    restart: always
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.flower.rule=Host(`${HOST}`) && PathPrefix(`/flower`)"
+      - "traefik.http.routers.flower.middlewares=stripprefix"
+      - "traefik.http.middlewares.stripprefix.stripprefix.prefixes=/flower"
+      - "traefik.http.routers.staticfiles.entrypoints=websecure"
+      - "traefik.http.routers.staticfiles.tls=true"
+      - "traefik.http.routers.staticfiles.tls.certresolver=letsencrypt"
+    depends_on:
+      - redis
+      - web
+
   web:
     build:
       context: .

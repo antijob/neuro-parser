@@ -3,7 +3,7 @@ name: CI
 on:
   push:
     branches:
-      - main
+      - flower-to-prod
   workflow_dispatch:
     inputs:
       runType:
@@ -19,7 +19,7 @@ jobs:
   clean:
     name: Clean images
     runs-on: ["self-hosted", "antijob-report", "production"]
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/flower-to-prod'
     steps:
       - name: Clean unused images and network
         run: |
@@ -29,7 +29,7 @@ jobs:
     needs:
       - clean
     runs-on: ["self-hosted", "antijob-report", "production"]
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/flower-to-prod'
     steps:
       - name: Check out repository code
         uses: actions/checkout@v3
@@ -60,6 +60,8 @@ jobs:
             -e s,^CF_DNS_API_TOKEN=.*,CF_DNS_API_TOKEN=$CF_DNS_API_TOKEN, \
             -e s,^API_TOKEN=.*,API_TOKEN=$API_TOKEN, \
             -e s,^CHAT_GPT_KEY=.*,CHAT_GPT_KEY=$CHAT_GPT_KEY, \
+            -e s,^FLOWER_USER=.*,FLOWER_USER=$FLOWER_USER, \
+            -e s,^FLOWER_PASSWORD=.*,FLOWER_PASSWORD=$FLOWER_PASSWORD, \
             .env
         env:
           POSTGRES_USER: "${{ secrets.POSTGRES_USER }}"
@@ -70,6 +72,8 @@ jobs:
           CF_DNS_API_TOKEN: "${{ secrets.CF_DNS_API_TOKEN }}"
           API_TOKEN: "${{ secrets.API_TOKEN }}"
           CHAT_GPT_KEY: "${{ secrets.CHAT_GPT_KEY }}"
+          FLOWER_USER: "${{ secrets.FLOWER_USER }}"
+          FLOWER_PASSWORD: "${{ secrets.FLOWER_PASSWORD }}"
       - name: Build python
         if: ${{ steps.filter.outputs.web == 'true' || github.event.inputs.runType == 'Force build' }}
         run: docker-compose -f docker-compose.prod.yaml build web
@@ -79,7 +83,7 @@ jobs:
     needs:
       - build
     runs-on: ["self-hosted", "antijob-report", "production"]
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/flower-to-prod'
     steps:
       # - name: Approve deployment
       #   uses: trstringer/manual-approval@v1
