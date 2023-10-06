@@ -1,0 +1,94 @@
+services:
+  traefik:
+    image: traefik:latest
+    container_name: "traefik"
+    command:
+      - "--accessLog=true"
+      - "--api.insecure=true"
+      - "--entrypoints.web.address=:80"
+      - "--log.level=DEBUG"
+      - "--providers.docker.exposedByDefault=false"
+    ports:
+      - 8008:80
+      - 8081:8080
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - .:/code
+    networks:
+      - djangonetwork
+
+  db:
+    image: postgres:13.4-alpine
+    volumes:
+      - ~/.parser/data/db:/var/lib/postgresql/data
+      - .:/code
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_HOST_AUTH_METHOD=md5
+    env_file:
+      - .env
+    networks:
+      - djangonetwork
+
+  web:
+    build: .
+    command: bash -c 'while !</dev/tcp/db/5432; do sleep 1;done; python manage.py runserver 0.0.0.0:8000'
+    volumes:
+      - ./models:/code/models
+      - .:/code
+    expose:
+      - 8000
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_NAME=${POSTGRES_NAME}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    depends_on:
+      - db
+    networks:
+      - djangonetwork
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.django.rule=Host(`${HOST}`)"
+
+  celery:
+    build: .
+    command: /bin/bash -c "chmod +x ./celery-start.sh && ./celery-start.sh"
+    volumes:
+      - .:/code
+    restart: always
+    depends_on:
+      - redis
+    networks:
+      - djangonetwork
+
+  flower:
+    image : mher/flower
+    container_name: flower
+    command: celery flower
+    environment:
+      - FLOWER_PORT=50
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    ports:
+      - 50:50
+    networks:
+      - djangonetwork
+    restart: always
+    depends_on:
+      - redis
+      - web
+
+  redis:
+    image: redis:alpine
+    expose:
+      - "6379"
+    networks:
+      - djangonetwork
+
+networks:
+  djangonetwork:
+    driver: bridge
