@@ -99,6 +99,7 @@ services:
       - "traefik.http.routers.flower.rule=Host(`${HOST}`) && PathPrefix(`/flower`)"
       - "traefik.http.routers.flower.middlewares=stripprefix"
       - "traefik.http.middlewares.stripprefix.stripprefix.prefixes=/flower"
+      - "traefik.http.services.flower.loadbalancer.server.port=5555"
     depends_on:
       - redis
       - web
