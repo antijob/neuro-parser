@@ -99,9 +99,6 @@ services:
       - "traefik.http.routers.flower.rule=Host(`${HOST}`) && PathPrefix(`/flower`)"
       - "traefik.http.routers.flower.middlewares=stripprefix"
       - "traefik.http.middlewares.stripprefix.stripprefix.prefixes=/flower"
-      - "traefik.http.routers.staticfiles.entrypoints=websecure"
-      - "traefik.http.routers.staticfiles.tls=true"
-      - "traefik.http.routers.staticfiles.tls.certresolver=letsencrypt"
     depends_on:
       - redis
       - web
