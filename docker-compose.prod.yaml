@@ -32,11 +32,15 @@ services:
       - "traefik.http.middlewares.auth.basicauth.users=testuser:$$apr1$$jIKW.bdS$$eKXe4Lxjgy/rH65wP1iQe1"
     environment:
       - CF_DNS_API_TOKEN=${CF_DNS_API_TOKEN}
+    networks:
+      - djangonetwork
 
   db:
     image: postgres:13.4-alpine
     volumes:
       - postgres_data_prod:/var/lib/postgresql/data
+    networks:
+      - djangonetwork
     environment:
       - POSTGRES_DB=${POSTGRES_DB}
       - POSTGRES_USER=${POSTGRES_USER}
@@ -57,6 +61,8 @@ services:
           nocopy: true
     depends_on:
       - web
+    networks:
+      - djangonetwork
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.staticfiles.rule=Host(`${HOST}`) && PathPrefix(`/static/`)"
@@ -126,12 +132,19 @@ services:
       - "traefik.http.routers.django.entrypoints=websecure"
       - "traefik.http.routers.django.tls=true"
       - "traefik.http.routers.django.tls.certresolver=letsencrypt"
+    networks:
+      - djangonetwork
   redis:
     image: redis:alpine
     expose:
       - "6379"
+    networks:
+      - djangonetwork
 
 volumes:
   postgres_data_prod:
   traefik-public-certificates:
   staticfiles-data:
+networks:
+  djangonetwork:
+    driver: bridge
