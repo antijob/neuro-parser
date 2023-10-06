@@ -4,7 +4,7 @@ from simhash import Simhash, SimhashIndex
 import re
 
 
-SWIMHASH_INDEX_KEY = "simhash-index"
+SIMHASH_INDEX_KEY = "simhash-index"
 SIMHASH_INDEX_TIMEOUT = 3600 * 3 # 3 hours
 clear_text = re.compile(r'http\S+') # remove links
 
@@ -24,11 +24,11 @@ def compare(url1, url2):
 
 
 def get_index():
-    return cache.get(SWIMHASH_INDEX_KEY)
+    return cache.get(SIMHASH_INDEX_KEY)
 
 
 def store_index(index):
-    cache.set(SWIMHASH_INDEX_KEY, index, SIMHASH_INDEX_TIMEOUT)
+    cache.set(SIMHASH_INDEX_KEY, index, SIMHASH_INDEX_TIMEOUT)
 
 
 def create_index(articles=[]):

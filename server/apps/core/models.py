@@ -318,6 +318,8 @@ class Article(models.Model):
             self.title, self.text, publication_date, self.url = data
             if publication_date:
                 self.publication_date = publication_date
+            else:
+                self.publication_date = datetime.date.today()
         self.is_downloaded = True
         self.save()
 

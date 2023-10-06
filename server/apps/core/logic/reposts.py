@@ -59,12 +59,15 @@ def check_repost_query(query):
             continue
 
         neighbours = simhash_index.neighbours(art, index)
-        if neighbours and len(neighbours) > 0:
+        # only unique urls can be in index
+        if art.url in neighbours:
+            is_unique = True
+        elif neighbours and len(neighbours) > 0:
             is_unique = False
             for url in neighbours:
                 dist = simhash_index.compare(url, art.url)
 
-                # check if close in simhash index
+                # check if close in simhash distance
                 if dist < 4:
                     continue
 
