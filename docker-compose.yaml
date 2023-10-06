@@ -66,18 +66,23 @@ services:
       - djangonetwork
 
   flower:
-    image : mher/flower
+    image: mher/flower
     container_name: flower
     command: celery flower
     environment:
-      - FLOWER_PORT=50
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
     ports:
-      - 50:50
+      - 5555:5555
     networks:
       - djangonetwork
     restart: always
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.flower.rule=Host(`${HOST}`) && PathPrefix(`/flower`)"
+      - "traefik.http.routers.static.rule=Host(`${HOST}`) && PathPrefix(`/static`)"
+      - "traefik.http.routers.flower.middlewares=stripprefix"
+      - "traefik.http.middlewares.stripprefix.stripprefix.prefixes=/flower"
     depends_on:
       - redis
       - web
