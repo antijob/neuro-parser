@@ -94,13 +94,12 @@ services:
     networks:
       - djangonetwork
     restart: always
-    volumes:
-      - "staticfiles-data:/code/static"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.flower.rule=Host(`${HOST}`) && PathPrefix(`/flower`)"
       - "traefik.http.routers.flower.middlewares=stripprefix"
       - "traefik.http.middlewares.stripprefix.stripprefix.prefixes=/flower"
+      - "traefik.http.routers.staticflower.rule=Host(`${HOST}`) && PathPrefix(`/static/`)"
       - "traefik.http.services.flower.loadbalancer.server.port=5555"
       - "traefik.http.routers.flower.entrypoints=websecure"
       - "traefik.http.routers.flower.tls=true"
