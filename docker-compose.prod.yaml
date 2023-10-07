@@ -99,7 +99,6 @@ services:
       - "traefik.http.routers.flower.rule=Host(`${HOST}`) && PathPrefix(`/flower`)"
       - "traefik.http.routers.flower.middlewares=stripprefix"
       - "traefik.http.middlewares.stripprefix.stripprefix.prefixes=/flower"
-      - "traefik.http.routers.staticflower.rule=Host(`${HOST}`) && PathPrefix(`/static/`)"
       - "traefik.http.services.flower.loadbalancer.server.port=5555"
       - "traefik.http.routers.flower.entrypoints=websecure"
       - "traefik.http.routers.flower.tls=true"
@@ -121,7 +120,7 @@ services:
     env_file:
       - .env
     environment:
-      - DEBUG=False
+      - DEBUG=True
       - POSTGRES_NAME=${POSTGRES_NAME}
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
