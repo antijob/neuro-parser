@@ -11,7 +11,7 @@ from datetime import datetime, timedelta
 def get_parse_candidates():
     start_date = datetime.now().date() - timedelta(days=3)
     articles = Article.objects.filter(
-        is_downloaded=True, 
+        is_downloaded=True,
         is_parsed=False,
         publication_date__gte=start_date)
     return articles
@@ -24,7 +24,7 @@ def parse_chain():
         return "No candidates"
 
     (
-        delete_duplicate_articles.s() | 
+        delete_duplicate_articles.s() |
         create_incidents.s() |
         delete_duplicated_incidents.s()
     ).apply_async()
@@ -57,14 +57,6 @@ def create_incidents(status):
 @app.task(queue="parser")
 def delete_duplicated_incidents(status):
     pass
-
-
-@app.task(queue="parser")
-def search_duplicates(article_id):
-    article = Article.objects.get(pk=article_id)
-    history = Article.objects.filter(incident__isnull=False)
-    duplicates.search_duplicates_in_history([article], history)
-
 
 @app.task(queue="parser")
 def rebuild_simhash_index():
