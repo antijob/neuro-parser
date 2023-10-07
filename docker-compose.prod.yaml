@@ -94,6 +94,8 @@ services:
     networks:
       - djangonetwork
     restart: always
+    volumes:
+      - "staticfiles-data:/code/static"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.flower.rule=Host(`${HOST}`) && PathPrefix(`/flower`)"
