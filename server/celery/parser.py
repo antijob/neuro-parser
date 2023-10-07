@@ -1,9 +1,6 @@
 from .celery_app import app
-from server.apps.core.logic.grabber import duplicates
 from server.apps.core.models import Article, Source
 from server.apps.core.logic.reposts import check_repost_query
-
-
 
 from datetime import datetime, timedelta
 
