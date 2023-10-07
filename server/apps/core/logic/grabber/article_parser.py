@@ -5,7 +5,6 @@ import dateparser
 import requests
 from lxml import cssselect, etree
 from lxml.html.clean import Cleaner
-from htmldate import find_date
 from goose3 import Goose
 from goose3.configuration import Configuration
 from icecream import ic
@@ -302,16 +301,6 @@ def parse_article_raw_data(url, data) -> ArticleData:
 
     if url.startswith('https://ok.ru/'):
         return parse_ok_raw_data(data, url)
-
-    # exception if no date
-    raw_date = find_date(data)
-    if not raw_date:
-        # set some old date if no date set
-        return ArticleData(None, None, datetime(1991, 12, 26), url) 
-    date = datetime.strptime(raw_date, "%Y-%m-%d")
-    one_week_ago = datetime.now() - timedelta(days=7)
-    if one_week_ago > date:
-        return ArticleData(None, None, date, url)
 
     config = Configuration()
     config.strict = False
