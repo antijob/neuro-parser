@@ -100,6 +100,9 @@ services:
       - "traefik.http.routers.flower.middlewares=stripprefix"
       - "traefik.http.middlewares.stripprefix.stripprefix.prefixes=/flower"
       - "traefik.http.services.flower.loadbalancer.server.port=5555"
+      - "traefik.http.routers.flower.entrypoints=websecure"
+      - "traefik.http.routers.flower.tls=true"
+      - "traefik.http.routers.flower.tls.certresolver=letsencrypt"
     depends_on:
       - redis
       - web
