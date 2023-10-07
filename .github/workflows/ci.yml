@@ -3,7 +3,7 @@ name: CI
 on:
   push:
     branches:
-      - flower-to-prod
+      - main
   workflow_dispatch:
     inputs:
       runType:
@@ -19,7 +19,7 @@ jobs:
   clean:
     name: Clean images
     runs-on: ["self-hosted", "antijob-report", "production"]
-    if: github.ref == 'refs/heads/flower-to-prod'
+    if: github.ref == 'refs/heads/main'
     steps:
       - name: Clean unused images and network
         run: |
@@ -29,7 +29,7 @@ jobs:
     needs:
       - clean
     runs-on: ["self-hosted", "antijob-report", "production"]
-    if: github.ref == 'refs/heads/flower-to-prod'
+    if: github.ref == 'refs/heads/main'
     steps:
       - name: Check out repository code
         uses: actions/checkout@v3
@@ -83,7 +83,7 @@ jobs:
     needs:
       - build
     runs-on: ["self-hosted", "antijob-report", "production"]
-    if: github.ref == 'refs/heads/flower-to-prod'
+    if: github.ref == 'refs/heads/main'
     steps:
       # - name: Approve deployment
       #   uses: trstringer/manual-approval@v1
