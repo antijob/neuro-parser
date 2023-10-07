@@ -72,7 +72,7 @@ services:
     environment:
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
-      - FLOWER_BASIC_AUTH=username:password
+      - FLOWER_BASIC_AUTH=${FLOWER_USER}:${FLOWER_PASSWORD}
     ports:
       - 5555:5555
     networks:
@@ -80,10 +80,7 @@ services:
     restart: always
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.flower.rule=Host(`${HOST}`) && PathPrefix(`/flower`)"
-      - "traefik.http.routers.static.rule=Host(`${HOST}`) && PathPrefix(`/static`)"
-      - "traefik.http.routers.flower.middlewares=stripprefix"
-      - "traefik.http.middlewares.stripprefix.stripprefix.prefixes=/flower"
+      - "traefik.http.routers.flower.rule=Host(`${FLOWER_HOST}`)"
     depends_on:
       - redis
       - web
