@@ -91,6 +91,8 @@ services:
       - FLOWER_BASIC_AUTH=${FLOWER_USER}:${FLOWER_PASSWORD}
     ports:
       - 5555:5555
+    env_file:
+      - .env
     networks:
       - djangonetwork
     restart: always
@@ -100,7 +102,6 @@ services:
       - "traefik.http.routers.flower.entrypoints=websecure"
       - "traefik.http.routers.flower.tls=true"
       - "traefik.http.routers.flower.tls.certresolver=letsencrypt"
-      - "traefik.http.services.flower.loadbalancer.server.port=5555"
     depends_on:
       - redis
       - web
