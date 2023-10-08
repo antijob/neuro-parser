@@ -113,7 +113,7 @@ services:
       dockerfile: Dockerfile.prod
     command: /bin/bash -c "chmod +x ./entrypoint-prod.sh && ./entrypoint-prod.sh"
     volumes:
-      - /root/models:/code/models
+      - /root/models:/home/github-actions/code/models
       - "staticfiles-data:/code/static"
     expose:
       - 8000
