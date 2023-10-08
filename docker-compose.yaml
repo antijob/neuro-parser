@@ -59,6 +59,7 @@ services:
     command: /bin/bash -c "chmod +x ./celery-start.sh && ./celery-start.sh"
     volumes:
       - .:/code
+      - ./models:/code/models
     restart: always
     depends_on:
       - redis
@@ -66,18 +67,21 @@ services:
       - djangonetwork
 
   flower:
-    image : mher/flower
+    image: mher/flower
     container_name: flower
     command: celery flower
     environment:
-      - FLOWER_PORT=50
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - FLOWER_BASIC_AUTH=${FLOWER_USER}:${FLOWER_PASSWORD}
     ports:
-      - 50:50
+      - 5555:5555
     networks:
       - djangonetwork
     restart: always
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.flower.rule=Host(`${FLOWER_HOST}`)"
     depends_on:
       - redis
       - web

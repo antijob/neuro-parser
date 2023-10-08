@@ -60,6 +60,8 @@ jobs:
             -e s,^CF_DNS_API_TOKEN=.*,CF_DNS_API_TOKEN=$CF_DNS_API_TOKEN, \
             -e s,^API_TOKEN=.*,API_TOKEN=$API_TOKEN, \
             -e s,^CHAT_GPT_KEY=.*,CHAT_GPT_KEY=$CHAT_GPT_KEY, \
+            -e s,^FLOWER_USER=.*,FLOWER_USER=$FLOWER_USER, \
+            -e s,^FLOWER_PASSWORD=.*,FLOWER_PASSWORD=$FLOWER_PASSWORD, \
             .env
         env:
           POSTGRES_USER: "${{ secrets.POSTGRES_USER }}"
@@ -70,6 +72,8 @@ jobs:
           CF_DNS_API_TOKEN: "${{ secrets.CF_DNS_API_TOKEN }}"
           API_TOKEN: "${{ secrets.API_TOKEN }}"
           CHAT_GPT_KEY: "${{ secrets.CHAT_GPT_KEY }}"
+          FLOWER_USER: "${{ secrets.FLOWER_USER }}"
+          FLOWER_PASSWORD: "${{ secrets.FLOWER_PASSWORD }}"
       - name: Build python
         if: ${{ steps.filter.outputs.web == 'true' || github.event.inputs.runType == 'Force build' }}
         run: docker-compose -f docker-compose.prod.yaml build web

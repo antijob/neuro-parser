@@ -32,11 +32,15 @@ services:
       - "traefik.http.middlewares.auth.basicauth.users=testuser:$$apr1$$jIKW.bdS$$eKXe4Lxjgy/rH65wP1iQe1"
     environment:
       - CF_DNS_API_TOKEN=${CF_DNS_API_TOKEN}
+    networks:
+      - djangonetwork
 
   db:
     image: postgres:13.4-alpine
     volumes:
       - postgres_data_prod:/var/lib/postgresql/data
+    networks:
+      - djangonetwork
     environment:
       - POSTGRES_DB=${POSTGRES_DB}
       - POSTGRES_USER=${POSTGRES_USER}
@@ -57,6 +61,8 @@ services:
           nocopy: true
     depends_on:
       - web
+    networks:
+      - djangonetwork
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.staticfiles.rule=Host(`${HOST}`) && PathPrefix(`/static/`)"
@@ -64,20 +70,57 @@ services:
       - "traefik.http.routers.staticfiles.tls=true"
       - "traefik.http.routers.staticfiles.tls.certresolver=letsencrypt"
 
+  celery:
+    build: .
+    command: /bin/bash -c "chmod +x ./celery-start.sh && ./celery-start.sh"
+    volumes:
+      - .:/code
+      - /root/models:/code/models
+    restart: always
+    depends_on:
+      - redis
+    networks:
+      - djangonetwork
+
+  flower:
+    image: mher/flower
+    container_name: flower
+    command: celery flower
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - FLOWER_BASIC_AUTH=${FLOWER_USER}:${FLOWER_PASSWORD}
+    ports:
+      - 5555:5555
+    env_file:
+      - .env
+    networks:
+      - djangonetwork
+    restart: always
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.flower.rule=Host(`${FLOWER_HOST}`)"
+      - "traefik.http.routers.flower.entrypoints=websecure"
+      - "traefik.http.routers.flower.tls=true"
+      - "traefik.http.routers.flower.tls.certresolver=letsencrypt"
+    depends_on:
+      - redis
+      - web
+      - celery
   web:
     build:
       context: .
       dockerfile: Dockerfile.prod
     command: /bin/bash -c "chmod +x ./entrypoint-prod.sh && ./entrypoint-prod.sh"
     volumes:
-      - /root/models:/home/github-actions/code/models
+      - /root/models:/code/models
       - "staticfiles-data:/code/static"
     expose:
       - 8000
     env_file:
       - .env
     environment:
-      - DEBUG=False
+      - DEBUG=True
       - POSTGRES_NAME=${POSTGRES_NAME}
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
@@ -90,12 +133,19 @@ services:
       - "traefik.http.routers.django.entrypoints=websecure"
       - "traefik.http.routers.django.tls=true"
       - "traefik.http.routers.django.tls.certresolver=letsencrypt"
+    networks:
+      - djangonetwork
   redis:
     image: redis:alpine
     expose:
       - "6379"
+    networks:
+      - djangonetwork
 
 volumes:
   postgres_data_prod:
   traefik-public-certificates:
   staticfiles-data:
+networks:
+  djangonetwork:
+    driver: bridge
