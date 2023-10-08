@@ -59,6 +59,7 @@ services:
     command: /bin/bash -c "chmod +x ./celery-start.sh && ./celery-start.sh"
     volumes:
       - .:/code
+      - ./models:/code/models
     restart: always
     depends_on:
       - redis

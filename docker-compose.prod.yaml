@@ -75,6 +75,7 @@ services:
     command: /bin/bash -c "chmod +x ./celery-start.sh && ./celery-start.sh"
     volumes:
       - .:/code
+      - /root/models:/home/github-actions/code/models
     restart: always
     depends_on:
       - redis
