@@ -106,7 +106,7 @@ services:
     depends_on:
       - redis
       - web
-
+      - celery
   web:
     build:
       context: .
