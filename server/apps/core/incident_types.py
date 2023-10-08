@@ -13,8 +13,6 @@ class IncidentType(models.Model):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.tokenizer = None
-        self.model = None
 
     @property
     def model_directory(self):
@@ -23,15 +21,13 @@ class IncidentType(models.Model):
         return MODELS_DIR.joinpath(self.model_path)
 
     def get_tokenizer(self):
-        if self.tokenizer is None:
-            self.tokenizer = AutoTokenizer.from_pretrained(self.model_directory, use_fast=False)
-        return self.tokenizer
+        tokenizer = AutoTokenizer.from_pretrained(self.model_directory, use_fast=False)
+        return tokenizer
 
     def get_model(self):
-        if self.model is None:
-            self.model = BertForSequenceClassification.from_pretrained(self.model_directory)
-            self.model.eval()
-        return self.model
+        model  = BertForSequenceClassification.from_pretrained(self.model_directory)
+        model.eval()
+        return model
 
     @classmethod
     def get_choices(cls):
