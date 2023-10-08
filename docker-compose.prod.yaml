@@ -75,7 +75,7 @@ services:
     command: /bin/bash -c "chmod +x ./celery-start.sh && ./celery-start.sh"
     volumes:
       - .:/code
-      - /root/models:/home/github-actions/code/models
+      - /root/models:/code/models
     restart: always
     depends_on:
       - redis
@@ -113,7 +113,7 @@ services:
       dockerfile: Dockerfile.prod
     command: /bin/bash -c "chmod +x ./entrypoint-prod.sh && ./entrypoint-prod.sh"
     volumes:
-      - /root/models:/home/github-actions/code/models
+      - /root/models:/code/models
       - "staticfiles-data:/code/static"
     expose:
       - 8000
