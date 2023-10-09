@@ -79,11 +79,19 @@ TELEGRAM_BOT_TOKEN=
 TELEGRAM_BOT_NAME=
 TELEGRAM_BOT_URL=
 ```
-Token from BotFather, name that you gave to the bot and url for web hooks. Default url - yoursite.com/bot
-After that you need to create new telegram bot and and add bot there. That's all bot remember that group 
+* TELEGRAM_BOT_TOKEN - Token from BotFather
+* TELEGRAM_BOT_NAME - name that you gave to the bot
+* TELEGRAM_BOT_URL - url for web hooks. Is's should be endpoint on your site, by defauls it - yoursite.com/bot/
+
+To manually register your web hook addres ad Telegram servers you can run that command
+```
+python3 manage.py set_webhook
+```
+
+After that you need to create new telegram chat and and add bot there. That's all bot remember that group 
 and will send notifications there. If you want recieve notifications only for some of existing categories
 use command ```/categ``` for bot settings. 
-Also you can go to Django admin and check Bot section to explore what channels are saved. 
+Also you can go to Django admin and check Bot section to explore channels that are saved. 
 
 Thank you for your contributions to the Neural Parser project!
 
