@@ -13,17 +13,25 @@ from server.apps.core.forms import IncidentTypeForm
 
 @admin.register(IncidentType)
 class IncidentTypeAdmin(admin.ModelAdmin):
-    list_display = ('description', 'model_path')
+    list_display = ('description', 'model_path', 'is_active')
     form = IncidentTypeForm
-    actions = ['disable_models']
+    actions = ['disable_models', 'enable_models']
 
     def disable_models(self, request, queryset):
         for obj in queryset:
             obj.is_active = False
             obj.save()
         self.message_user(
-            request, f"{queryset.count()} articles will be parsed.")
+            request, f"{queryset.count()} models will be switched.")
     disable_models.short_description = "Disable models"
+
+    def enable_models(self, request, queryset):
+        for obj in queryset:
+            obj.is_active = True
+            obj.save()
+        self.message_user(
+            request, f"{queryset.count()} models will be switched.")
+    disable_models.short_description = "Enable models"
 
 
 @admin.register(MediaIncident)
