@@ -287,13 +287,6 @@ class Article(models.Model):
     publication_date = models.DateField('Дата публикации',
                                         null=True,
                                         blank=True)
-    terms = ArrayField(models.CharField(max_length=32,
-                                        blank=True,
-                                        default='',
-                                        null=True),
-                       blank=True,
-                       null=True)
-
     class Meta:
         verbose_name = 'Cтатья'
         verbose_name_plural = 'Статьи'
