@@ -1,7 +1,8 @@
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from server.apps.core.incident_types import IncidentType
 from .models import MediaIncident
-from server.apps.bot.models import Channel
+from server.apps.bot.models import Channel, TypeStatus
 from server.apps.bot.logic.send import send_message
 
 inc_template = """
@@ -20,7 +21,6 @@ def mediaincident_post_save(sender, instance, created, **kwargs):
     """
     if created:
         all_channels = Channel.objects.all()
-        # if
         msg = inc_template.format(
                                     title=instance.title,
                                     desc=instance.description,
@@ -28,6 +28,7 @@ def mediaincident_post_save(sender, instance, created, **kwargs):
                                     url=instance.urls,
                                     )
         for chn in all_channels:
-            send_message(chn.channel_id, msg)
-    # else:
-    #     send_message(204663278, "UPD INSTANCE")
+            type_status = TypeStatus.objects.get(channel=chn, incident_type=instance.incident_type)
+            if type_status.status:
+                send_message(chn.channel_id, msg)
+
