@@ -15,29 +15,42 @@ from server.apps.core.forms import IncidentTypeForm
 class IncidentTypeAdmin(admin.ModelAdmin):
     list_display = ('description', 'model_path')
     form = IncidentTypeForm
+    actions = ['disable_models']
+
+    def disable_models(self, request, queryset):
+        for obj in queryset:
+            obj.is_active = False
+            obj.save()
+        self.message_user(
+            request, f"{queryset.count()} articles will be parsed.")
+    disable_models.short_description = "Disable models"
 
 
 @admin.register(MediaIncident)
 class MediaIncidentAdmin(admin.ModelAdmin):
-    list_display = ('any_title', 'incident_type','status')
+    list_display = ('any_title', 'incident_type', 'status')
+
 
 @admin.register(Article)
 class ArticleAdmin(admin.ModelAdmin):
-    list_display = ('url', 'publication_date', 'is_downloaded', 'is_parsed', 'is_duplicate', 'title', 'relevance')
+    list_display = ('url', 'publication_date', 'is_downloaded',
+                    'is_parsed', 'is_duplicate', 'title', 'relevance')
     ordering = ('-publication_date',)
-    actions=['force_parse']
+    actions = ['force_parse']
 
     def force_parse(self, request, queryset):
         for obj in queryset:
             obj.is_parsed = False
             obj.save()
-        self.message_user(request, f"{queryset.count()} articles will be parsed.")
+        self.message_user(
+            request, f"{queryset.count()} articles will be parsed.")
     force_parse.short_description = "Force parse"
+
 
 @admin.register(Source)
 class SourceAdmin(admin.ModelAdmin):
     list_display = ('url', 'region', 'is_active')
-    actions=['activate', 'deactivate']
+    actions = ['activate', 'deactivate']
 
     def save_model(self, request, obj, form, change):
         urls = obj.url.split()
@@ -58,13 +71,15 @@ class SourceAdmin(admin.ModelAdmin):
         for obj in queryset:
             obj.is_active = True
             obj.save()
-        self.message_user(request, f"{queryset.count()} sources were deactivate.")
+        self.message_user(
+            request, f"{queryset.count()} sources were deactivate.")
 
     def deactivate(self, request, queryset):
         for obj in queryset:
             obj.is_active = False
             obj.save()
-        self.message_user(request, f"{queryset.count()} sources were deactivate.")
+        self.message_user(
+            request, f"{queryset.count()} sources were deactivate.")
 
     activate.short_description = "Activate sources"
     deactivate.short_description = "Deactivate sources"
