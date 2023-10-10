@@ -31,7 +31,7 @@ class IncidentTypeAdmin(admin.ModelAdmin):
             obj.save()
         self.message_user(
             request, f"{queryset.count()} models will be switched.")
-    disable_models.short_description = "Enable models"
+    enable_models.short_description = "Enable models"
 
 
 @admin.register(MediaIncident)
