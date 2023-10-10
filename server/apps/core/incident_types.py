@@ -29,6 +29,32 @@ class IncidentType(models.Model):
         model.eval()
         return model
 
+    def process_batch(self, batch):
+        if self.chat_gpt_prompt:
+            return self.process_batch_gpt(batch)
+        if self.model_path:
+            return self.process_batch_model(batch)
+        return None
+
+    def process_batch_model(self, batch):
+        incidents_count = 0
+        tokenizer = self.get_tokenizer()
+        model = self.get_model()
+        for art in batch:
+            relevance = rate_with_model_and_tokenizer(
+                            art.normalized_text(),
+                            model,
+                            tokenizer)
+
+            if relevance > self.treshold:
+                art.create_incident_with_type(self)
+                incidents_count += 1
+
+        return incidents_count
+
+    def process_batch_gpt(self, batch):  
+        return 0
+
     @classmethod
     def get_choices(cls):
         return [(incident_type.id, incident_type.description) for incident_type in cls.objects.all()]

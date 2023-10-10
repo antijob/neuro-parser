@@ -6,7 +6,6 @@ import server.apps.core.logic.grabber.classificator.chat_gpt as chat_gpt
 def predict_is_incident(normalized_text, incident_type):
     tokenizer = incident_type.get_tokenizer()
     model = incident_type.get_model()
-    model.eval()
 
     relevance = rate_with_model_and_tokenizer(
                     normalized_text,
