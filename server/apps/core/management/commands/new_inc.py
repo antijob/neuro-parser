@@ -18,7 +18,6 @@ class Command(BaseCommand):
             # incident_type=None,  # You can pass an IncidentType instance if needed
             incident_type=IncidentType.objects.get(id=2),  # You can pass an IncidentType instance if needed
             count=1,
-            tags=["tag1", "tag2"],  # Add tags as a list
             urls=["http://example.com", "http://example.org"],  # Add URLs as a list
             public_title="Public Title",
             public_description="Public description for the incident."
