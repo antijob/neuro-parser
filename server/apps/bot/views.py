@@ -27,7 +27,7 @@ dispatcher.add_handler(CommandHandler("start", help_callback))
 dispatcher.add_handler(CommandHandler("categ", categ))
 dispatcher.add_handler(CallbackQueryHandler(button))
 dispatcher.add_handler(MessageHandler(Filters.status_update.new_chat_members, new_chat_members))
-dispatcher.add_handler(MessageHandler(Filters.all, help_callback))
+# dispatcher.add_handler(MessageHandler(Filters.all, help_callback))
 
 
 @method_decorator(csrf_exempt, name="dispatch")
