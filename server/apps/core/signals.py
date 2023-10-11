@@ -7,9 +7,9 @@ from server.apps.bot.logic.send import send_message
 
 inc_template = """
 New incident created
+Category: {cat}
 Title: {title}
 Description: {desc}
-Status: {status}
 URLs: {url}
 """
 
@@ -22,10 +22,10 @@ def mediaincident_post_save(sender, instance, created, **kwargs):
     if created:
         all_channels = Channel.objects.all()
         msg = inc_template.format(
+                                    cat=instance.incident_type.description,
                                     title=instance.title,
                                     desc=instance.description,
-                                    status=instance.status,
-                                    url=instance.urls,
+                                    url=' '.join(instance.urls),
                                     )
         for chn in all_channels:
             type_status = TypeStatus.objects.get(channel=chn, incident_type=instance.incident_type)
