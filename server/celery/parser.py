@@ -1,5 +1,5 @@
 from .celery_app import app
-from server.apps.core.models import Article, Source
+from server.apps.core.models import Article
 from server.apps.core.logic.reposts import check_repost_query
 
 from datetime import datetime, timedelta
@@ -37,7 +37,7 @@ def delete_duplicate_articles():
 
 
 @app.task(queue="parser")
-def create_incidents(status):
+def create_incidents():
     articles = get_parse_candidates()
     incidents_count = 0
     for article in articles:
@@ -51,9 +51,11 @@ def create_incidents(status):
             print(f"An error occurred while creating incident for article: {e}")
     return f"Incindens created: {incidents_count}"
 
+
 @app.task(queue="parser")
-def delete_duplicated_incidents(status):
+def delete_duplicated_incidents():
     pass
+
 
 @app.task(queue="parser")
 def rebuild_simhash_index():
