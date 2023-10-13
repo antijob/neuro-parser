@@ -6,17 +6,18 @@
 # And then we shouldn't count them futher
 from datetime import datetime, timedelta
 from difflib import SequenceMatcher
-from . import simhash_index 
+from . import simhash_index
+from server.apps.core.models import Article
+
 
 def latest_unique_articles():
-    from server.apps.core.models import Article
-
     start_date = datetime.now().date() - timedelta(days=3)
-    return Article.objects.filter(
-        publication_date__gte=start_date, 
-        is_duplicate=False,
-        is_parsed=True,
-        )
+    articles = Article.objects.filter(
+        is_downloaded=True,
+        is_parsed=False,
+        create_date__gte=start_date)
+    return articles
+
 
 def calc_ratio(a: str, b: str):
     match = SequenceMatcher(None, a, b)

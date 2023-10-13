@@ -10,7 +10,7 @@ def get_parse_candidates():
     articles = Article.objects.filter(
         is_downloaded=True,
         is_parsed=False,
-        publication_date__gte=start_date)
+        create_date__gte=start_date)
     return articles
 
 
@@ -19,12 +19,10 @@ def parse_chain():
     articles = get_parse_candidates()
     if len(articles) == 0:
         return "No candidates"
+    delete_duplicate_articles.s().apply_async()
+    create_incidents.s().apply_async()
+    delete_duplicated_incidents.s().apply_async()
 
-    (
-        delete_duplicate_articles.s() |
-        create_incidents.s() |
-        delete_duplicated_incidents.s()
-    ).apply_async()
     return f"Start chain with {len(articles)} urls"
 
 
