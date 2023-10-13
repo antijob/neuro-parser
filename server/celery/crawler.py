@@ -6,8 +6,8 @@ from server.apps.core.logic.grabber.fetcher import Fetcher
 
 @app.task(queue="crawler", name='crawl_chain')
 def crawl_chain():
-    fetch_sources.s().apply_async()
     update_sources.s().apply_async()
+    fetch_sources.s().apply_async()
 
 
 @app.task(queue="crawler")
