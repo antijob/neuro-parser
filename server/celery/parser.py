@@ -19,9 +19,11 @@ def parse_chain():
     articles = get_parse_candidates()
     if len(articles) == 0:
         return "No candidates"
-    delete_duplicate_articles.s().apply_async()
-    create_incidents.s().apply_async()
-    delete_duplicated_incidents.s().apply_async()
+    (
+        delete_duplicate_articles.s() |
+        create_incidents.s() |
+        delete_duplicated_incidents.s()
+    ).apply_async()
 
     return f"Start chain with {len(articles)} urls"
 
@@ -35,7 +37,7 @@ def delete_duplicate_articles():
 
 
 @app.task(queue="parser")
-def create_incidents():
+def create_incidents(status):
     articles = get_parse_candidates()
     incidents_count = 0
     for article in articles:
@@ -51,7 +53,7 @@ def create_incidents():
 
 
 @app.task(queue="parser")
-def delete_duplicated_incidents():
+def delete_duplicated_incidents(status):
     pass
 
 
