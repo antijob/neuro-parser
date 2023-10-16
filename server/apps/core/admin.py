@@ -42,7 +42,7 @@ class MediaIncidentAdmin(admin.ModelAdmin):
 @admin.register(Article)
 class ArticleAdmin(admin.ModelAdmin):
     list_display = ('url', 'publication_date', 'is_downloaded',
-                    'is_parsed', 'is_duplicate', 'title', 'relevance')
+                    'is_parsed', 'is_duplicate', 'title', 'rate')
     ordering = ('-publication_date',)
     actions = ['force_parse']
 
