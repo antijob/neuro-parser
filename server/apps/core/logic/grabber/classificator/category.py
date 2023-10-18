@@ -17,7 +17,7 @@ def predict_is_incident(normalized_text, incident_type, article=None):
         article.rate[incident_type.description] = relevance
         article.save()
 
-    return relevance > incident_type.treshold
+    return relevance[0]-relevance[1] > incident_type.treshold
 
 
 def predict_incident_type(normalized_text, article=None):
