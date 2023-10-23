@@ -6,7 +6,7 @@ services:
       - "--accessLog=true"
       - "--api.insecure=true"
       - "--entrypoints.web.address=:80"
-      - "--log.level=DEBUG"
+      - "--log.level=INFO"
       - "--providers.docker.exposedByDefault=false"
     ports:
       - 8008:80
