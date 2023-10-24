@@ -138,6 +138,14 @@ class BaseIncident(models.Model):
         blank=True,
         on_delete=models.DO_NOTHING,
     )
+    related_article = models.ForeignKey(
+        'Article',
+        verbose_name='Статья',
+        related_name='articles',
+        null=True,
+        blank=True,
+        on_delete=models.DO_NOTHING,
+    )
     region = models.CharField('Регион', choices=REGIONS,
                               default='RU', max_length=16)
     incident_type = models.ForeignKey(
@@ -366,6 +374,7 @@ class Article(models.Model):
                 status=MediaIncident.UNPROCESSED,
                 title=self.any_title(),
                 public_title=public_title,
+                related_article=self,
                 create_date=self.publication_date or datetime.date.today(),
                 description=self.text,
                 public_description=self.text,

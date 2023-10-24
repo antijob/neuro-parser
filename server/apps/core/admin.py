@@ -36,7 +36,14 @@ class IncidentTypeAdmin(admin.ModelAdmin):
 
 @admin.register(MediaIncident)
 class MediaIncidentAdmin(admin.ModelAdmin):
-    list_display = ('any_title', 'incident_type', 'status')
+    list_display = ('any_title', 'incident_type',
+                    'status', 'rate_article')
+
+    def rate_article(self, obj):
+        if obj.related_article:
+            return obj.related_article.rate
+
+    rate_article.short_description = 'Article rate'
 
 
 @admin.register(Article)
