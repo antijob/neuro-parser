@@ -60,16 +60,16 @@ def plan_incidents(status):
     return task_group()
 
 
-
 @app.task(queue="parser")
 def create_incidents(batch):
     articles_batch = [Article.objects.get(url=url) for url in batch]
     incidents_count = 0
-    for incident_type in IncidentType.objects.all(): #filter(is_active=True):
+    for incident_type in IncidentType.objects.all():  # filter(is_active=True):
         try:
             incidents_count += incident_type.process_batch(articles_batch)
         except Exception as e:
-            print(f"An error occurred while creating incident for type {incident_type.description}: {e}")
+            print(
+                f"An error occurred while creating incident for type {incident_type.description}: {e}")
     for art in articles_batch:
         art.is_parsed = True
         art.save()
@@ -79,7 +79,6 @@ def create_incidents(batch):
 @app.task(queue="parser")
 def wait_for_completion(results):
     results.get()
-
 
 
 @app.task(queue="parser")

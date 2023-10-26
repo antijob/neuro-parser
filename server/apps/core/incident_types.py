@@ -1,6 +1,7 @@
 from transformers import AutoTokenizer, BertForSequenceClassification
 from django.db import models
 from server.settings.components.common import BASE_DIR, MODELS_DIR
+from server.apps.core.logic.grabber.classificator.cosine import rate_with_model_and_tokenizer
 
 
 class IncidentType(models.Model):
@@ -46,17 +47,17 @@ class IncidentType(models.Model):
         model = self.get_model()
         for art in batch:
             relevance = rate_with_model_and_tokenizer(
-                            art.normalized_text(),
-                            model,
-                            tokenizer)
+                art.normalized_text(),
+                model,
+                tokenizer)
 
-            if relevance > self.treshold:
+            if relevance[0]-relevance[1] > self.treshold:
                 art.create_incident_with_type(self)
                 incidents_count += 1
 
         return incidents_count
 
-    def process_batch_gpt(self, batch):  
+    def process_batch_gpt(self, batch):
         return 0
 
     @classmethod

@@ -233,6 +233,7 @@ class MediaIncident(BaseIncident):
             public_title=article.any_title(),
             create_date=article.publication_date or datetime.date.today(),
             description=article.text,
+            
             public_description=article.text,
             incident_type=incident_type,
             region=article.region)
