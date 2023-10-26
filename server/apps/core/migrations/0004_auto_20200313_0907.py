@@ -13,11 +13,11 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='mediaincident',
             name='incident_type',
-            field=models.IntegerField(choices=[(0, 'Другое'), (1, 'Уголовное преследование'), (2, 'Административное давление'), (3, 'Запрет информации'), (4, 'Регулирование'), (5, 'Насилие'), (6, 'Ограничение доступа'), (7, 'Гражданские иски'), (8, 'Кибератака')], default=0, verbose_name='Вид ограничения'),
+            field=models.IntegerField(default=0, verbose_name='Вид ограничения'),
         ),
         migrations.AlterField(
             model_name='userincident',
             name='incident_type',
-            field=models.IntegerField(choices=[(0, 'Другое'), (1, 'Уголовное преследование'), (2, 'Административное давление'), (3, 'Запрет информации'), (4, 'Регулирование'), (5, 'Насилие'), (6, 'Ограничение доступа'), (7, 'Гражданские иски'), (8, 'Кибератака')], default=0, verbose_name='Вид ограничения'),
+            field=models.IntegerField(default=0, verbose_name='Вид ограничения'),
         ),
     ]

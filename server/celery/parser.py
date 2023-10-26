@@ -23,7 +23,7 @@ def get_parse_candidates():
     articles = Article.objects.filter(
         is_downloaded=True,
         is_parsed=False,
-        publication_date__gte=start_date)
+        create_date__gte=start_date)
     return articles
 
 
@@ -33,12 +33,12 @@ def parse_chain():
 
     if len(articles) == 0:
         return "No candidates"
-
     (
         delete_duplicate_articles.s() |
         plan_incidents.s() |
         wait_for_completion.s()
     ).apply_async()
+
     return f"Start chain with {len(articles)} urls"
 
 
@@ -60,6 +60,7 @@ def plan_incidents(status):
     return task_group()
 
 
+
 @app.task(queue="parser")
 def create_incidents(batch):
     articles_batch = [Article.objects.get(url=url) for url in batch]
@@ -78,6 +79,7 @@ def create_incidents(batch):
 @app.task(queue="parser")
 def wait_for_completion(results):
     results.get()
+
 
 
 @app.task(queue="parser")

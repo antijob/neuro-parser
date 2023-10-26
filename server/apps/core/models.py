@@ -128,7 +128,8 @@ class BaseIncident(models.Model):
 
     title = models.TextField('Заголовок', null=True, blank=True)
     description = models.TextField('Описание', null=True, blank=True)
-    status = models.IntegerField('Статус', choices=STATUSES, null=False, blank=False, default=UNPROCESSED)
+    status = models.IntegerField(
+        'Статус', choices=STATUSES, null=False, blank=False, default=UNPROCESSED)
     create_date = models.DateField('Дата создания', default=datetime.date.today)
     update_date = models.DateField('Дата обновления', auto_now=True)
     assigned_to = models.ForeignKey(
@@ -137,12 +138,25 @@ class BaseIncident(models.Model):
         blank=True,
         on_delete=models.DO_NOTHING,
     )
-    region = models.CharField('Регион', choices=REGIONS, default='RU', max_length=16)
-    incident_type = models.ForeignKey(IncidentType, null=True, on_delete=models.SET_NULL)
+    related_article = models.ForeignKey(
+        'Article',
+        verbose_name='Статья',
+        related_name='articles',
+        null=True,
+        blank=True,
+        on_delete=models.DO_NOTHING,
+    )
+    region = models.CharField('Регион', choices=REGIONS,
+                              default='RU', max_length=16)
+    incident_type = models.ForeignKey(
+        IncidentType, null=True, on_delete=models.SET_NULL)
     count = models.PositiveIntegerField('Количество ограничений', default=1)
-    urls = ArrayField(models.URLField(blank=True, default='', null=True), blank=True, null=True)
-    public_title = models.CharField('Публичное название', max_length=512, null=True, blank=True)
-    public_description = models.TextField('Публичное описание', null=True, blank=True)
+    urls = ArrayField(models.URLField(blank=True, default='',
+                      null=True), blank=True, null=True)
+    public_title = models.CharField(
+        'Публичное название', max_length=512, null=True, blank=True)
+    public_description = models.TextField(
+        'Публичное описание', null=True, blank=True)
 
     class Meta:
         abstract = True
@@ -213,15 +227,15 @@ class MediaIncident(BaseIncident):
     @classmethod
     def create_with_article(cls, article, incident_type):
         return cls.objects.create(
-                urls=[article.url],
-                status=cls.UNPROCESSED,
-                title=article.any_title(),
-                public_title=article.any_title(),
-                create_date=article.publication_date or datetime.date.today(),
-                description=article.text,
-                public_description=article.text,
-                incident_type=incident_type,
-                region=article.region)
+            urls=[article.url],
+            status=cls.UNPROCESSED,
+            title=article.any_title(),
+            public_title=article.any_title(),
+            create_date=article.publication_date or datetime.date.today(),
+            description=article.text,
+            public_description=article.text,
+            incident_type=incident_type,
+            region=article.region)
 
     class Meta:
         verbose_name = 'Инцидент из СМИ'
@@ -256,7 +270,8 @@ class Source(models.Model):
             try:
                 added += [Article.objects.create(url=url, source=self)]
             except Exception as e:
-                raise type(e)(f'When add_articles with {url} exception happend: ' + e)
+                raise type(e)(
+                    f'When add_articles with {url} exception happend: ' + e)
         return added
 
     def update(self):
@@ -281,16 +296,19 @@ class Article(models.Model):
                                on_delete=models.SET_NULL,
                                null=True,
                                blank=True)
-    url = models.TextField(primary_key=True, verbose_name='URL', default='', blank=True)
-    title = models.TextField(verbose_name='Заголовок', default='', blank=True, null=True)
-    text = models.TextField(verbose_name='Текст', default='', blank=True, null=True)
+    url = models.TextField(
+        primary_key=True, verbose_name='URL', default='', blank=True)
+    title = models.TextField(verbose_name='Заголовок',
+                             default='', blank=True, null=True)
+    text = models.TextField(verbose_name='Текст',
+                            default='', blank=True, null=True)
     is_downloaded = models.BooleanField(verbose_name='Скачана', default=False)
     is_parsed = models.BooleanField(verbose_name='Обработана', default=False)
     is_incident_created = models.BooleanField(verbose_name='Инцидент создан',
                                               default=False)
     is_duplicate = models.BooleanField(verbose_name='Дубликат', default=False)
-    relevance = models.IntegerField(verbose_name='Оценка релевантности',
-                                    null=True, blank=True)
+    rate = models.JSONField(
+        verbose_name='Оценка релевантности', default=dict)
     incident = models.OneToOneField(MediaIncident,
                                     verbose_name='Инцидент',
                                     related_name='article',
@@ -300,6 +318,7 @@ class Article(models.Model):
     publication_date = models.DateField('Дата публикации',
                                         null=True,
                                         blank=True)
+
     class Meta:
         verbose_name = 'Cтатья'
         verbose_name_plural = 'Статьи'
@@ -364,14 +383,13 @@ class Article(models.Model):
 
         if not self.text:
             return
-
-        incident_types = category.predict_incident_type(self.normalized_text())
+        normalized_text = normalize_text(self.text)
+        incident_types = category.predict_incident_type(normalized_text, self)
         if not incident_types:
             return None
 
         for incident_type in incident_types:
             MediaIncident.create_with_article(self, incident_type)
-
         self.is_incident_created = True
         self.save()
         return self.incident

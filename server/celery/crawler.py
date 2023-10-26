@@ -3,10 +3,11 @@ from .celery_app import app
 from server.apps.core.models import Article, Source
 from server.apps.core.logic.grabber.fetcher import Fetcher
 
+
 @app.task(queue="crawler", name='crawl_chain')
 def crawl_chain():
     (
-        update_sources.s() | 
+        update_sources.s() |
         fetch_sources.s()
     ).apply_async()
 
