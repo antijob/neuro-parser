@@ -21,13 +21,18 @@ def help_callback(update, _context: CallbackContext) -> None:
 
 def new_chat_members(update: Update, context: CallbackContext):
     chat_id = update.message.chat_id
-    new_chat_members = update.message.new_chat_members
+    list_new_chat_members = update.message.new_chat_members
 
     message = f'Бот добавлен в чат - {update.message.chat.title}.' + ADD_MESSAGE
 
-    for member in new_chat_members:
+    for member in list_new_chat_members:
         if member.username == TELEGRAM_BOT_NAME and member.is_bot == True:
-            chn = Channel.objects.create(channel_id=chat_id)
+            try:
+                chn = Channel.objects.create(channel_id=chat_id)
+            except Exception as e:
+                raise type(e)(
+                    f'When you try create new chanell with {chat_id} exception happend: ' + e)
+
             for it in IncidentType.objects.all():
                 type_status = TypeStatus.objects.create(
                     incident_type=it,
@@ -43,7 +48,6 @@ def categ(update, context):
     try:
         # check if this chanel exist in db
         cats = Channel.objects.get(channel_id__exact=chat_id)
-
     except Exception as e:
         context.bot.send_message(
             chat_id=chat_id,
