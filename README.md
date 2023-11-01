@@ -44,9 +44,9 @@ Add for you `/etc/hosts` file record which resolve domain for local traefik
 127.0.0.1 report.local
 ```
 
-Open admin panel in `http://report.local:8008/s/ecret/admin`
+Open admin panel in `http://report.local/s/ecret/admin`
 
-Or use api `http://report.local:8008/api`
+Or use api `http://report.local/api`
 
 
 ## Running production
