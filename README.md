@@ -89,7 +89,7 @@ In local machine you should have tunnel for webhook. You can create this throw [
 
 Dont, forhet use ngrok https domain in `TELEGRAM_BOT_URL=` env variable. Example:
 
-`TELEGRAM_BOT_URL=https://21a0-91-151-136-184.ngrok-free.app/bot`
+`TELEGRAM_BOT_URL=https://21a0-91-151-136-184.ngrok-free.app/bot`. Dont forget update container.
 
 To manually register your web hook addres ad Telegram servers you can run that command
 
