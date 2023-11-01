@@ -83,7 +83,7 @@ TELEGRAM_BOT_URL=
 * TELEGRAM_BOT_NAME - name that you gave to the bot
 * TELEGRAM_BOT_URL - url for web hooks. Is's should be endpoint on your site, by defauls it - yoursite.com/bot/
 
-In local machine you should have tunnel for webhook. You can create this throw [ngrok]{https://dashboard.ngrok.com}
+In local machine you should have tunnel for webhook. You can create this throw [ngrok](https://dashboard.ngrok.com)
 
 `ngrok http --host-header=rewrite report.local:80`
 
