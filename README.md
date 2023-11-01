@@ -83,10 +83,17 @@ TELEGRAM_BOT_URL=
 * TELEGRAM_BOT_NAME - name that you gave to the bot
 * TELEGRAM_BOT_URL - url for web hooks. Is's should be endpoint on your site, by defauls it - yoursite.com/bot/
 
+In local machine you should have tunnel for webhook. You can create this throw [ngrok]{https://dashboard.ngrok.com}
+
+`ngrok http --host-header=rewrite report.local:80`
+
+Dont, forhet use ngrok https domain in `TELEGRAM_BOT_URL=` env variable. Example:
+
+`TELEGRAM_BOT_URL=https://21a0-91-151-136-184.ngrok-free.app/bot`
+
 To manually register your web hook addres ad Telegram servers you can run that command
-```
-python3 manage.py set_webhook
-```
+
+`python3 manage.py set_webhook`
 
 After that you need to create new telegram chat and and add bot there. That's all bot remember that group 
 and will send notifications there. If you want recieve notifications only for some of existing categories
