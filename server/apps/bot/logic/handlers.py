@@ -27,7 +27,12 @@ def new_chat_members(update: Update, context: CallbackContext):
 
     for member in list_new_chat_members:
         if member.username == TELEGRAM_BOT_NAME and member.is_bot == True:
-            chn = Channel.objects.create(channel_id=chat_id)
+            try:
+                chn = Channel.objects.create(channel_id=chat_id)
+            except Exception as e:
+                raise type(e)(
+                    f'When you try create new chanell with {chat_id} exception happend: ' + e)
+
             for it in IncidentType.objects.all():
                 type_status = TypeStatus.objects.create(
                     incident_type=it,
