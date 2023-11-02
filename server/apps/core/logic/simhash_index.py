@@ -33,13 +33,13 @@ def store_index(index):
 
 def create_index(articles=[]):
     if articles and len(articles) > 0:
-        # ToDo: check if text is empty
-        objs = [(art.url, clear_simhash(art.text)) for art in articles]
+        objs = [(art.url, clear_simhash(art.text))
+                for art in articles if isinstance(art.text, str) and art.text.strip()]
     else:
         objs = []
 
     logging.basicConfig()
-    sh_log = logging.getLogger().setLevel(logging.ERROR) # silent index
+    sh_log = logging.getLogger().setLevel(logging.ERROR)  # silent index
     return SimhashIndex(objs, k=10, log=sh_log)
 
 
