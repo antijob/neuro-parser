@@ -6,9 +6,10 @@ from server.apps.core.logic.reposts import check_repost_query
 from datetime import datetime, timedelta
 from itertools import islice
 from celery import group
-
+import json
 
 BATCH_SIZE = 20
+
 
 def split_every(n, iterable):
     i = iter(iterable)
@@ -35,11 +36,10 @@ def parse_chain():
         return "No candidates"
     (
         delete_duplicate_articles.s() |
-        plan_incidents.s() |
-        wait_for_completion.s()
+        plan_incidents.s()
     ).apply_async()
 
-    return f"Start chain with {len(articles)} urls"
+    return f"Start chain with {len(articles)} urlsss"
 
 
 @app.task(queue="parser")
@@ -57,7 +57,8 @@ def plan_incidents(status):
     for batch in split_every(BATCH_SIZE, articles):
         tasks.append(create_incidents.s([art.url for art in batch]))
     task_group = group(tasks)
-    return task_group()
+    task_group.apply_async()
+    return f"Group of create_incidents tasks submitted"
 
 
 @app.task(queue="parser")
@@ -74,11 +75,6 @@ def create_incidents(batch):
         art.is_parsed = True
         art.save()
     return f"Batch finished. Incodents created: {incidents_count}"
-
-
-@app.task(queue="parser")
-def wait_for_completion(results):
-    results.get()
 
 
 @app.task(queue="parser")
