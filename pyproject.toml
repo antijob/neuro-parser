@@ -46,6 +46,7 @@ icecream = "*"
 django-redis = "^5.3.0"
 watchdog = "^3.0.0"
 openai = "^1.0.1"
+simhash = "^2.1.2"
 [tool.poetry.extras]
 transformers = ["scikit-learn"]
 

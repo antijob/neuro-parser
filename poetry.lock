@@ -2393,6 +2393,21 @@ files = [
 ]
 
 [[package]]
+name = "simhash"
+version = "2.1.2"
+description = "A Python implementation of Simhash Algorithm"
+optional = false
+python-versions = "*"
+files = [
+    {file = "simhash-2.1.2-py2-none-any.whl", hash = "sha256:49c5d81f31254f7e3f71dc2f5a245625c3d6143584478fdf4ffd2e63e4929366"},
+    {file = "simhash-2.1.2-py3-none-any.whl", hash = "sha256:968de16c82c227a631aa00e57ab58f9e4ee9e47e8408486199a9eb59c1d6979b"},
+    {file = "simhash-2.1.2.tar.gz", hash = "sha256:533bc8cf41e4e6dd83f0b1847363516bf3323e0fa92e63d9e6df4e281e882e1b"},
+]
+
+[package.dependencies]
+numpy = "*"
+
+[[package]]
 name = "six"
 version = "1.16.0"
 description = "Python 2 and 3 compatibility utilities"
@@ -2846,4 +2861,4 @@ transformers = ["scikit-learn"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8"
-content-hash = "4087a8fe7b7d8dbc6f172d161b34aadf28e048c213f03ba1d17230fe9d92ca33"
+content-hash = "e715e88c4b73dc579cd189dfe964aeb75b9b82843526dd67bc1819b1efd823d1"
