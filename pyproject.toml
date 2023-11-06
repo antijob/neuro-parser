@@ -44,6 +44,8 @@ scikit-learn = { version = "==1.2.0", optional = false }
 gunicorn = "^21.2.0"
 icecream = "*"
 django-redis = "^5.3.0"
+watchdog = "^3.0.0"
+openai = "^1.0.1"
 [tool.poetry.extras]
 transformers = ["scikit-learn"]
 
