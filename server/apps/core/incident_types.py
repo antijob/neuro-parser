@@ -2,6 +2,7 @@ from transformers import AutoTokenizer, BertForSequenceClassification
 from django.db import models
 from server.settings.components.common import BASE_DIR, MODELS_DIR
 from server.apps.core.logic.grabber.classificator.cosine import rate_with_model_and_tokenizer
+import server.apps.core.logic.grabber.classificator.chat_gpt as chat_gpt
 
 
 class IncidentType(models.Model):
@@ -58,7 +59,20 @@ class IncidentType(models.Model):
         return incidents_count
 
     def process_batch_gpt(self, batch):
-        return 0
+        incidents_count = 0
+        for art in batch:
+            if self.chat_gpt_prompt:
+                is_incident = chat_gpt.predict_is_incident(
+                    art.normalized_text(),
+                    self.chat_gpt_prompt,
+                    self.description,
+                    art)
+                if is_incident:
+                    art.create_incident_with_type(self)
+                    incidents_count += 1
+                    continue
+
+        return incidents_count
 
     @classmethod
     def get_choices(cls):
