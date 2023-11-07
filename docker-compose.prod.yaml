@@ -2,7 +2,7 @@ version: "3.11"
 
 services:
   traefik:
-    image: traefik:latest
+    image: traefik:3.18.4
     command:
       - "--accessLog=true"
       - "--api.dashboard=false"
@@ -36,7 +36,7 @@ services:
       - djangonetwork
 
   db:
-    image: postgres:13.4-alpine
+    image: postgres:13.4
     volumes:
       - postgres_data_prod:/var/lib/postgresql/data
     networks:
@@ -50,7 +50,7 @@ services:
       - .env
 
   nginx:
-    image: nginx:1.23-alpine
+    image: nginx:1.23
     restart: unless-stopped
     volumes:
       - type: volume
