@@ -7,7 +7,6 @@ from server.apps.core.logic.morphy import normalize_text
 def predict_is_incident(normalized_text, incident_type, article=None):
     tokenizer = incident_type.get_tokenizer()
     model = incident_type.get_model()
-    model.eval()
 
     relevance = rate_with_model_and_tokenizer(
         normalized_text,

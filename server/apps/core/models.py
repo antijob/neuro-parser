@@ -224,6 +224,20 @@ class MediaIncident(BaseIncident):
             )
         return ''
 
+    @classmethod
+    def create_with_article(cls, article, incident_type):
+        return cls.objects.create(
+            urls=[article.url],
+            status=cls.UNPROCESSED,
+            title=article.any_title(),
+            public_title=article.any_title(),
+            create_date=article.publication_date or datetime.date.today(),
+            description=article.text,
+            
+            public_description=article.text,
+            incident_type=incident_type,
+            region=article.region)
+
     class Meta:
         verbose_name = 'Инцидент из СМИ'
         verbose_name_plural = 'Инциденты из СМИ'
@@ -353,33 +367,33 @@ class Article(models.Model):
 
         return self.text
 
+    @property
+    def region(self):
+        region = self.source.region if self.source else 'RU'
+        if region == 'RU':
+            region = region_code("{} {}".format(self.title, self.text))
+        return region
+
+    def normalized_text(self):
+        return normalize_text(self.text)
+
     # ToDo: made self.incident field contain multiple incidents
     def create_incident(self, force=False):
         if self.is_incident_created and not force:
             return self.incident
-        if not self.text or not self.text.strip():
+
+        if not self.text:
             return
         normalized_text = normalize_text(self.text)
         incident_types = category.predict_incident_type(normalized_text, self)
         if not incident_types:
             return None
 
-        region = self.source.region if self.source else 'RU'
-        if region == 'RU':
-            region = region_code("{} {}".format(self.title, self.text))
-        public_title = self.any_title()
         for incident_type in incident_types:
-            self.incident = MediaIncident.objects.create(
-                urls=[self.url],
-                status=MediaIncident.UNPROCESSED,
-                title=self.any_title(),
-                public_title=public_title,
-                related_article=self,
-                create_date=self.publication_date or datetime.date.today(),
-                description=self.text,
-                public_description=self.text,
-                incident_type=incident_type,
-                region=region)
+            MediaIncident.create_with_article(self, incident_type)
         self.is_incident_created = True
         self.save()
         return self.incident
+
+    def create_incident_with_type(self, incident_type):
+        return MediaIncident.create_with_article(self, incident_type)

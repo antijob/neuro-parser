@@ -1,8 +1,22 @@
 from .celery_app import app
-from server.apps.core.models import Article
+from server.apps.core.models import Article, Source
+from server.apps.core.incident_types import IncidentType
 from server.apps.core.logic.reposts import check_repost_query
 
 from datetime import datetime, timedelta
+from itertools import islice
+from celery import group
+import json
+
+BATCH_SIZE = 20
+
+
+def split_every(n, iterable):
+    i = iter(iterable)
+    piece = list(islice(i, n))
+    while piece:
+        yield piece
+        piece = list(islice(i, n))
 
 
 def get_parse_candidates():
@@ -17,15 +31,15 @@ def get_parse_candidates():
 @app.task(queue="parser", name='parse_chain')
 def parse_chain():
     articles = get_parse_candidates()
+
     if len(articles) == 0:
         return "No candidates"
     (
         delete_duplicate_articles.s() |
-        create_incidents.s() |
-        delete_duplicated_incidents.s()
+        plan_incidents.s()
     ).apply_async()
 
-    return f"Start chain with {len(articles)} urls"
+    return f"Start chain with {len(articles)} urlsss"
 
 
 @app.task(queue="parser")
@@ -37,24 +51,30 @@ def delete_duplicate_articles():
 
 
 @app.task(queue="parser")
-def create_incidents(status):
+def plan_incidents(status):
     articles = get_parse_candidates()
-    incidents_count = 0
-    for article in articles:
-        try:
-            res = article.create_incident()
-            article.is_parsed = True
-            article.save()
-            if res:
-                incidents_count += 1
-        except Exception as e:
-            print(f"An error occurred while creating incident for article: {e}")
-    return f"Incindens created: {incidents_count}"
+    tasks = []
+    for batch in split_every(BATCH_SIZE, articles):
+        tasks.append(create_incidents.s([art.url for art in batch]))
+    task_group = group(tasks)
+    task_group.apply_async()
+    return f"Group of create_incidents tasks submitted"
 
 
 @app.task(queue="parser")
-def delete_duplicated_incidents(status):
-    pass
+def create_incidents(batch):
+    articles_batch = [Article.objects.get(url=url) for url in batch]
+    incidents_count = 0
+    for incident_type in IncidentType.objects.all():  # filter(is_active=True):
+        try:
+            incidents_count += incident_type.process_batch(articles_batch)
+        except Exception as e:
+            print(
+                f"An error occurred while creating incident for type {incident_type.description}: {e}")
+    for art in articles_batch:
+        art.is_parsed = True
+        art.save()
+    return f"Batch finished. Incodents created: {incidents_count}"
 
 
 @app.task(queue="parser")
