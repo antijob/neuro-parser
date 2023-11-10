@@ -60,34 +60,35 @@ def check_repost_query(query):
             continue
 
         neighbours = simhash_index.neighbours(art, index)
-        # only unique urls can be in index
         if art.url in neighbours:
-            is_unique = True
+            # only unique urls can be in index
+            is_duplicate = False
         elif neighbours and len(neighbours) > 0:
-            is_unique = False
+            is_duplicate = False
             for url in neighbours:
                 dist = simhash_index.compare(url, art.url)
 
                 # check if close in simhash distance
-                if dist < 4:
+                if dist > 4:
                     continue
 
                 # check if close by calc ratio
                 text = Article.objects.get(url=url).text
                 if not text:
                     continue
-                if calc_ratio(text, art.text) > .5:
+                if calc_ratio(text, art.text) < .5:
                     continue
 
-                # okay, you are unique
-                is_unique = True
-                simhash_index.add(art, index)
+                # sorry, you are not unique
+                is_duplicate = True
                 break
         else:
-            simhash_index.add(art, index)
-            is_unique = True
+            is_duplicate = False
 
-        art.is_duplicate = not is_unique
+        if not is_duplicate:
+            simhash_index.add(art, index)
+
+        art.is_duplicate = is_duplicate
         art.save()
 
     simhash_index.store_index(index)
