@@ -52,7 +52,7 @@ def delete_duplicate_articles():
 def plan_incidents(status):
     articles = get_parse_candidates()
     tasks = []
-    for batch in split_every(INCIDENT_BATCH_SIZE, articles):
+    for batch in split_every(int(INCIDENT_BATCH_SIZE), articles):
         tasks.append(create_incidents.s([art.url for art in batch]))
     task_group = group(tasks)
     task_group.apply_async()
