@@ -2,13 +2,11 @@ from .celery_app import app
 from server.apps.core.models import Article, Source
 from server.apps.core.incident_types import IncidentType
 from server.apps.core.logic.reposts import check_repost_query
+from server.settings.components.celery import INCIDENT_BATCH_SIZE
 
 from datetime import datetime, timedelta
 from itertools import islice
 from celery import group
-import json
-
-BATCH_SIZE = 20
 
 
 def split_every(n, iterable):
@@ -54,7 +52,7 @@ def delete_duplicate_articles():
 def plan_incidents(status):
     articles = get_parse_candidates()
     tasks = []
-    for batch in split_every(BATCH_SIZE, articles):
+    for batch in split_every(INCIDENT_BATCH_SIZE, articles):
         tasks.append(create_incidents.s([art.url for art in batch]))
     task_group = group(tasks)
     task_group.apply_async()
