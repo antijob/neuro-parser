@@ -51,7 +51,9 @@ class IncidentType(models.Model):
                 art.normalized_text(),
                 model,
                 tokenizer)
-
+            if art:
+                art.rate[self.description] = relevance
+                art.save()
             if relevance[0]-relevance[1] > self.treshold:
                 art.create_incident_with_type(self)
                 incidents_count += 1
@@ -67,6 +69,9 @@ class IncidentType(models.Model):
                     self.chat_gpt_prompt,
                     self.description,
                     art)
+                if art:
+                    art.rate[self.description] = is_incident
+                    art.save()
                 if is_incident:
                     art.create_incident_with_type(self)
                     incidents_count += 1
