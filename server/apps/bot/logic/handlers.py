@@ -65,3 +65,13 @@ def categ(update, context):
         parse_mode='HTML',
         reply_markup=keyboard
     )
+
+
+def chat_member_left(update: Update, context: CallbackContext):
+    chat_id = update.message.chat_id
+    try:
+        channel = Channel.objects.get(channel_id=chat_id)
+        channel.delete()
+    except Exception as e:
+        raise type(e)(
+            f'When remove bot from chat {chat_id} exception happend: ' + e)
