@@ -5,16 +5,17 @@ from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 from telegram import Update
 from telegram.ext import (
-                            CommandHandler,
-                            Filters,
-                            MessageHandler,
-                            Updater,
-                            CallbackQueryHandler,
-                        )
+    CommandHandler,
+    Filters,
+    MessageHandler,
+    Updater,
+    CallbackQueryHandler,
+)
 
 from server.apps.bot.logic.handlers import (
     help_callback,
     new_chat_members,
+    chat_member_left,
     categ,
 )
 from server.apps.bot.logic.keyboard import button
@@ -26,7 +27,10 @@ dispatcher.add_handler(CommandHandler("help", help_callback))
 dispatcher.add_handler(CommandHandler("start", help_callback))
 dispatcher.add_handler(CommandHandler("categ", categ))
 dispatcher.add_handler(CallbackQueryHandler(button))
-dispatcher.add_handler(MessageHandler(Filters.status_update.new_chat_members, new_chat_members))
+dispatcher.add_handler(MessageHandler(
+    Filters.status_update.new_chat_members, new_chat_members))
+dispatcher.add_handler(MessageHandler(
+    Filters.status_update.left_chat_member, chat_member_left))
 # dispatcher.add_handler(MessageHandler(Filters.all, help_callback))
 
 
