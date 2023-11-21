@@ -33,9 +33,9 @@ def new_chat_members(update: Update, context: CallbackContext):
                 raise type(e)(
                     f'When you try create new chanell with {chat_id} exception happend: ' + e)
 
-            for it in IncidentType.objects.all():
-                type_status = TypeStatus.objects.create(
-                    incident_type=it,
+            for incident in IncidentType.objects.all():
+                TypeStatus.objects.create(
+                    incident_type=incident,
                     channel=chn,
                     status=True,
                 )
@@ -44,7 +44,6 @@ def new_chat_members(update: Update, context: CallbackContext):
 
 def categ(update, context):
     chat_id = update.message.chat_id
-
     try:
         # check if this chanel exist in db
         cats = Channel.objects.get(channel_id__exact=chat_id)
@@ -56,6 +55,17 @@ def categ(update, context):
         raise type(e)(
             f'When add bot to chat {chat_id} exception happend: ' + e)
 
+    for incident in IncidentType.objects.all():
+        status = TypeStatus.objects.filter(
+            incident_type=incident,
+            channel=cats,
+        )
+        if (not status):
+            TypeStatus.objects.create(
+                incident_type=incident,
+                channel=cats,
+                status=True,
+            )
     # Create and send the inline keyboard
     keyboard = create_inline_keyboard(cats)
 
