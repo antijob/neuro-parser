@@ -11,10 +11,12 @@ def create_inline_keyboard(chn: Channel):
     Creates inline keyboard for all types of incidents that we have in IncidentType model.
     """
 
-    cross = u'\U0000274c'
-    check = u'\U00002705'
+    cross = "\U0000274c"
+    check = "\U00002705"
 
-    types = TypeStatus.objects.filter(channel=chn).order_by('id')
+    types = TypeStatus.objects.filter(
+        channel=chn, incident_type__should_sent_to_bot=True
+    ).order_by("id")
 
     keyboard = list()
 
@@ -25,12 +27,17 @@ def create_inline_keyboard(chn: Channel):
         else:
             status = cross
 
-        keyboard.append([InlineKeyboardButton(
-            btn_label, callback_data=str(item.incident_type.id)),
-            InlineKeyboardButton(
-            status, callback_data=str(item.incident_type.id))])
+        keyboard.append(
+            [
+                InlineKeyboardButton(
+                    btn_label, callback_data=str(item.incident_type.id)
+                ),
+                InlineKeyboardButton(status, callback_data=str(item.incident_type.id)),
+            ]
+        )
 
     return InlineKeyboardMarkup(keyboard)
+
 
 # Callback function to handle button presses
 
@@ -49,12 +56,8 @@ def button(update, context):
     # Extract the callback_data which contains the button information
     button_data = query.data
     print("BUTTON DATA", button_data)
-    incident_type = IncidentType.objects.get(
-        id__exact=int(button_data))
-    type_status = TypeStatus.objects.get(
-        incident_type=incident_type,
-        channel=chn
-    )
+    incident_type = IncidentType.objects.get(id__exact=int(button_data))
+    type_status = TypeStatus.objects.get(incident_type=incident_type, channel=chn)
     type_status.status = not type_status.status
     type_status.save()
 
@@ -62,6 +65,6 @@ def button(update, context):
         chat_id=query.message.chat_id,
         message_id=query.message.message_id,
         text=CATEGORIES_MESSAGE,
-        parse_mode='HTML',
-        reply_markup=create_inline_keyboard(chn)  # Update the inline keyboard
+        parse_mode="HTML",
+        reply_markup=create_inline_keyboard(chn),  # Update the inline keyboard
     )
