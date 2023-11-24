@@ -6,7 +6,7 @@ from server.apps.bot.logic.messages import (
     CATEGORIES_MESSAGE,
     ADD_MESSAGE,
 )
-from server.apps.bot.logic.keyboard import create_inline_keyboard, get_categ_list
+from server.apps.bot.logic.keyboard import create_inline_keyboard
 from server.apps.bot.models import Channel
 from server.apps.bot.models import TypeStatus
 from server.apps.core.incident_types import IncidentType
@@ -61,7 +61,7 @@ def categ(update, context):
 
     context.bot.send_message(
         chat_id=chat_id,
-        text=get_categ_list(),
+        text=CATEGORIES_MESSAGE,
         parse_mode='HTML',
         reply_markup=keyboard
     )
