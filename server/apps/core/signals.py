@@ -31,8 +31,8 @@ def mediaincident_post_save(sender, instance, created, **kwargs):
             try:
                 type_status = TypeStatus.objects.get(
                     channel=chn, incident_type=instance.incident_type)
+                if type_status.status:
+                    send_message(chn.channel_id, msg)
             except Exception as e:
                 print('An error occurred: ', e)
-                print('instanct: ', instance)
-            if type_status.status:
-                send_message(chn.channel_id, msg)
+                print('instance: ', instance.id)
