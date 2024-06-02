@@ -6,24 +6,27 @@ A neural parser is a tool for parsing and analyzing news and content to search f
 
 ### Managing Python Packages
 
-For managing Python packages, we use [Poetry](https://python-poetry.org/docs/):
+For managing Python packages, we use [PDM](https://pdm-project.org/):
 
 ```
-# install everything
-poetry install
+# install all locked packages 
+pdm install
 
-# update 
-poetry update
+# resolve all dependencies and lock packages to lock file
+pdm lock
 
-# go to venv
-poetry shell
+# update all packages 
+pdm update
 
 # generate requirements.txt
-poetry export --format requirements.txt --without-hashes --output requirements.txt
+pdm export --no-hashes -o requirements.txt
+
+# add new package to pyproject.toml
+pdm add <package_name>
 ```
 
 docker still use generated requirements.txt file
-git should contain both pyproject.toml and poetry.lock files 
+git should contain both pyproject.toml and pdm.lock files 
 
 
 ## Running local
