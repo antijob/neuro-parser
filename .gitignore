@@ -248,3 +248,6 @@ cleanup-docker.sh
 
 tmp/docker-compose.yml
 models
+
+# PDM
+.pdm-python

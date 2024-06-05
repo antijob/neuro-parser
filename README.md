@@ -6,24 +6,27 @@ A neural parser is a tool for parsing and analyzing news and content to search f
 
 ### Managing Python Packages
 
-For managing Python packages, we use [Poetry](https://python-poetry.org/docs/):
+For managing Python packages, we use [PDM](https://pdm-project.org/):
 
 ```
-# install everything
-poetry install
+# install all locked packages 
+pdm install
 
-# update 
-poetry update
+# resolve all dependencies and lock packages to lock file
+pdm lock
 
-# go to venv
-poetry shell
+# update all packages 
+pdm update
 
 # generate requirements.txt
-poetry export --format requirements.txt --without-hashes --output requirements.txt
+pdm export --no-hashes -o requirements.txt
+
+# add new package to pyproject.toml
+pdm add <package_name>
 ```
 
 docker still use generated requirements.txt file
-git should contain both pyproject.toml and poetry.lock files 
+git should contain both pyproject.toml and pdm.lock files 
 
 
 ## Running local
@@ -83,20 +86,20 @@ TELEGRAM_BOT_URL=
 * TELEGRAM_BOT_NAME - name that you gave to the bot
 * TELEGRAM_BOT_URL - url for web hooks. Is's should be endpoint on your site, by defauls it - yoursite.com/bot/
 
-In local machine you should have tunnel for webhook. You can create this throw [ngrok](https://dashboard.ngrok.com)
+In local machine you should have tunnel for webhook. You can create this with [ngrok](https://dashboard.ngrok.com)
 
 `ngrok http --host-header=rewrite report.local:80`
 
-Dont, forhet use ngrok https domain in `TELEGRAM_BOT_URL=` env variable. Example:
+Don't, forget to use ngrok https domain in `TELEGRAM_BOT_URL=` env variable. Example:
 
-`TELEGRAM_BOT_URL=https://21a0-91-151-136-184.ngrok-free.app/bot`. Dont forget update container.
+`TELEGRAM_BOT_URL=https://21a0-91-151-136-184.ngrok-free.app/bot`. Don't forget update container.
 
-To manually register your web hook addres ad Telegram servers you can run that command
+To manually register your web hook address on Telegram servers you can run that command
 
 `python3 manage.py set_webhook`
 
-After that you need to create new telegram chat and and add bot there. That's all bot remember that group 
-and will send notifications there. If you want recieve notifications only for some of existing categories
+After that you need to create new telegram chat and add bot there. That's all bot remember that group 
+and will send notifications there. If you want receive notifications only for some of existing categories
 use command ```/categ``` for bot settings. 
 Also you can go to Django admin and check Bot section to explore channels that are saved. 
 
