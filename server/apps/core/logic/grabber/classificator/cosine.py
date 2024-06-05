@@ -14,7 +14,7 @@ DATA_DIR = os.path.join(settings.BASE_DIR, 'server', 'apps',
 def rate(normalized_text):
     modelname = 'atiwar_fired'
     tokenizer = AutoTokenizer.from_pretrained(
-        os.path.join(DATA_DIR, modelname), use_fast=False)
+        os.path.join(DATA_DIR, modelname), use_fast=False, from_safetensors=True)
 
     model = BertForSequenceClassification.from_pretrained(
         os.path.join(DATA_DIR, modelname))

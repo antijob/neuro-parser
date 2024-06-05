@@ -29,11 +29,13 @@ class IncidentType(models.Model):
         return MODELS_DIR.joinpath(self.model_path)
 
     def get_tokenizer(self):
-        tokenizer = AutoTokenizer.from_pretrained(self.model_directory, use_fast=False)
+        tokenizer = AutoTokenizer.from_pretrained(
+            self.model_directory, use_fast=False, from_safetensors=True)
         return tokenizer
 
     def get_model(self):
-        model = BertForSequenceClassification.from_pretrained(self.model_directory)
+        model = BertForSequenceClassification.from_pretrained(
+            self.model_directory)
         model.eval()
         return model
 
