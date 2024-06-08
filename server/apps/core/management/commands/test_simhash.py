@@ -6,7 +6,7 @@ from django.core.management import call_command
 from simhash import SimhashIndex, Simhash
 from server.apps.core.models import Article
 import re
-from server.apps.core.logic.reposts import get_orig, calc_ratio
+from server.apps.simhash.reposts import get_orig, calc_ratio
 import logging
 
 
@@ -16,11 +16,11 @@ class Command(BaseCommand):
         sh_log = logging.getLogger().setLevel(logging.ERROR)
         index = SimhashIndex([], k=10, log=sh_log)
 
-        art = Article.objects.filter(is_downloaded=True, is_duplicate=False) 
+        art = Article.objects.filter(is_downloaded=True, is_duplicate=False)
         for a in art:
             if not a.text:
                 continue
-            text = re.sub(r'http\S+', '', a.text)
+            text = re.sub(r"http\S+", "", a.text)
 
             sh = Simhash(text)
             near = index.get_near_dups(sh)
@@ -42,7 +42,7 @@ class Command(BaseCommand):
             if not a.text:
                 continue
 
-            text = re.sub(r'http\S+', '', a.text)
+            text = re.sub(r"http\S+", "", a.text)
             sh = Simhash(text)
 
             near = index.get_near_dups(sh)
@@ -56,8 +56,8 @@ class Command(BaseCommand):
     def compare(self, url1, url2):
         text1 = Article.objects.get(url=url1).text
         text2 = Article.objects.get(url=url2).text
-        text1 = re.sub(r'http\S+', '', text1)
-        text2 = re.sub(r'http\S+', '', text2)
+        text1 = re.sub(r"http\S+", "", text1)
+        text2 = re.sub(r"http\S+", "", text2)
         sh1 = Simhash(text1)
         sh2 = Simhash(text2)
         return sh1.distance(sh2)
