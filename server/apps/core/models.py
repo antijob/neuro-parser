@@ -195,7 +195,7 @@ def get_default_country_id():
     """return default country id, default country is Russia"""
     # default_country = Country.objects.get(name="RUS")
     # return default_country.id
-    return 12
+    return 11
 
 
 class Source(models.Model):
