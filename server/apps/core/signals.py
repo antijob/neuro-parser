@@ -1,24 +1,10 @@
-from django.db.models.signals import post_migrate, post_save
+from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 from server.apps.bot.logic.send import send_message
 from server.apps.bot.models import Channel, TypeStatus
-from server.apps.core.data.regions import COUNTRIES, REGIONS
 
-from .models import Country, MediaIncident, Region
-
-
-@receiver(post_migrate)
-def create_default_data(sender, **kwargs):
-    """
-    Function that will be executed on each migration
-    """
-    for country in COUNTRIES:
-        Country.objects.get_or_create(name=country[0])
-    for region in REGIONS:
-        Region.objects.get_or_create(
-            name=region[0], country=Country.objects.get(name="RUS")
-        )
+from .models import MediaIncident
 
 
 inc_template = """
