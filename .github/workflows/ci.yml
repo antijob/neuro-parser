@@ -99,9 +99,22 @@ jobs:
         run: docker logout
 
 
+  test:
+    name: Run tests
+    needs:
+      - build
+    runs-on: ["self-hosted", "antijob-report", "staging"]
+    if: ${{ always() }}
+    steps:
+      - name: Here we run tests
+        run: |
+          echo "Running tests..."
+
+
   start_staging:
     name: Start staging
     needs:
+      - test
       - build
     runs-on: ["self-hosted", "antijob-report", "staging"]
     if: github.ref == 'refs/heads/staging'
