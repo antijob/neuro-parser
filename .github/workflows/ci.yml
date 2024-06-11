@@ -101,8 +101,6 @@ jobs:
 
   test:
     name: Run tests
-    needs:
-      - build
     runs-on: ["self-hosted", "antijob-report", "staging"]
     if: ${{ always() }}
     steps:
