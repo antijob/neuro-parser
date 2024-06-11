@@ -111,6 +111,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.prod
+      tags:
+        - antijob/neuro-parser:$NEURO_PARSER_VERSION
+    image: antijob/neuro-parser:$NEURO_PARSER_VERSION
     command: /bin/bash -c "chmod +x ./entrypoint-prod.sh && ./entrypoint-prod.sh"
     volumes:
       - /root/models:/home/github-actions/code/models

@@ -24,6 +24,8 @@ jobs:
       - name: Clean unused images and network
         run: |
           docker image prune -f
+
+
   build:
     name: Build production
     needs:
@@ -49,6 +51,7 @@ jobs:
               - 'requirements.txt'
 
       - name: Prepare .env
+        if: ${{ steps.filter.outputs.web == 'true' || github.event.inputs.runType == 'Force build' }}
         run: |
           cp .env.template .env
           sed -i \
@@ -74,26 +77,67 @@ jobs:
           CHAT_GPT_KEY: "${{ secrets.CHAT_GPT_KEY }}"
           FLOWER_USER: "${{ secrets.FLOWER_USER }}"
           FLOWER_PASSWORD: "${{ secrets.FLOWER_PASSWORD }}"
+
       - name: Build python
         if: ${{ steps.filter.outputs.web == 'true' || github.event.inputs.runType == 'Force build' }}
-        run: docker-compose -f docker-compose.prod.yaml build web
+        run: |
+          NEURO_PARSER_VERSION=${GITHUB_REF#refs/heads/} \
+            docker-compose -f docker-compose.prod.yaml build web
 
-  start:
+      - name: login to docker registry
+        if: ${{ steps.filter.outputs.web == 'true' || github.event.inputs.runtype == 'force build' }}
+        run: echo "${{ secrets.docker_password }}" | docker login -u ${{ secrets.docker_username }} --password-stdin
+
+      - name: push to registry
+        if: ${{ steps.filter.outputs.web == 'true' || github.event.inputs.runtype == 'force build' }}
+        run: |
+          neuro_parser_version=${github_ref#refs/heads/} \
+            docker-compose -f docker-compose.prod.yaml push web
+
+      - name: logout from docker registry
+        if: ${{ steps.filter.outputs.web == 'true' || github.event.inputs.runtype == 'force build' }}
+        run: docker logout
+
+
+  start_staging:
+    name: Start staging
+    needs:
+      - build
+    runs-on: ["self-hosted", "antijob-report", "staging"]
+    if: github.ref == 'refs/heads/staging'
+    steps:
+      - name: login to docker registry
+        run: echo "${{ secrets.docker_password }}" | docker login -u ${{ secrets.docker_username }} --password-stdin
+
+      - name: Start the app
+        run: |
+          docker-compose -f docker-compose.prod.yaml pull
+          docker-compose -f docker-compose.prod.yaml up -d
+          docker-compose -f docker-compose.prod.yaml exec -T web python manage.py migrate
+          docker-compose -f docker-compose.prod.yaml exec -T web python manage.py collectstatic --noinput
+
+      - name: logout from docker registry
+        if: ${{ always() }}
+        run: docker logout
+
+
+  start_production:
     name: Start production
     needs:
       - build
     runs-on: ["self-hosted", "antijob-report", "production"]
     if: github.ref == 'refs/heads/main'
     steps:
-      # - name: Approve deployment
-      #   uses: trstringer/manual-approval@v1
-      #   with:
-      #     secret: ${{ github.TOKEN }}
-      #     approvers: Vldln
-      #     minimum-approvals: 1
+      - name: login to docker registry
+        run: echo "${{ secrets.docker_password }}" | docker login -u ${{ secrets.docker_username }} --password-stdin
 
       - name: Start the app
         run: |
+          docker-compose -f docker-compose.prod.yaml pull
           docker-compose -f docker-compose.prod.yaml up -d
           docker-compose -f docker-compose.prod.yaml exec -T web python manage.py migrate
           docker-compose -f docker-compose.prod.yaml exec -T web python manage.py collectstatic --noinput
+
+      - name: logout from docker registry
+        if: ${{ always() }}
+        run: docker logout
