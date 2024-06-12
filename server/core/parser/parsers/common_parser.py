@@ -1,4 +1,4 @@
-from types import List
+from typing import Iterable
 
 from goose3 import Goose
 from goose3.configuration import Configuration
@@ -373,5 +373,5 @@ class CommonParser(ParserBase):
         return ArticleData(title, text, date, url)
 
     @classmethod
-    def extract_urls(cls, url: str, document) -> List[str]:
-        return list(extract_html_urls(url, document))
+    def extract_urls(cls, url: str, document) -> Iterable[str]:
+        return extract_html_urls(url, document)

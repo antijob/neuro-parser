@@ -1,7 +1,6 @@
-from types import List
+from typing import Iterable
 
 import requests
-from types import List
 from selectolax.parser import HTMLParser
 import re
 from ...user_agent import random_headers
@@ -38,7 +37,7 @@ class VkParser(ParserBase):
         return ArticleData(title, text, date, url)
 
     @classmethod
-    def extract_urls(cls, url: str, document=None) -> List[str]:
+    def extract_urls(cls, url: str, document=None) -> Iterable[str]:
         page = requests.get(url, headers=random_headers())
         tree = HTMLParser(page.text)
 

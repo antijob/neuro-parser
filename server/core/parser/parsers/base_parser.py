@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from collections import namedtuple
-from types import List
+from typing import Iterable
 
 
 ArticleData = namedtuple("ArticleData", "title text date final_url")
@@ -24,5 +24,5 @@ class ParserBase(ABC):
 
     @classmethod
     @abstractmethod
-    def extract_urls(cls, url: str, document=None) -> List[str]:
+    def extract_urls(cls, url: str, document=None) -> Iterable[str]:
         pass

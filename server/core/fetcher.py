@@ -1,4 +1,3 @@
-# fetcher.py
 import asyncio
 import aiohttp
 import time
@@ -6,17 +5,21 @@ import time
 from asgiref.sync import sync_to_async
 from .user_agent import session_random_headers
 
+from typing import Callable, Awaitable, Any, Coroutine, Iterable, List, Dict
 
-async def article_postprocess(article, content):
+from server.apps.core.models import Article, Source
+
+
+async def article_postprocess(article: Article, content) -> float:
     if content is None:
         return 0
     return await sync_to_async(article.get_html_and_postprocess)(content)
 
 
-async def source_postprocess(source, content):
-    if content is None:
-        return 0
-    return 1
+# async def source_postprocess(source, content):
+#     if content is None:
+#         return 0
+#     return 1
 
 
 class BadCodeException(Exception):
@@ -26,7 +29,7 @@ class BadCodeException(Exception):
         self.code = code
 
 
-async def fetch_url(session, url):
+async def fetch_url(session, url: str):
     params = {}
     if url.startswith("https://t.me/"):
         params = {"embed": "1"}
@@ -35,81 +38,84 @@ async def fetch_url(session, url):
             return await response.text()
         else:
             raise BadCodeException(response.status)
-            return None
 
 
-class Fetcher(object):
-    def __new__(cls):
-        if not hasattr(cls, "instance"):
-            cls.instance = super(Fetcher, cls).__new__(cls)
-        return cls.instance
+class CoroutineStatistics:
+    def __init__(self, source: str, article_numbers: int):
+        self.source: str = source
+        self.len: int = article_numbers
+        self.fetches: int = 0
+        self.success: int = 0
+        self.bad_codes: int = 0
+        self.exceptions: int = 0
+        self.codes: Dict[int, int] = {}
 
-    def __init__(self):
-        self.coroutines = []
+        self.start_time: float = 0
+        self.elapsed_time: float = 0
+        self.fetch_time: float = 0
+        self.postprocess_time: float = 0
+        self.fetch_start_time: float = 0
 
-    class CoroutineStatistics:
-        def __init__(self, source, article_numbers):
-            self.source = source
-            self.len = article_numbers
-            self.fetches = 0
-            self.success = 0
-            self.bad_codes = 0
-            self.exceptions = 0
-            self.codes = {}
+    def start(self):
+        self.start_time = time.time()
 
-            self.start_time = 0
-            self.elapsed_time = 0
-            self.fetch_time = 0
-            self.postprocess_time = 0
-            self.fetch_start_time = 0
+    def finish(self):
+        end_time = time.time()
+        self.elapsed_time = end_time - self.start_time
 
-        def start(self):
-            self.start_time = time.time()
+    def exception(self):
+        self.exceptions += 1
 
-        def finish(self):
-            end_time = time.time()
-            self.elapsed_time = end_time - self.start_time
+    def postprocess(self, time: float):
+        self.postprocess_time += time
+        self.success += 1
 
-        def exception(self):
-            self.exceptions += 1
+    def fetch_start(self):
+        self.fetch_start_time = time.time()
 
-        def postprocess(self, time):
-            self.postprocess_time += time
-            self.success += 1
+    def fetched(self):
+        fetch_end_time = time.time()
+        self.fetch_time += fetch_end_time - self.fetch_start_time
+        self.fetches += 1
 
-        def fetch_start(self):
-            self.fetch_start_time = time.time()
+    def bad_code(self, code: int):
+        self.bad_codes += 1
+        if code in self.codes:
+            self.codes[code] += 1
+        else:
+            self.codes[code] = 1
 
-        def fetched(self):
-            fetch_end_time = time.time()
-            self.fetch_time += fetch_end_time - self.fetch_start_time
-            self.fetches += 1
-
-        def bad_code(self, code):
-            self.bad_codes += 1
-            if code in self.codes:
-                self.codes[code] += 1
-            else:
-                self.codes[code] = 1
-
-        def __str__(self):
-            codes_str = "Bad codes info: "
+    def __str__(self):
+        codes_str = ""
+        if len(self.codes) > 0:
+            codes_str = "\nBad codes info: "
             for code, count in self.codes.items():
                 codes_str += f'"{code}": {count}, '
-            return (
-                f"Coroutine finished. Source: {self.source}: {self.len} articles by {self.elapsed_time:.2f}s.\n"
-                f"Fetch time: {self.fetch_time:.2f}s, Parse time:{self.postprocess_time:.2f}s\n"
-                f"Succeded: {self.success}, Fetched: {self.fetches}, Bad Codes: {self.bad_codes}, Exceptions: {self.exceptions}\n"
-                f"{codes_str}"
-            )
+        return (
+            f"Coroutine finished. Source: {self.source}: {self.len} articles by {self.elapsed_time:.2f}s.\n"
+            f"Fetch time: {self.fetch_time:.2f}s, Parse time:{self.postprocess_time:.2f}s\n"
+            f"Succeded: {self.success}, Fetched: {self.fetches}, Bad Codes: {self.bad_codes}, Exceptions: {self.exceptions}"
+            f"{codes_str}"
+        )
 
-    async def coroutine(self, source, articles, postprocess_function):
-        rps = 1  # source.rps
+
+# Должен ли это быть синглетон? Чтобы он мог держать рпс, сколько бы раз его не запустили? Или дизайн его создан не для этого? Или для этих целей надо создавать некоторую обертку над ним?
+class Fetcher:
+    def __init__(self):
+        self.coroutines: List[Coroutine] = []
+
+    async def create_coroutine(
+        self,
+        source: Source,
+        articles: Dict[str, Article],
+        postprocess_function: Callable[[Article, Any], Awaitable[float]],
+    ):
+        rps: float = 1  # source.rps
         if ".ok.ru" in source.url or "t.me" in source.url:
             rps = 0.1
 
         print(f"Start coroutine. Source {source.url}: {len(articles)} articles")
-        statistics = Fetcher.CoroutineStatistics(source.url, len(articles))
+        statistics = CoroutineStatistics(source.url, len(articles))
 
         async with aiohttp.ClientSession(
             trust_env=True,
@@ -125,7 +131,7 @@ class Fetcher(object):
                     content = await fetch_url(session, url)
                     statistics.fetched()
 
-                    postprocess_time = postprocess_function(article, content)
+                    postprocess_time = await postprocess_function(article, content)
                     statistics.postprocess(postprocess_time)
 
                     await asyncio.sleep(delay)
@@ -138,9 +144,10 @@ class Fetcher(object):
             statistics.finish()
             print(statistics)
 
-    def add_coroutine(self, source, articles):
-        articles = {a.url: a for a in articles}
-        coro = self.coroutine(source, articles, article_postprocess)
+    def add_coroutine(self, source: Source, articles: Iterable[Article]):
+        articles_dict: Dict[str, Article]
+        articles_dict = {a.url: a for a in articles}
+        coro = self.create_coroutine(source, articles_dict, article_postprocess)
 
         self.coroutines.append(coro)
 

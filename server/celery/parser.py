@@ -1,7 +1,7 @@
 from .celery_app import app
 from server.apps.core.models import Article, Source
 from server.apps.core.incident_types import IncidentType
-from server.core.article_index.query_checker import check_repost_query
+from server.core.article_index.query_checker import mark_duplicates
 from server.settings.components.celery import INCIDENT_BATCH_SIZE
 
 from datetime import datetime, timedelta
@@ -39,7 +39,7 @@ def parse_chain():
 @app.task(queue="parser")
 def delete_duplicate_articles():
     articles = get_parse_candidates()
-    check_repost_query(articles)
+    mark_duplicates(articles)
     dups = articles.filter(is_duplicate=True)
     return f"Duplicates found: {len(dups)}"
 

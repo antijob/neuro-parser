@@ -1,9 +1,10 @@
+from typing import List, Iterable
+
 from lxml import etree
 import requests
 from ..user_agent import random_headers
 from lxml.html.clean import Cleaner
 
-from types import List
 from .parsers.base_parser import ParserBase
 
 from .parsers.vk_parser import VkParser
@@ -74,11 +75,11 @@ def get_document(url: str, clean=False):
 
 
 class SourceParser:
-    parsers = [VkParser, OkParser, TgParser]
-    document_parsers = [RssParser, CommonParser]
+    parsers: List[ParserBase] = [VkParser, OkParser, TgParser]
+    document_parsers: List[ParserBase] = [RssParser, CommonParser]
 
     @classmethod
-    def extract_all_news_urls(cls, url: str) -> list[str]:
+    def extract_all_news_urls(cls, url: str) -> Iterable[str]:
         for parser in cls.parsers:
             if parser.can_handle(url):
                 return parser.extract_urls(url)

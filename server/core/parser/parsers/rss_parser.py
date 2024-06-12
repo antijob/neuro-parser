@@ -3,6 +3,7 @@ from ..utils import is_correct_article_link, get_absolute_url, is_rss_link
 from lxml import cssselect
 import re
 import feedparser
+from typing import Iterable
 
 
 def find_rss_urls(source_url: str, document):
@@ -48,5 +49,5 @@ class RssParser(ParserBase):
         raise NotImplementedError("RSS parser does not implement parse_raw_data")
 
     @classmethod
-    def extract_urls(cls, url: str, document) -> list:
+    def extract_urls(cls, url: str, document) -> Iterable[str]:
         return list(extract_rss_urls(url, document))

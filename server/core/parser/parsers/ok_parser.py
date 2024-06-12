@@ -1,3 +1,5 @@
+from typing import Iterable
+
 import requests
 from selectolax.parser import HTMLParser
 import re
@@ -27,15 +29,17 @@ class OkParser(ParserBase):
                 title = get_first_sentence(text)
         else:
             title = ""
-        date = convert_date_format(tree.css_first("div.ucard_add-info_i").text())
+        node = tree.css_first("div.ucard_add-info_i")
+        date = ""
+        if node:
+            date = convert_date_format(node.text())
         return ArticleData(title, text, date, url)
 
     @classmethod
-    def extract_urls(cls, url: str, document=None) -> List[str]:
+    def extract_urls(cls, url: str, document=None) -> Iterable[str]:
         page = requests.get(url, headers=random_headers())
         tree = HTMLParser(page.text)
 
         for node in tree.css("a.media-text_a"):
             news_page_link = "https://ok.ru" + node.attributes["href"]
-            # print("Link: ", news_page_link)
             yield news_page_link

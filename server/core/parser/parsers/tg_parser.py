@@ -1,4 +1,4 @@
-from types import List
+from typing import List
 
 from selectolax.parser import HTMLParser
 import requests

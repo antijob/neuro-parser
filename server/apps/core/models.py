@@ -291,7 +291,7 @@ class Article(models.Model):
         raw_data = ArticleParser.get_article(self.url)
         self.postprocess_raw_data(raw_data)
 
-    def get_html_and_postprocess(self, data):
+    def get_html_and_postprocess(self, data) -> float:
         postprocess_start_time = time.time()
         raw_data = ArticleParser.parse_article_raw_data(self.url, data)
         self.postprocess_raw_data(raw_data)
