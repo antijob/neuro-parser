@@ -353,7 +353,9 @@ class CommonParser(ParserBase):
             article = g.extract(url=url)
             title = article.title
             text = article.cleaned_text
-            final_url = article.final_url
+            final_url = (
+                article.final_url
+            )  # Это приводит к потере исходной ссылки, если случаются редиректы
             date = convert_date_format(article.publish_date)
 
         return ArticleData(title, text, date, final_url)
@@ -367,7 +369,6 @@ class CommonParser(ParserBase):
             article = g.extract(raw_html=data)
             title = article.title
             text = article.cleaned_text
-            final_url = article.final_url
             date = convert_date_format(article.publish_date)
 
         return ArticleData(title, text, date, url)

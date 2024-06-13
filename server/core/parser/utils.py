@@ -16,6 +16,7 @@ def get_first_sentence(text: str) -> str:
     return match.group(0) if match else ""
 
 
+# ToDo: fix Invalid date format: только что
 def convert_date_format(date_string: str) -> str:
     """
     Parse data string and return in format %Y-%m-%d

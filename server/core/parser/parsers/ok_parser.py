@@ -3,7 +3,7 @@ from typing import Iterable
 import requests
 from selectolax.parser import HTMLParser
 import re
-from ...user_agent import random_headers
+from server.libs.user_agent import random_headers
 from ..utils import convert_date_format, get_first_sentence
 
 from server.core.parser.parsers.base_parser import ArticleData, ParserBase

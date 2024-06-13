@@ -7,8 +7,6 @@ from server.apps.core.models import Article
 from datetime import datetime, timedelta
 from typing import List
 
-# from server.lib.singleton import SingletonMeta
-
 
 SIMHASH_INDEX_KEY_TEMPLATE = "simhash-index-{dim}-{tol}"
 SIMHASH_DIMENSION = 128
@@ -28,18 +26,18 @@ def get_latest_unique_articles() -> List[Article]:
     return articles
 
 
-def make_simhash_from_article_text(text: str) -> Simhash:
-    text = text.strip()
-    text = text.lower()
+def make_simhash_from_article(article: Article) -> Simhash:
+    text = "\n".join([article.title, article.text])
+    text = text.strip().lower()
     text = clear_text.sub("", text)
     return Simhash(text, f=SIMHASH_DIMENSION)
 
 
 def get_simhash_distance(url1, url2):
-    text1 = Article.objects.get(url=url1).text
-    text2 = Article.objects.get(url=url2).text
-    sh1 = make_simhash_from_article_text(text1)
-    sh2 = make_simhash_from_article_text(text2)
+    art1 = Article.objects.get(url=url1)
+    art2 = Article.objects.get(url=url2)
+    sh1 = make_simhash_from_article(art1)
+    sh2 = make_simhash_from_article(art2)
     return sh1.distance(sh2)
 
 
@@ -68,7 +66,7 @@ class ArticleIndex:
         cache.set(self.key, self.simhashIndex, SIMHASH_INDEX_TIMEOUT)
 
     def create_index(self, articles: List[Article]) -> None:
-        objs = [(art.url, make_simhash_from_article_text(art.text)) for art in articles]
+        objs = [(art.url, make_simhash_from_article(art)) for art in articles]
 
         # logging.basicConfig()
         sh_log = logging.getLogger().setLevel(logging.ERROR)  # silent index
@@ -79,11 +77,11 @@ class ArticleIndex:
     def get_neighbours(self, article: Article) -> List[str]:
         if not article.text:
             return []
-        sh = make_simhash_from_article_text(article.text)
+        sh = make_simhash_from_article(article)
         return self.simhashIndex.get_near_dups(sh)
 
     def add(self, article: Article) -> None:
         if not article.text:
             return
-        sh = make_simhash_from_article_text(article.text)
+        sh = make_simhash_from_article(article)
         self.simhashIndex.add(article.url, sh)

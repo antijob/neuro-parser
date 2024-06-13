@@ -1,19 +1,26 @@
 import asyncio
 import aiohttp
 import time
-
 from asgiref.sync import sync_to_async
-from .user_agent import session_random_headers
+
+
+from server.libs.user_agent import session_random_headers
 
 from typing import Callable, Awaitable, Any, Coroutine, Iterable, List, Dict
 
 from server.apps.core.models import Article, Source
+from server.core.parser.article_parser import ArticleParser
 
 
 async def article_postprocess(article: Article, content) -> float:
     if content is None:
         return 0
-    return await sync_to_async(article.get_html_and_postprocess)(content)
+
+    postprocess_start_time = time.time()
+    raw_data = ArticleParser.parse_article_raw_data(article.url, content)
+    await sync_to_async(ArticleParser.postprocess_raw_data)(article, raw_data)
+    postprocess_end_time = time.time()
+    return postprocess_end_time - postprocess_start_time
 
 
 # async def source_postprocess(source, content):

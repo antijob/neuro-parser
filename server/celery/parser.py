@@ -20,7 +20,10 @@ def split_every(n, iterable):
 def get_parse_candidates():
     start_date = datetime.now().date() - timedelta(days=3)
     articles = Article.objects.filter(
-        is_downloaded=True, is_parsed=False, create_date__gte=start_date
+        is_downloaded=True,
+        is_parsed=False,
+        is_duplicate=False,
+        create_date__gte=start_date,
     )
     return articles
 
@@ -69,7 +72,7 @@ def create_incidents(batch):
     for art in articles_batch:
         art.is_parsed = True
         art.save()
-    return f"Batch finished. Incodents created: {incidents_count}"
+    return f"Batch finished. Incidents created: {incidents_count}"
 
 
 @app.task(queue="parser")

@@ -1,4 +1,4 @@
-from typing import List
+from typing import Iterable
 
 from selectolax.parser import HTMLParser
 import requests
@@ -52,7 +52,7 @@ class TgParser(ParserBase):
         return ArticleData(title, text, date, url)
 
     @classmethod
-    def extract_urls(cls, url: str, document=None) -> List[str]:
+    def extract_urls(cls, url: str, document=None) -> Iterable[str]:
         if "/s/" not in url:
             url = url.replace("https://t.me/", "https://t.me/s/")
         page = requests.get(url)

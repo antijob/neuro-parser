@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import datetime
 import re
-import time
 
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
@@ -289,24 +288,7 @@ class Article(models.Model):
 
     def download(self):
         raw_data = ArticleParser.get_article(self.url)
-        self.postprocess_raw_data(raw_data)
-
-    def get_html_and_postprocess(self, data) -> float:
-        postprocess_start_time = time.time()
-        raw_data = ArticleParser.parse_article_raw_data(self.url, data)
-        self.postprocess_raw_data(raw_data)
-        postprocess_end_time = time.time()
-        return postprocess_end_time - postprocess_start_time
-
-    def postprocess_raw_data(self, data):
-        if data:
-            self.title, self.text, publication_date, self.url = data
-            if publication_date:
-                self.publication_date = publication_date
-            else:
-                self.publication_date = datetime.date.today()
-        self.is_downloaded = True
-        self.save()
+        ArticleParser.postprocess_raw_data(self, raw_data)
 
     def any_title(self):
         if self.title:

@@ -1,11 +1,10 @@
 from typing import List, Iterable
+from .parsers.base_parser import ParserBase
 
 from lxml import etree
 import requests
-from ..user_agent import random_headers
+from server.libs.user_agent import random_headers
 from lxml.html.clean import Cleaner
-
-from .parsers.base_parser import ParserBase
 
 from .parsers.vk_parser import VkParser
 from .parsers.ok_parser import OkParser
