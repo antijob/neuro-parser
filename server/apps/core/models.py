@@ -204,7 +204,7 @@ class Source(models.Model):
     country = models.ForeignKey(
         Country,
         on_delete=models.CASCADE,
-        default=get_default_country_id,
+        default=11,
     )
     region = models.ForeignKey(
         Region, on_delete=models.CASCADE, default=None, null=True, blank=True
