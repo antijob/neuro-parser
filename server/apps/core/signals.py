@@ -1,11 +1,14 @@
+import logging
+
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 from server.apps.bot.logic.send import send_message
-from server.apps.bot.models import Channel, TypeStatus
+from server.apps.bot.models import Channel, CountryStatus, RegionStatus, TypeStatus
 
 from .models import MediaIncident
 
+logger = logging.getLogger(__name__)
 
 inc_template = """
 New incident created
@@ -35,8 +38,17 @@ def mediaincident_post_save(sender, instance, created, **kwargs):
                 type_status = TypeStatus.objects.get(
                     channel=chn, incident_type=instance.incident_type
                 )
-                if type_status.status:
+                country_status = CountryStatus.objects.get(
+                    channel=chn, country=instance.country
+                )
+                region_status = RegionStatus.objects.get(
+                    channel=chn, region=instance.region
+                )
+                if (
+                    type_status.status
+                    and country_status.status
+                    and region_status.status
+                ):
                     send_message(chn.channel_id, msg)
             except Exception as e:
-                print("An error occurred: ", e)
-                print("instance: ", instance.id)
+                logger.error(f"An error occurred: {e} \n (In instance: {instance.id})")

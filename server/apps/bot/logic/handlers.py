@@ -1,15 +1,21 @@
 from telegram import Update
 from telegram.ext import CallbackContext
 
-from server.apps.bot.logic.messages import (
-    HELP_COMMAND_MESSAGE,
-    CATEGORIES_MESSAGE,
-    ADD_MESSAGE,
+from server.apps.bot.logic.keyboard import (
+    create_country_keyboard,
+    create_inline_keyboard,
+    create_region_keyboard,
 )
-from server.apps.bot.logic.keyboard import create_inline_keyboard
-from server.apps.bot.models import Channel
-from server.apps.bot.models import TypeStatus
+from server.apps.bot.logic.messages import (
+    ADD_MESSAGE,
+    CATEGORIES_MESSAGE,
+    COUNTRY_MESSAGE,
+    REGION_MESSAGE,
+    HELP_COMMAND_MESSAGE,
+)
+from server.apps.bot.models import Channel, TypeStatus, CountryStatus, RegionStatus
 from server.apps.core.incident_types import IncidentType
+from server.apps.core.models import Country, Region
 from server.settings.components.telegram import TELEGRAM_BOT_NAME
 
 
@@ -23,15 +29,16 @@ def new_chat_members(update: Update, context: CallbackContext):
     chat_id = update.message.chat_id
     list_new_chat_members = update.message.new_chat_members
 
-    message = f'Бот добавлен в чат - {update.message.chat.title}.' + ADD_MESSAGE
+    message = f"Бот добавлен в чат - {update.message.chat.title}. {ADD_MESSAGE}"
 
     for member in list_new_chat_members:
-        if member.username == TELEGRAM_BOT_NAME and member.is_bot == True:
+        if member.username == TELEGRAM_BOT_NAME and member.is_bot:
             try:
                 chn = Channel.objects.create(channel_id=chat_id)
             except Exception as e:
                 raise type(e)(
-                    f'When you try create new chanell with {chat_id} exception happend: ' + e)
+                    f"When you try create new chanell with {chat_id} exception happend: {e}"
+                )
 
             for incident in IncidentType.objects.all():
                 TypeStatus.objects.create(
@@ -39,41 +46,95 @@ def new_chat_members(update: Update, context: CallbackContext):
                     channel=chn,
                     status=True,
                 )
+            for country in Country.objects.all():
+                CountryStatus.objects.create(
+                    country=country,
+                    channel=chn,
+                    status=True,
+                )
+            for region in Region.objects.all():
+                RegionStatus.objects.create(
+                    region=region,
+                    channel=chn,
+                    status=True,
+                )
+
             update.message.reply_text(message)
 
 
 def categ(update, context):
     chat_id = update.message.chat_id
+
+    # check if this chanel exist in db
     try:
-        # check if this chanel exist in db
         cats = Channel.objects.get(channel_id__exact=chat_id)
     except Exception as e:
         context.bot.send_message(
-            chat_id=chat_id,
-            text="Проверьте настройки бота, что-то пошло не так"
+            chat_id=chat_id, text="Проверьте настройки бота, что-то пошло не так"
         )
-        raise type(e)(
-            f'When add bot to chat {chat_id} exception happend: ' + e)
+        raise type(e)(f"Category command in chat {chat_id} exception happend: {e}")
 
     for incident in IncidentType.objects.all():
         status = TypeStatus.objects.filter(
             incident_type=incident,
             channel=cats,
         )
-        if (not status):
+        if not status:
             TypeStatus.objects.create(
                 incident_type=incident,
                 channel=cats,
                 status=True,
             )
-    # Create and send the inline keyboard
     keyboard = create_inline_keyboard(cats)
 
     context.bot.send_message(
         chat_id=chat_id,
         text=CATEGORIES_MESSAGE,
-        parse_mode='HTML',
-        reply_markup=keyboard
+        parse_mode="HTML",
+        reply_markup=keyboard,
+    )
+
+
+def country(update, context):
+    chat_id = update.message.chat_id
+    try:
+        # check if this chanel exist in db
+        cats = Channel.objects.get(channel_id__exact=chat_id)
+    except Exception as e:
+        context.bot.send_message(
+            chat_id=chat_id, text="Проверьте настройки бота, что-то пошло не так"
+        )
+        raise type(e)(f"Country command in chat {chat_id} exception happend: {e}")
+
+    keyboard = create_country_keyboard(cats)
+
+    context.bot.send_message(
+        chat_id=chat_id,
+        text=COUNTRY_MESSAGE,
+        parse_mode="HTML",
+        reply_markup=keyboard,
+    )
+
+
+def region(update, context):
+    chat_id = update.message.chat_id
+
+    try:
+        # check if this chanel exist in db
+        cats = Channel.objects.get(channel_id__exact=chat_id)
+    except Exception as e:
+        context.bot.send_message(
+            chat_id=chat_id, text="Проверьте настройки бота, что-то пошло не так"
+        )
+        raise type(e)(f"Country command in chat {chat_id} exception happend: {e}")
+
+    keyboard = create_region_keyboard(cats)
+
+    context.bot.send_message(
+        chat_id=chat_id,
+        text=REGION_MESSAGE,
+        parse_mode="HTML",
+        reply_markup=keyboard,
     )
 
 
@@ -83,5 +144,4 @@ def chat_member_left(update: Update, context: CallbackContext):
         channel = Channel.objects.get(channel_id=chat_id)
         channel.delete()
     except Exception as e:
-        raise type(e)(
-            f'When remove bot from chat {chat_id} exception happend: ' + e)
+        raise type(e)(f"When remove bot from chat {chat_id} exception happend: {e}")

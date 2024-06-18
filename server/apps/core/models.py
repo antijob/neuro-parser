@@ -23,6 +23,9 @@ class Country(models.Model):
     def __str__(self) -> str:
         return self.name
 
+    def get_full_country_name(self):
+        return dict(COUNTRIES).get(self.name, "Unknown country")
+
     class Meta:
         verbose_name = "Страна"
         verbose_name_plural = "Страны"
@@ -34,6 +37,9 @@ class Region(models.Model):
 
     def __str__(self) -> str:
         return f"{self.name}, {self.country.name}"
+
+    def get_full_region_name(self):
+        return dict(REGIONS).get(self.name, "Unknown region")
 
     class Meta:
         verbose_name = "Регион"
