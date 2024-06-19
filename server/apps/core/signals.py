@@ -14,6 +14,8 @@ inc_template = """
 New incident created
 Category: {cat}
 Title: {title}
+Country: {country}
+Region: {region}
 Description: {desc}
 URLs: {url}
 """
@@ -30,6 +32,8 @@ def mediaincident_post_save(sender, instance, created, **kwargs):
         msg = inc_template.format(
             cat=instance.incident_type.description,
             title=instance.title,
+            country=instance.country,
+            region=instance.region,
             desc=instance.description,
             url=" ".join(instance.urls),
         )
