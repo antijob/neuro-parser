@@ -27,11 +27,12 @@ jobs:
 
 
   build:
-    name: Build production
+    name: Build
     needs:
       - clean
     runs-on: ["self-hosted", "antijob-report", "production"]
-    if: github.ref == 'refs/heads/main'
+    outputs:
+      branch_name: ${{ steps.build.outputs.branch_name }}
     steps:
       - name: Check out repository code
         uses: actions/checkout@v3
@@ -78,10 +79,15 @@ jobs:
           FLOWER_USER: "${{ secrets.FLOWER_USER }}"
           FLOWER_PASSWORD: "${{ secrets.FLOWER_PASSWORD }}"
 
+
       - name: Build python
+        id: build
         if: ${{ steps.filter.outputs.web == 'true' || github.event.inputs.runType == 'Force build' }}
         run: |
-          NEURO_PARSER_VERSION=${GITHUB_REF#refs/heads/} \
+          branch=$(echo "${GITHUB_REF#refs/heads/}" | tr '/' '-')
+          echo "Branch name with / substituted for - : $branch"
+          echo "branch_name=$branch" >> $GITHUB_OUTPUT
+          NEURO_PARSER_VERSION=${branch} \
             docker-compose -f docker-compose.prod.yaml build web
 
       - name: login to docker registry
@@ -91,7 +97,7 @@ jobs:
       - name: push to registry
         if: ${{ steps.filter.outputs.web == 'true' || github.event.inputs.runtype == 'force build' }}
         run: |
-          neuro_parser_version=${github_ref#refs/heads/} \
+          NEURO_PARSER_VERSION=${{ steps.build.output.BRANCH_NAME }} \
             docker-compose -f docker-compose.prod.yaml push web
 
       - name: logout from docker registry
@@ -116,31 +122,46 @@ jobs:
       - build
     runs-on: ["self-hosted", "antijob-report", "staging"]
     if: github.ref == 'refs/heads/staging'
+    environment: staging
     steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+
       - name: login to docker registry
         run: echo "${{ secrets.docker_password }}" | docker login -u ${{ secrets.docker_username }} --password-stdin
 
-      - name: Start the app
+      - name: Prepare .env
+        if: ${{ steps.filter.outputs.web == 'true' || github.event.inputs.runType == 'Force build' }}
         run: |
-          docker-compose -f docker-compose.prod.yaml pull
-          docker-compose -f docker-compose.prod.yaml up -d
-          docker-compose -f docker-compose.prod.yaml exec -T web python manage.py migrate
-          docker-compose -f docker-compose.prod.yaml exec -T web python manage.py collectstatic --noinput
-
-      - name: logout from docker registry
-        if: ${{ always() }}
-        run: docker logout
-
-
-  start_production:
-    name: Start production
-    needs:
-      - build
-    runs-on: ["self-hosted", "antijob-report", "production"]
-    if: github.ref == 'refs/heads/main'
-    steps:
-      - name: login to docker registry
-        run: echo "${{ secrets.docker_password }}" | docker login -u ${{ secrets.docker_username }} --password-stdin
+          cp .env.template .env
+          sed -i \
+            -e s,^POSTGRES_USER=.*,POSTGRES_USER=$POSTGRES_USER, \
+            -e s,^POSTGRES_PASSWORD=.*,POSTGRES_PASSWORD=$POSTGRES_PASSWORD, \
+            -e s,^SENTRY_DSN=.*,SENTRY_DSN=$SENTRY_DSN, \
+            -e s,^TELEGRAM_BOT_TOKEN=.*,TELEGRAM_BOT_TOKEN=$TELEGRAM_BOT_TOKEN, \
+            -e s,^DJANGO_KEY=.*,DJANGO_KEY=$DJANGO_KEY, \
+            -e s,^CF_DNS_API_TOKEN=.*,CF_DNS_API_TOKEN=$CF_DNS_API_TOKEN, \
+            -e s,^API_TOKEN=.*,API_TOKEN=$API_TOKEN, \
+            -e s,^CHAT_GPT_KEY=.*,CHAT_GPT_KEY=$CHAT_GPT_KEY, \
+            -e s,^FLOWER_USER=.*,FLOWER_USER=$FLOWER_USER, \
+            -e s,^FLOWER_PASSWORD=.*,FLOWER_PASSWORD=$FLOWER_PASSWORD, \
+            -e s,^FLOWER_HOST=.*,FLOWER_HOST=$FLOWER_HOST, \
+            -e s,^HOST=.*,HOST=$HOST, \
+            .env
+          echo ${{ needs.build.output.branch_name }} >> .env
+        env:
+          POSTGRES_USER: "${{ secrets.POSTGRES_USER }}"
+          POSTGRES_PASSWORD: "${{ secrets.POSTGRES_PASSWORD }}"
+          SENTRY_DSN: "${{ secrets.SENTRY_DSN }}"
+          TELEGRAM_BOT_TOKEN: "${{ secrets.TELEGRAM_BOT_TOKEN }}"
+          DJANGO_KEY: "${{ secrets.DJANGO_KEY}}"
+          CF_DNS_API_TOKEN: "${{ secrets.CF_DNS_API_TOKEN }}"
+          API_TOKEN: "${{ secrets.API_TOKEN }}"
+          CHAT_GPT_KEY: "${{ secrets.CHAT_GPT_KEY }}"
+          FLOWER_USER: "${{ secrets.FLOWER_USER }}"
+          FLOWER_PASSWORD: "${{ secrets.FLOWER_PASSWORD }}"
+          FLOWER_HOST: "${{ secrets.FLOWER_HOST }}"
+          HOST: "${{ secrets.HOST }}"
 
       - name: Start the app
         run: |
