@@ -71,7 +71,7 @@ services:
       - "traefik.http.routers.staticfiles.tls.certresolver=letsencrypt"
 
   celery:
-    build: .
+    image: antijob/neuro-parser:$NEURO_PARSER_VERSION
     command: /bin/bash -c "chmod +x ./celery-start.sh && ./celery-start.sh"
     volumes:
       - .:/code
