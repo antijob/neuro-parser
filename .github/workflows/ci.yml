@@ -30,6 +30,7 @@ jobs:
     name: Build
     needs:
       - clean
+    runs-on: "ubuntu-latest"
     outputs:
       branch_name: ${{ steps.build.outputs.branch_name }}
     steps:
