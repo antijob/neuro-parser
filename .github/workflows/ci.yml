@@ -107,7 +107,7 @@ jobs:
 
   test:
     name: Run tests
-    runs-on: ["self-hosted", "antijob-report", "staging"]
+    runs-on: ["self-hosted", "antijob-report", "production"]
     if: ${{ always() }}
     steps:
       - name: Here we run tests
