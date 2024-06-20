@@ -33,7 +33,7 @@ dateparser==1.2.0
 dawg-python==0.7.2
 defusedxml==0.7.1
 distro==1.9.0
-django==3.2.21
+django==3.2.25
 django-allauth==0.58.2
 django-redis==5.4.0
 django-split-settings==1.1.0
