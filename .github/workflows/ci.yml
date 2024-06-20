@@ -30,7 +30,6 @@ jobs:
     name: Build
     needs:
       - clean
-    runs-on: ["self-hosted", "antijob-report", "production"]
     outputs:
       branch_name: ${{ steps.build.outputs.branch_name }}
     steps:
