@@ -120,7 +120,7 @@ jobs:
     needs:
       - test
       - build
-    runs-on: ["self-hosted", "antijob-report", "staging"]
+    runs-on: ["self-hosted", "neuroparser", "staging"]
     if: github.ref == 'refs/heads/feat/add-ci'
     environment: staging
     steps:
