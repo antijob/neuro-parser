@@ -165,10 +165,10 @@ jobs:
 
       - name: Start the app
         run: |
-          docker-compose -f docker-compose.prod.yaml pull
-          docker-compose -f docker-compose.prod.yaml up -d
-          docker-compose -f docker-compose.prod.yaml exec -T web python manage.py migrate
-          docker-compose -f docker-compose.prod.yaml exec -T web python manage.py collectstatic --noinput
+          docker compose -f docker-compose.prod.yaml pull
+          docker compose -f docker-compose.prod.yaml up -d
+          docker compose -f docker-compose.prod.yaml exec -T web python manage.py migrate
+          docker compose -f docker-compose.prod.yaml exec -T web python manage.py collectstatic --noinput
 
       - name: logout from docker registry
         if: ${{ always() }}
