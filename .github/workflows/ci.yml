@@ -19,7 +19,6 @@ jobs:
   clean:
     name: Clean images
     runs-on: ["self-hosted", "antijob-report", "production"]
-    if: github.ref == 'refs/heads/main'
     steps:
       - name: Clean unused images and network
         run: |
