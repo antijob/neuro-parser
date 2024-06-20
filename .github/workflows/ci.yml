@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - feat/add-ci
   workflow_dispatch:
     inputs:
       runType:
@@ -120,7 +121,7 @@ jobs:
       - test
       - build
     runs-on: ["self-hosted", "antijob-report", "staging"]
-    if: github.ref == 'refs/heads/staging'
+    if: github.ref == 'refs/heads/feat/add-ci'
     environment: staging
     steps:
       - name: Check out repository code
