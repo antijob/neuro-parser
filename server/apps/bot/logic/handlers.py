@@ -74,17 +74,25 @@ def categ(update, context):
         )
         raise type(e)(f"Category command in chat {chat_id} exception happend: {e}")
 
-    for incident in IncidentType.objects.all():
-        status = TypeStatus.objects.filter(
-            incident_type=incident,
-            channel=cats,
-        )
-        if not status:
-            TypeStatus.objects.create(
+    if IncidentType.objects.exists():
+        """Check if IncidentTypes exists"""
+        for incident in IncidentType.objects.all():
+            status = TypeStatus.objects.filter(
                 incident_type=incident,
                 channel=cats,
-                status=True,
             )
+            if not status:
+                TypeStatus.objects.create(
+                    incident_type=incident,
+                    channel=cats,
+                    status=True,
+                )
+    else:
+        context.bot.send_message(
+            chat_id=chat_id, text="Нет доступных типов инцидентов, нужно их добавить."
+        )
+        return
+
     keyboard = create_inline_keyboard(cats)
 
     context.bot.send_message(
