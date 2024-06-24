@@ -20,12 +20,17 @@ from server.settings.components.telegram import TELEGRAM_BOT_NAME
 
 
 def help_callback(update, _context: CallbackContext) -> None:
+    """callback for /help command"""
     update.message.reply_text(
         text=HELP_COMMAND_MESSAGE, parse_mode="HTML", disable_web_page_preview=True
     )
 
 
 def new_chat_members(update: Update, context: CallbackContext):
+    """
+    on add to chat send welcome message and create
+    status objects for all IncidentTypes, Country and Region
+    """
     chat_id = update.message.chat_id
     list_new_chat_members = update.message.new_chat_members
 
@@ -37,7 +42,7 @@ def new_chat_members(update: Update, context: CallbackContext):
                 chn = Channel.objects.create(channel_id=chat_id)
             except Exception as e:
                 raise type(e)(
-                    f"When you try create new chanell with {chat_id} exception happend: {e}"
+                    f"Error in add bot in chat {chat_id} exception happend: {e}"
                 )
 
             for incident in IncidentType.objects.all():
@@ -63,6 +68,8 @@ def new_chat_members(update: Update, context: CallbackContext):
 
 
 def categ(update, context):
+    """callback for /categ command"""
+
     chat_id = update.message.chat_id
 
     # check if this chanel exist in db
@@ -104,6 +111,8 @@ def categ(update, context):
 
 
 def country(update, context):
+    """callback for /country command"""
+
     chat_id = update.message.chat_id
     try:
         # check if this chanel exist in db
@@ -125,6 +134,8 @@ def country(update, context):
 
 
 def region(update, context):
+    """callback for /region command"""
+
     chat_id = update.message.chat_id
 
     try:
@@ -147,6 +158,9 @@ def region(update, context):
 
 
 def chat_member_left(update: Update, context: CallbackContext):
+    """
+    on bot delete from chat delete also records from db
+    """
     chat_id = update.message.chat_id
     try:
         channel = Channel.objects.get(channel_id=chat_id)
