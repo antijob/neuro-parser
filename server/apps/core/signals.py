@@ -6,7 +6,7 @@ from django.dispatch import receiver
 from server.apps.bot.logic.send import send_message
 from server.apps.bot.models import Channel, CountryStatus, RegionStatus, TypeStatus
 
-from .models import MediaIncident
+from .models import MediaIncident, IncidentType
 
 logger = logging.getLogger(__name__)
 
@@ -24,8 +24,10 @@ URLs: {url}
 @receiver(post_save, sender=MediaIncident)
 def mediaincident_post_save(sender, instance, created, **kwargs):
     """
-    Function that will be executed on each save of
+    Function that will be executed on creation of
     new instance of MediaIncident model
+    It checks if all statuses are true and if so sends message
+    with bot
     """
     if created:
         all_channels = Channel.objects.all()
@@ -55,4 +57,24 @@ def mediaincident_post_save(sender, instance, created, **kwargs):
                 ):
                     send_message(chn.channel_id, msg)
             except Exception as e:
-                logger.error(f"An error occurred: {e} \n (In instance: {instance.id})")
+                logger.error(f"An error occurred: {e} \nIn instance: {instance.id}")
+
+
+@receiver(post_save, sender=IncidentType)
+def incidenttype_post_save(sender, instance, created, **kwargs):
+    """
+    Executes on creation of new instance of IncidentType model
+    Creates status (TypeStatus) for each channel in order to guarantee
+    that message about new incident will be sent to users
+    """
+    if created:
+        all_channels = Channel.objects.all()
+        for chn in all_channels:
+            try:
+                TypeStatus.objects.create(
+                    incident_type=instance, channel=chn, status=True
+                )
+            except Exception as e:
+                logger.error(
+                    f"An error in signal on creation TypeStatus: {e} \nInstance: {instance.id}"
+                )
