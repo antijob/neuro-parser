@@ -191,18 +191,12 @@ class MediaIncident(BaseIncident):
             public_description=article.text,
             incident_type=incident_type,
             region=article.region,
+            country=article.country,
         )
 
     class Meta:
         verbose_name = "Инцидент из СМИ"
         verbose_name_plural = "Инциденты из СМИ"
-
-
-def get_default_country_id():
-    """return default country id, default country is Russia"""
-    # default_country = Country.objects.get(name="RUS")
-    # return default_country.id
-    return 11
 
 
 class Source(models.Model):
@@ -317,13 +311,11 @@ class Article(models.Model):
     @property
     def region(self):
         region = self.source.region if self.source else "ALL"
-        if region == "ALL":
-            region = region_code("{} {}".format(self.title, self.text))
         return region
 
     @property
     def country(self):
-        country = self.source.country if self.source else "ALL"
+        country = self.source.country if self.source else "RUS"
         return country
 
     def normalized_text(self):
