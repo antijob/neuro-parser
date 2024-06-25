@@ -1,12 +1,13 @@
 from .celery_app import app
-from server.apps.core.models import Article, Source
-from server.apps.core.incident_types import IncidentType
+from server.apps.core.models import Article
 from server.core.article_index.query_checker import mark_duplicates
 from server.settings.components.celery import INCIDENT_BATCH_SIZE
 
 from datetime import datetime, timedelta
 from itertools import islice
 from celery import group
+
+from core.incident_predictor import IncidentPredictor
 
 
 def split_every(n, iterable):
@@ -62,13 +63,9 @@ def plan_incidents(status):
 def create_incidents(batch):
     articles_batch = [Article.objects.get(url=url) for url in batch]
     incidents_count = 0
-    for incident_type in IncidentType.objects.all():  # filter(is_active=True):
-        try:
-            incidents_count += incident_type.process_batch(articles_batch)
-        except Exception as e:
-            print(
-                f"An error occurred while creating incident for type {incident_type.description}: {e}"
-            )
+
+    incidents_count = IncidentPredictor.predict_batch(articles_batch)
+
     for art in articles_batch:
         art.is_parsed = True
         art.save()
@@ -77,5 +74,5 @@ def create_incidents(batch):
 
 @app.task(queue="parser")
 def rebuild_simhash_index():
-    # ToDo
+    # ToDo: Раз в день, не реже, перестраивать индекс с нуля
     pass

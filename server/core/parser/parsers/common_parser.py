@@ -206,26 +206,15 @@ IGNORED_PATHS = [
 ]
 
 
-def has_acceptable_extension(path) -> bool:
-    splitted = path.split(".")
-    if len(splitted) < 2:
-        return True
-    return splitted[-1] in ACCEPTABLE_EXTENSIONS
-
-
-def remove_extension(path: str) -> str:
-    splitted = path.split(".")
-    if len(splitted) < 2:
-        return path
-    if splitted[-1] in ACCEPTABLE_EXTENSIONS:
-        return path[: -(1 + len(splitted[-1]))]
-
-
 def is_path_ignored(url: str) -> bool:
     path = str(urlparse(url).path)
-    if not has_acceptable_extension(path):
-        return True
-    splitted_path = remove_extension(path).split("/")
+    splitted = path.rsplit(".", maxsplit=1)
+
+    if len(splitted) > 1:
+        if splitted[-1] not in ACCEPTABLE_EXTENSIONS:
+            return True
+        path = splitted[0]
+    splitted_path = path.split("/")
     if "news" in splitted_path:
         return False
     for ignored in IGNORED_PATHS:
@@ -316,49 +305,10 @@ def text_content(node, long_text_only: bool = False, include_links: bool = True)
     return remove_double_spaces(text)
 
 
-def extract_html_urls(source_url, document):
-    """Returns article urls found on the news list page."""
-
-    if document is None:
-        return []
-    links = cssselect.CSSSelector("a")(document)
-
-    for link in links:
-        if is_inside_service_tag(link):
-            continue
-        link_text = text_content(link, long_text_only=False, include_links=True).strip()
-        if not is_valid_link_text(link_text):
-            continue
-        url = get_absolute_url(source_url, link.get("href"))
-        if not is_correct_article_link(url):
-            continue
-        if is_path_ignored(url):
-            continue
-        if not is_rss_link(url):
-            yield url
-
-
 class CommonParser(ParserBase):
     @classmethod
     def can_handle(cls, url: str) -> bool:
-        return True  # Default parser for all other URLs
-
-    @classmethod
-    def get_page_data(cls, url: str) -> ArticleData:
-        config = Configuration()
-        config.strict = False
-        config.http_timeout = 8
-
-        with Goose(config) as g:
-            article = g.extract(url=url)
-            title = article.title
-            text = article.cleaned_text
-            final_url = (
-                article.final_url
-            )  # Это приводит к потере исходной ссылки, если случаются редиректы
-            date = convert_date_format(article.publish_date)
-
-        return ArticleData(title, text, date, final_url)
+        return True  # Default parser
 
     @classmethod
     def parse_raw_data(cls, url: str, data) -> ArticleData:
@@ -374,5 +324,23 @@ class CommonParser(ParserBase):
         return ArticleData(title, text, date, url)
 
     @classmethod
-    def extract_urls(cls, url: str, document) -> Iterable[str]:
-        return extract_html_urls(url, document)
+    def extract_urls(cls, source_url: str, document) -> Iterable[str]:
+        if document is None:
+            return []
+        links = cssselect.CSSSelector("a")(document)
+
+        for link in links:
+            if is_inside_service_tag(link):
+                continue
+            link_text = text_content(
+                link, long_text_only=False, include_links=True
+            ).strip()
+            if not is_valid_link_text(link_text):
+                continue
+            url = get_absolute_url(source_url, link.get("href"))
+            if not is_correct_article_link(url):
+                continue
+            if is_path_ignored(url):
+                continue
+            if not is_rss_link(url):
+                yield url

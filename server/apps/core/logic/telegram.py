@@ -12,10 +12,13 @@ from django.core.validators import URLValidator
 from server.apps.core.models import Article
 from server.celery.parser import search_duplicates
 
+from server.core.fetcher import Fetcher
+from server.core.incident_predictor import IncidentPredictor
+
 PRINTABLE_CHARS = frozenset(string.printable)
 
-TELEGRAM_BOT_TOKEN = ''
-TELEGRAM_CHAT_ID = ''
+TELEGRAM_BOT_TOKEN = ""
+TELEGRAM_CHAT_ID = ""
 TELEGRAM_URL = "https://api.telegram.org/bot{}".format(TELEGRAM_BOT_TOKEN)
 ALLOWED_CHAT_IDS = [TELEGRAM_CHAT_ID]
 ALLOWED_USERNAMES = []
@@ -134,8 +137,9 @@ def create_incident_from_article(article):
         incident = article.incident
     else:
         if not article.is_downloaded:
-            article.download()
-        incident = article.create_incident()
+            Fetcher.download(article)
+
+        incident = IncidentPredictor.predict(article)
     return incident, not exists
 
 

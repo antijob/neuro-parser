@@ -15,11 +15,6 @@ class VkParser(ParserBase):
         return re.match(r"https://vk\.com/", url)
 
     @classmethod
-    def get_page_data(cls, url: str) -> ArticleData:
-        page = requests.get(url, headers=random_headers())
-        return cls.parse_raw_data(page.text, url)
-
-    @classmethod
     def parse_raw_data(cls, url: str, data) -> ArticleData:
         tree = HTMLParser(data)
         wall_post = tree.css_first("div.wall_post_text")
@@ -36,6 +31,7 @@ class VkParser(ParserBase):
 
         return ArticleData(title, text, date, url)
 
+    # И тут с какого хрена?
     @classmethod
     def extract_urls(cls, url: str, document=None) -> Iterable[str]:
         page = requests.get(url, headers=random_headers())

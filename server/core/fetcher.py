@@ -3,7 +3,6 @@ import aiohttp
 import time
 from asgiref.sync import sync_to_async
 
-
 from server.libs.user_agent import session_random_headers
 
 from typing import Callable, Awaitable, Any, Coroutine, Iterable, List, Dict
@@ -12,39 +11,11 @@ from server.apps.core.models import Article, Source
 from server.core.parser.article_parser import ArticleParser
 
 
-async def article_postprocess(article: Article, content) -> float:
-    if content is None:
-        return 0
-
-    postprocess_start_time = time.time()
-    raw_data = ArticleParser.parse_article_raw_data(article.url, content)
-    await sync_to_async(ArticleParser.postprocess_raw_data)(article, raw_data)
-    postprocess_end_time = time.time()
-    return postprocess_end_time - postprocess_start_time
-
-
-# async def source_postprocess(source, content):
-#     if content is None:
-#         return 0
-#     return 1
-
-
 class BadCodeException(Exception):
     def __init__(self, code):
         super().__init__("Bad code")
 
         self.code = code
-
-
-async def fetch_url(session, url: str):
-    params = {}
-    if url.startswith("https://t.me/"):
-        params = {"embed": "1"}
-    async with session.get(url, params=params) as response:
-        if response.status == 200:
-            return await response.text()
-        else:
-            raise BadCodeException(response.status)
 
 
 class CoroutineStatistics:
@@ -106,17 +77,34 @@ class CoroutineStatistics:
         )
 
 
+async def fetch_url(session: aiohttp.ClientSession, url: str) -> str:
+    params = {}
+    if url.startswith("https://t.me/"):
+        params = {"embed": "1"}
+    async with session.get(url, params=params) as response:  # aiohttp.ClientResponse
+        if response.status == 200:
+            return await response.text()
+        else:
+            raise BadCodeException(response.status)
+
+
 # Должен ли это быть синглетон? Чтобы он мог держать рпс, сколько бы раз его не запустили? Или дизайн его создан не для этого? Или для этих целей надо создавать некоторую обертку над ним?
 class Fetcher:
     def __init__(self):
         self.coroutines: List[Coroutine] = []
 
-    async def create_coroutine(
-        self,
-        source: Source,
-        articles: Dict[str, Article],
-        postprocess_function: Callable[[Article, Any], Awaitable[float]],
-    ):
+    async def download(self, article: Article) -> None:
+        async with aiohttp.ClientSession(
+            trust_env=True,
+            connector=aiohttp.TCPConnector(ssl=False),
+            headers=session_random_headers(),
+        ) as session:
+            content = await fetch_url(session, article.url)
+            article.text = content
+            ArticleParser.postprocess_article(article, content)
+            await sync_to_async(article.save, thread_sensitive=True)()
+
+    async def create_coroutine(self, source: Source, articles: Dict[str, Article]):
         rps: float = 1  # source.rps
         if ".ok.ru" in source.url or "t.me" in source.url:
             rps = 0.1
@@ -138,8 +126,13 @@ class Fetcher:
                     content = await fetch_url(session, url)
                     statistics.fetched()
 
-                    postprocess_time = await postprocess_function(article, content)
-                    statistics.postprocess(postprocess_time)
+                    postprocess_start_time = time.time()
+                    ArticleParser.postprocess_article(article, content)
+                    await sync_to_async(article.save, thread_sensitive=True)()
+                    postprocess_end_time = time.time()
+                    statistics.postprocess(
+                        postprocess_end_time - postprocess_start_time
+                    )
 
                     await asyncio.sleep(delay)
                 except BadCodeException as e:
@@ -154,7 +147,7 @@ class Fetcher:
     def add_coroutine(self, source: Source, articles: Iterable[Article]):
         articles_dict: Dict[str, Article]
         articles_dict = {a.url: a for a in articles}
-        coro = self.create_coroutine(source, articles_dict, article_postprocess)
+        coro = self.create_coroutine(source, articles_dict)
 
         self.coroutines.append(coro)
 

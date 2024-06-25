@@ -1,0 +1,146 @@
+from typing import Union
+import datetime
+
+from server.libs.morphy import normalize_text
+from server.apps.core.models import IncidentType, Article, MediaIncident
+
+from transformers import AutoTokenizer, BertForSequenceClassification
+
+from django.conf import settings
+
+from ..libs import chat_gpt
+
+
+# COSINE.PY
+import os
+import tqdm
+
+
+from django.conf import settings
+
+import torch
+
+
+def rate_with_model_and_tokenizer(normalized_text, model, tokenizer):
+    encoding = tokenizer(
+        normalized_text,
+        return_tensors="pt",
+        padding=True,
+        truncation=True,
+        max_length=256,
+    )
+    input_ids = encoding["input_ids"]
+    dataset = torch.utils.data.TensorDataset(
+        input_ids,
+    )
+    model_iter = torch.utils.data.DataLoader(dataset, batch_size=1, shuffle=False)
+
+    predictions_pos = 0
+    predictions_neg = 0
+    for text in tqdm.tqdm(model_iter):
+        outputs = model(text[0])
+        predictions_pos += outputs.logits[0][1].item()
+        predictions_neg += outputs.logits[0][0].item()
+    return [predictions_neg, predictions_pos]
+
+
+# THERE SHOULD BE 2 pipelines
+
+# 1 -- unique url pipeline
+# 2 -- urls batch pipeline
+
+# it should get data from model -- chatgpt prompt and model dir
+
+
+class IncidentPredictor:
+    current_incident_type: IncidentType
+    tokenizer: any
+    model: any
+    is_gpt_setup: bool
+
+    def setup_incident_type(self, it: IncidentType):
+        self.current_incident_type = it
+
+        self.is_gpt_setup = False
+        if it.model_directory:
+            self.tokenizer = AutoTokenizer.from_pretrained(
+                it.model_directory, use_fast=False, from_safetensors=True
+            )
+            self.model = BertForSequenceClassification.from_pretrained(
+                it.model_directory
+            )
+            self.model.eval()
+        elif it.chat_gpt_prompt:
+            self.is_gpt_setup = True
+
+    def _is_incident(self, article: Article = None):
+
+        normalized_text = normalize_text(article.text)
+        if self.is_gpt_setup:
+            return chat_gpt.predict_is_incident(
+                normalized_text,
+                self.current_incident_type.chat_gpt_prompt,
+                self.current_incident_type.description,
+                article,
+            )
+        relevance = rate_with_model_and_tokenizer(
+            normalized_text, self.model, self.tokenizer
+        )
+        if article:
+            article.rate[self.current_incident_type.description] = relevance
+            article.save()
+
+        return relevance[0] - relevance[1] > self.current_incident_type.treshold
+
+    def _create_incident(self, article: Article) -> MediaIncident:
+        return MediaIncident.objects.create(
+            urls=[article.url],
+            status=MediaIncident.UNPROCESSED,
+            title=article.any_title(),
+            public_title=article.any_title(),
+            create_date=article.publication_date or datetime.date.today(),
+            description=article.text,
+            related_article=article,
+            public_description=article.text,
+            incident_type=self.current_incident_type,
+            region=article.region,
+            country=article.country,
+        )
+
+    def predict_batch(self, batch: list[Article]) -> int:
+        incidents_count: int = 0
+        for incident_type in IncidentType.objects.all():
+            if not incident_type.is_active:
+                continue
+
+            self.setup_incident_type(incident_type)
+
+            for article in batch:
+                if self._is_incident(article):
+                    self._create_incident(article)
+                    incidents_count += 1
+        return incidents_count
+
+    def predict(self, article: Article) -> Union[MediaIncident, None]:
+        for incident_type in IncidentType.objects.all():
+            if not incident_type.is_active:
+                continue
+
+            self.setup_incident_type(incident_type)
+            normalized_text = normalize_text(article.text)
+
+            if self.is_gpt_setup:
+                is_incident = chat_gpt.predict_is_incident(
+                    normalized_text,
+                    incident_type.chat_gpt_prompt,
+                    incident_type.description,
+                    article,
+                )
+                if is_incident:
+                    return self._create_incident(article)
+
+            if not incident_type.model_path:
+                continue
+            if is_incident:
+                return self._create_incident(article)
+        return None
