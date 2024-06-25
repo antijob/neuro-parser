@@ -1,5 +1,5 @@
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
-from server.apps.core.incident_types import IncidentType
+from server.apps.core.models import IncidentType
 from server.apps.bot.logic.messages import (
     CATEGORIES_MESSAGE,
 )

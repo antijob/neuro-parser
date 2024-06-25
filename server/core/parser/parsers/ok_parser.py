@@ -15,11 +15,6 @@ class OkParser(ParserBase):
         return re.match(r"https://ok\.ru/", url)
 
     @classmethod
-    def get_page_data(cls, url: str) -> ArticleData:
-        page = requests.get(url, headers=random_headers())
-        return cls.parse_raw_data(page.text, url)
-
-    @classmethod
     def parse_raw_data(cls, url: str, data) -> ArticleData:
         tree = HTMLParser(data)
         text = tree.css_first("div.media-text_cnt_tx").text()

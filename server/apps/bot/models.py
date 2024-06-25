@@ -1,5 +1,5 @@
 from django.db import models
-from server.apps.core.incident_types import IncidentType
+from server.apps.core.models import IncidentType
 
 
 class Channel(models.Model):
@@ -8,7 +8,7 @@ class Channel(models.Model):
     """
 
     channel_id = models.CharField(max_length=32, blank=False, null=False, unique=True)
-    type = models.ManyToManyField(IncidentType, through='TypeStatus')
+    type = models.ManyToManyField(IncidentType, through="TypeStatus")
 
     def __str__(self):
         return self.channel_id

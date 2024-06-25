@@ -3,18 +3,7 @@ import os.path
 from django.conf import settings
 
 from server.apps.core.data.topo import TOPONYMS, COUNTRIES
-from server.apps.core.logic.morphy import normalize_text
-
-DATA_DIR = os.path.join(
-    settings.BASE_DIR,
-    "server",
-    "apps",
-    "core",
-    "logic",
-    "grabber",
-    "classificator",
-    "data",
-)
+from server.libs.morphy import normalize_text
 
 
 def region_codes(text):

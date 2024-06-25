@@ -10,6 +10,7 @@ from datetime import datetime
 from server.core.parser.parsers.base_parser import ArticleData, ParserBase
 
 
+# Why not from ..utils import get_first_sentence ??
 def get_first_sentence(text):
     pattern = r"^(.*?[.!?])\s"
     match = re.search(pattern, text)
@@ -25,12 +26,6 @@ class TgParser(ParserBase):
     @classmethod
     def can_handle(cls, url: str) -> bool:
         return re.match(r"https://t\.me/", url)
-
-    @classmethod
-    def get_page_data(cls, url: str) -> ArticleData:
-        params = {"embed": "1"}
-        page = requests.get(url, params)
-        return cls.parse_raw_data(page.text, url)
 
     @classmethod
     def parse_raw_data(cls, url: str, data) -> ArticleData:
@@ -51,6 +46,7 @@ class TgParser(ParserBase):
         date = original_datetime.strftime("%Y-%m-%d")
         return ArticleData(title, text, date, url)
 
+    # Почему здесь дополнительный запрос ?
     @classmethod
     def extract_urls(cls, url: str, document=None) -> Iterable[str]:
         if "/s/" not in url:

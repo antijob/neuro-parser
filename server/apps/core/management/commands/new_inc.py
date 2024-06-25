@@ -1,11 +1,11 @@
 from django.core.management.base import BaseCommand
 from datetime import date
 from server.apps.core.models import MediaIncident
-from server.apps.core.incident_types import IncidentType
+from server.apps.core.models import IncidentType
 
 
 class Command(BaseCommand):
-    help = 'Creates and saves an instance of BaseIncident'
+    help = "Creates and saves an instance of BaseIncident"
 
     def handle(self, *args, **kwargs):
         # Create a new instance of BaseIncident

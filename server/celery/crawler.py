@@ -2,6 +2,7 @@ from .celery_app import app
 
 from server.apps.core.models import Article, Source
 from server.core.fetcher import Fetcher
+from server.core.parser.source_parser import SourceParser
 
 
 @app.task(queue="crawler", name="crawl_chain")
@@ -15,7 +16,7 @@ def update_sources():
     urls_count = 0
     for source in sources:
         try:
-            urls_count += source.update()
+            urls_count += SourceParser.create_new_articles(source)
         except Exception as e:
             print(f"An error occurred while updating source: {e}")
     return f"Urls extracted: {urls_count}"

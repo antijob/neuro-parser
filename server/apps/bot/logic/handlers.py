@@ -9,7 +9,7 @@ from server.apps.bot.logic.messages import (
 from server.apps.bot.logic.keyboard import create_inline_keyboard
 from server.apps.bot.models import Channel
 from server.apps.bot.models import TypeStatus
-from server.apps.core.incident_types import IncidentType
+from server.apps.core.models import IncidentType
 from server.settings.components.telegram import TELEGRAM_BOT_NAME
 
 
