@@ -14,11 +14,6 @@ class ParserBase(ABC):
 
     @classmethod
     @abstractmethod
-    def get_page_data(cls, url: str) -> ArticleData:
-        pass
-
-    @classmethod
-    @abstractmethod
     def parse_raw_data(cls, url: str, data) -> ArticleData:
         pass
 
