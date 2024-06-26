@@ -8,6 +8,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('bot', '0001_initial'),
+        ('core', '0005_alter_country_name'),
     ]
 
     operations = [
