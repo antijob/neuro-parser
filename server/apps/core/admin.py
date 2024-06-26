@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from django.contrib import admin
 
 from server.apps.core.models import (
@@ -10,7 +8,7 @@ from server.apps.core.models import (
     Country,
     Region,
 )
-from server.apps.core.forms import IncidentTypeForm
+from server.apps.core.forms import IncidentTypeForm, RegionAdminForm
 
 
 @admin.register(Country)
@@ -20,6 +18,7 @@ class CountryAdmin(admin.ModelAdmin):
 
 @admin.register(Region)
 class RegionAdmin(admin.ModelAdmin):
+    form = RegionAdminForm
     list_display = ("name", "country")
 
 
