@@ -27,10 +27,12 @@ def get_latest_unique_articles() -> List[Article]:
 
 
 def make_simhash_from_article(article: Article) -> Simhash:
-    text = "\n".join([article.title, article.text])
-    text = text.strip().lower()
-    text = clear_text.sub("", text)
-    return Simhash(text, f=SIMHASH_DIMENSION)
+    title = article.title if article.title else ""
+    text = article.text if article.text else ""
+    full_text = "\n".join([title, text])
+    full_text = full_text.strip().lower()
+    full_text = clear_text.sub("", full_text)
+    return Simhash(full_text, f=SIMHASH_DIMENSION)
 
 
 def get_simhash_distance(url1, url2):
