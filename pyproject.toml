@@ -47,6 +47,7 @@ dependencies = [
     "simhash<3.0.0,>=2.1.2",
     "aiohttp<4.0.0,>=3.8.6",
     "lxml[html_clean]<6,>=5",
+    "backports-zoneinfo>=0.2.1",
 ]
 name = "neuro-parser"
 version = "0.1.0"

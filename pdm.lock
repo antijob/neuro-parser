@@ -5,7 +5,7 @@
 groups = ["default"]
 strategy = ["cross_platform", "inherit_metadata"]
 lock_version = "4.4.1"
-content_hash = "sha256:9973e869a57bf41eb16c2862053bf5de6e3a8b5d433f19bf942bc233a69f0485"
+content_hash = "sha256:a4fcba1d0738ad92d0ecc584e3094d597de8e87e57c41f3b6ddeea4febbaf4d5"
 
 [[package]]
 name = "aiohttp"
@@ -230,7 +230,6 @@ version = "0.2.1"
 requires_python = ">=3.6"
 summary = "Backport of the standard library zoneinfo module"
 groups = ["default"]
-marker = "python_version < \"3.9\""
 files = [
     {file = "backports.zoneinfo-0.2.1-cp38-cp38-macosx_10_14_x86_64.whl", hash = "sha256:8961c0f32cd0336fb8e8ead11a1f8cd99ec07145ec2931122faaac1c8f7fd987"},
     {file = "backports.zoneinfo-0.2.1-cp38-cp38-manylinux1_i686.whl", hash = "sha256:e81b76cace8eda1fca50e345242ba977f9be6ae3945af8d46326d776b4cf78d1"},
