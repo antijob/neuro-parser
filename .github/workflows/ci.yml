@@ -132,7 +132,6 @@ jobs:
         run: echo "${{ secrets.docker_password }}" | docker login -u ${{ secrets.docker_username }} --password-stdin
 
       - name: Prepare .env
-        if: ${{ steps.filter.outputs.web == 'true' || github.event.inputs.runType == 'Force build' }}
         run: |
           cp .env.template .env
           sed -i \
