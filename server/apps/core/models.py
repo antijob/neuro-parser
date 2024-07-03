@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import datetime
 import re
-import time
 
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
@@ -9,11 +8,13 @@ from django.urls import reverse
 
 from server.apps.core.data.regions import COUNTRIES, REGIONS
 from server.apps.core.incident_types import IncidentType
-from server.apps.core.logic.grabber import article_parser, source_parser
 from server.apps.core.logic.grabber.classificator import category
 from server.apps.core.logic.grabber.region import region_code
 from server.apps.core.logic.morphy import normalize_text
 from server.apps.users.models import User
+from server.core.parser.source_parser import SourceParser
+
+from server.core.parser.article_parser import ArticleParser
 
 
 class Country(models.Model):
@@ -21,6 +22,9 @@ class Country(models.Model):
 
     def __str__(self) -> str:
         return self.name
+
+    def get_full_country_name(self):
+        return dict(COUNTRIES).get(self.name, "Unknown country")
 
     class Meta:
         verbose_name = "Страна"
@@ -33,6 +37,9 @@ class Region(models.Model):
 
     def __str__(self) -> str:
         return f"{self.name}, {self.country.name}"
+
+    def get_full_region_name(self):
+        return dict(REGIONS).get(self.name, "Unknown region")
 
     class Meta:
         verbose_name = "Регион"
@@ -184,18 +191,12 @@ class MediaIncident(BaseIncident):
             public_description=article.text,
             incident_type=incident_type,
             region=article.region,
+            country=article.country,
         )
 
     class Meta:
         verbose_name = "Инцидент из СМИ"
         verbose_name_plural = "Инциденты из СМИ"
-
-
-def get_default_country_id():
-    """return default country id, default country is Russia"""
-    # default_country = Country.objects.get(name="RUS")
-    # return default_country.id
-    return 11
 
 
 class Source(models.Model):
@@ -231,15 +232,15 @@ class Source(models.Model):
         return added
 
     def update(self):
-        urls = source_parser.extract_all_news_urls(self.url)
+        urls = SourceParser.extract_all_news_urls(self.url)
         if not urls:
             return 0
         added = self.add_articles(urls)
         self.save()
         return len(added)
 
-    def grab_archive(self, first_page_url=None, first_page=1):
-        return source_parser.grab_archive(self, first_page_url, first_page)
+    # def grab_archive(self, first_page_url=None, first_page=1):
+    #     return source_parser.grab_archive(self, first_page_url, first_page)
 
     def __str__(self):
         return "Source [{}]".format(self.url)
@@ -286,25 +287,8 @@ class Article(models.Model):
         super().save(*args, **kwargs)
 
     def download(self):
-        raw_data = article_parser.get_article(self.url)
-        self.postprocess_raw_data(raw_data)
-
-    def get_html_and_postprocess(self, data):
-        postprocess_start_time = time.time()
-        raw_data = article_parser.parse_article_raw_data(self.url, data)
-        self.postprocess_raw_data(raw_data)
-        postprocess_end_time = time.time()
-        return postprocess_end_time - postprocess_start_time
-
-    def postprocess_raw_data(self, data):
-        if data:
-            self.title, self.text, publication_date, self.url = data
-            if publication_date:
-                self.publication_date = publication_date
-            else:
-                self.publication_date = datetime.date.today()
-        self.is_downloaded = True
-        self.save()
+        raw_data = ArticleParser.get_article(self.url)
+        ArticleParser.postprocess_raw_data(self, raw_data)
 
     def any_title(self):
         if self.title:
@@ -327,13 +311,11 @@ class Article(models.Model):
     @property
     def region(self):
         region = self.source.region if self.source else "ALL"
-        if region == "ALL":
-            region = region_code("{} {}".format(self.title, self.text))
         return region
 
     @property
     def country(self):
-        country = self.source.country if self.source else "ALL"
+        country = self.source.country if self.source else "RUS"
         return country
 
     def normalized_text(self):

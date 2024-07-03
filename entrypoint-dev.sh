@@ -13,6 +13,6 @@ python manage.py set_webhook
 python manage.py status_update
 
 # Start the Django application
-gunicorn --bind 0.0.0.0:8000 server.wsgi
+python manage.py runserver 0.0.0.0:8000
 
 

@@ -1,7 +1,7 @@
 from .celery_app import app
 from server.apps.core.models import Article, Source
 from server.apps.core.incident_types import IncidentType
-from server.apps.core.logic.reposts import check_repost_query
+from server.core.article_index.query_checker import mark_duplicates
 from server.settings.components.celery import INCIDENT_BATCH_SIZE
 
 from datetime import datetime, timedelta
@@ -22,20 +22,19 @@ def get_parse_candidates():
     articles = Article.objects.filter(
         is_downloaded=True,
         is_parsed=False,
-        create_date__gte=start_date)
+        is_duplicate=False,
+        create_date__gte=start_date,
+    )
     return articles
 
 
-@app.task(queue="parser", name='parse_chain')
+@app.task(queue="parser", name="parse_chain")
 def parse_chain():
     articles = get_parse_candidates()
 
     if len(articles) == 0:
         return "No candidates"
-    (
-        delete_duplicate_articles.s() |
-        plan_incidents.s()
-    ).apply_async()
+    (delete_duplicate_articles.s() | plan_incidents.s()).apply_async()
 
     return f"Start chain with {len(articles)} urlsss"
 
@@ -43,7 +42,7 @@ def parse_chain():
 @app.task(queue="parser")
 def delete_duplicate_articles():
     articles = get_parse_candidates()
-    check_repost_query(articles)
+    mark_duplicates(articles)
     dups = articles.filter(is_duplicate=True)
     return f"Duplicates found: {len(dups)}"
 
@@ -68,11 +67,12 @@ def create_incidents(batch):
             incidents_count += incident_type.process_batch(articles_batch)
         except Exception as e:
             print(
-                f"An error occurred while creating incident for type {incident_type.description}: {e}")
+                f"An error occurred while creating incident for type {incident_type.description}: {e}"
+            )
     for art in articles_batch:
         art.is_parsed = True
         art.save()
-    return f"Batch finished. Incodents created: {incidents_count}"
+    return f"Batch finished. Incidents created: {incidents_count}"
 
 
 @app.task(queue="parser")
