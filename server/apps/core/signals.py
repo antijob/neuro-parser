@@ -1,23 +1,25 @@
 import logging
+import sys
 
+from asgiref.sync import async_to_sync
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
-from server.apps.bot.logic.send import send_message
-from server.apps.bot.models import Channel, CountryStatus, RegionStatus, TypeStatus
+from server.apps.bot.bot_instance import bot, close_bot
+from server.apps.bot.models import Channel, ChannelIncidentType
 
-from .models import MediaIncident, IncidentType
+from .models import IncidentType, MediaIncident
 
+logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 logger = logging.getLogger(__name__)
 
 inc_template = """
-New incident created
-Category: {cat}
-Title: {title}
-Country: {country}
-Region: {region}
-Description: {desc}
-URLs: {url}
+<b>Category:</b> {cat}
+<b>Title:</b> {title}
+<b>Country:</b> {country}
+<b>Region:</b> {region}
+<b>Description:</b> {desc}
+<b>URLs:</b> {url}
 """
 
 
@@ -41,27 +43,25 @@ def mediaincident_post_save(sender, instance, created, **kwargs):
         )
         for chn in all_channels:
             try:
-                type_status = TypeStatus.objects.get(
+                type_status = ChannelIncidentType.objects.get(
                     channel=chn, incident_type=instance.incident_type
                 )
-                country_status = CountryStatus.objects.get(
-                    channel=chn, country=instance.country
+                logger.debug(
+                    f"Chanel_IncidentType: {type_status.channel} {type_status.incident_type} {type_status.status}"
                 )
-                region_status = RegionStatus.objects.get(
-                    channel=chn, region=instance.region
-                )
-                if (
-                    type_status.status
-                    and country_status.status
-                    and region_status.status
-                ):
-                    send_message(chn.channel_id, msg)
+                if type_status.status:
+                    logger.info(f"Sending message to channel: {chn.channel_id}")
+                    async_to_sync(bot.send_message)(chat_id=chn.channel_id, text=msg)
+
             except Exception as e:
-                logger.error(f"An error occurred: {e} \nIn instance: {instance.id}")
+                logger.error(f"An error occurred: {e} In instance: {instance.id}")
+        logger.info("Message sent to all channels")
+        async_to_sync(close_bot)()
 
 
 @receiver(post_save, sender=IncidentType)
 def incidenttype_post_save(sender, instance, created, **kwargs):
+    # TODO: rewrite
     """
     Executes on creation of new instance of IncidentType model
     Creates status (TypeStatus) for each channel in order to guarantee
@@ -71,7 +71,7 @@ def incidenttype_post_save(sender, instance, created, **kwargs):
         all_channels = Channel.objects.all()
         for chn in all_channels:
             try:
-                TypeStatus.objects.create(
+                ChannelIncidentType.objects.create(
                     incident_type=instance, channel=chn, status=True
                 )
             except Exception as e:
