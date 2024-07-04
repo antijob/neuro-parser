@@ -2,24 +2,34 @@ from django.contrib import admin
 
 from server.apps.bot.models import (
     Channel,
-    TypeStatus,
-    CountryStatus,
-    RegionStatus,
+    ChannelIncidentType,
+    ChannelCountry,
 )
 
-admin.site.register(Channel)
+
+class ChannelIncidentTypeInline(admin.TabularInline):
+    model = ChannelIncidentType
+    extra = 1
 
 
-@admin.register(TypeStatus)
-class TypeStatusAdmin(admin.ModelAdmin):
-    list_display = ("incident_type", "channel", "status")
+class ChannelSubscriptionInline(admin.TabularInline):
+    model = ChannelCountry
+    extra = 1
 
 
-@admin.register(CountryStatus)
-class CountryStatusAdmin(admin.ModelAdmin):
-    list_display = ("country", "channel", "status")
+@admin.register(Channel)
+class ChannelAdmin(admin.ModelAdmin):
+    list_display = ["channel_id"]
+    inlines = [ChannelIncidentTypeInline]
 
 
-@admin.register(RegionStatus)
-class RegionStatusAdmin(admin.ModelAdmin):
-    list_display = ("region", "channel", "status")
+@admin.register(ChannelIncidentType)
+class ChannelIncidentTypeAdmin(admin.ModelAdmin):
+    list_display = ["channel", "incident_type", "status"]
+    inlines = [ChannelSubscriptionInline]
+
+
+@admin.register(ChannelCountry)
+class ChannelSubscriptionAdmin(admin.ModelAdmin):
+    list_display = ["channel_incident_type", "country", "enabled_regions", "status"]
+    list_filter = ["channel_incident_type", "country", "status"]
