@@ -56,7 +56,7 @@ def main():
 
     # Пересоздать рабочую базу с нуля
     run_command(
-        "docker-compose exec db psql -U postgres -d postgres -c 'DROP DATABASE \"neural-parser\";'"
+        "docker-compose exec db psql -U postgres -d postgres -c 'DROP DATABASE IF EXISTS \"neural-parser\";'"
     )
     run_command(
         "docker-compose exec db psql -U postgres -d postgres -c 'CREATE DATABASE \"neural-parser\";'"
@@ -82,6 +82,9 @@ def main():
     run_command(
         "docker-compose exec web python manage.py createsuperuser --noinput --email np@np.com"
     )
+
+    # Применить фикстуры
+    run_command("docker compose exec web python manage.py loaddata incident_types.json")
 
     logger.info("Database reset process completed successfully")
 
