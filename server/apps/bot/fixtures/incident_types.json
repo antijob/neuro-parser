@@ -1,0 +1,20 @@
+[
+  {
+    "model": "core.incidenttype",
+    "pk": 1,
+    "fields": {
+      "description": "Пупа",
+      "is_active": true,
+      "should_sent_to_bot": true
+    }
+  },
+  {
+    "model": "core.incidenttype",
+    "pk": 2,
+    "fields": {
+      "description": "Лупа",
+      "is_active": true,
+      "should_sent_to_bot": true
+    }
+  }
+]
