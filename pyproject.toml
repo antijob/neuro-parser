@@ -7,7 +7,7 @@ includes = ["neuro_parser"]
 authors = [
     {name = "Antijob", email = "info@antijob.net"},
 ]
-requires-python = "<4.0,>=3.8"
+requires-python = "<4.0,>=3.9"
 dependencies = [
     "beautifulsoup4==4.10.0",
     "celery[redis]<6.0.0,>=5.3.4",
