@@ -67,7 +67,7 @@ async def category_status_change_callback(
 
     chn = await chat_in_db(callback.message)
     if not chn:
-        return
+        return None
 
     cit = await sync_to_async(ChannelIncidentType.objects.get)(
         id__exact=int(callback_data.channel_incident_type_id)
