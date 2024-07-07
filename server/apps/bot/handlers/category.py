@@ -6,13 +6,14 @@ from aiogram.types import CallbackQuery, Message
 from asgiref.sync import sync_to_async
 from magic_filter import F
 
-from server.apps.bot.data.messages import CATEGORIES_MESSAGE
+from server.apps.bot.data.messages import CATEGORIES_MESSAGE, COUNTRY_MESSAGE
 from server.apps.bot.handlers.utils import chat_in_db
 from server.apps.bot.keyboards.category_kb import (
     CategoryCallbackFactory,
     category_keyboard,
 )
-from server.apps.bot.models import ChannelIncidentType, IncidentType
+from server.apps.bot.keyboards.country_kb import country_keyboard
+from server.apps.bot.models import ChannelIncidentType
 
 logger = logging.getLogger(__name__)
 
@@ -68,14 +69,11 @@ async def category_status_change_callback(
     if not chn:
         return
 
-    incident_type = await sync_to_async(IncidentType.objects.get)(
-        id__exact=int(callback_data.incident_type_id)
+    cit = await sync_to_async(ChannelIncidentType.objects.get)(
+        id__exact=int(callback_data.channel_incident_type_id)
     )
-    type_status = await sync_to_async(ChannelIncidentType.objects.get)(
-        incident_type=incident_type, channel=chn
-    )
-    type_status.status = not type_status.status
-    await sync_to_async(type_status.save)()
+    cit.status = not cit.status
+    await sync_to_async(cit.save)()
 
     keyboard = await category_keyboard(chn)
     await callback.message.edit_reply_markup(reply_markup=keyboard)
@@ -86,4 +84,10 @@ async def category_status_change_callback(
 async def category_config_callback(
     callback: CallbackQuery, callback_data: CategoryCallbackFactory
 ):
-    await callback.answer("А настроек то пока и нет", show_alert=True)
+    chn = await chat_in_db(callback.message)
+    if not chn:
+        return
+
+    keyboard = await country_keyboard(callback_data.channel_incident_type_id)
+    await callback.message.edit_text(text=COUNTRY_MESSAGE, reply_markup=keyboard)
+    await callback.answer()
