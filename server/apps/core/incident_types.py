@@ -30,7 +30,7 @@ class IncidentType(models.Model):
 
     def get_tokenizer(self):
         tokenizer = AutoTokenizer.from_pretrained(
-            self.model_directory, use_fast=False, from_safetensors=True)
+            self.model_directory, use_fast=False)
         return tokenizer
 
     def get_model(self):
@@ -48,8 +48,8 @@ class IncidentType(models.Model):
 
     def process_batch_model(self, batch):
         incidents_count = 0
-        tokenizer = self.get_tokenizer()
-        model = self.get_model()
+        tokenizer = item.get_tokenizer()
+        model = model.get_model()
         for art in batch:
             relevance = rate_with_model_and_tokenizer(
                 art.normalized_text(), model, tokenizer
