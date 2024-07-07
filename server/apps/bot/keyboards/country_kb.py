@@ -3,11 +3,11 @@ from enum import Enum
 from typing import Optional
 
 from aiogram.filters.callback_data import CallbackData
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from asgiref.sync import sync_to_async
 
-from server.apps.bot.data.settings import CHECK, CROSS
+from server.apps.bot.data.settings import CHECK, CROSS, REGIONS
 from server.apps.bot.models import (
     ChannelCountry,
     ChannelIncidentType,
@@ -44,19 +44,29 @@ def country_keyboard(cit: ChannelIncidentType) -> Optional[InlineKeyboardMarkup]
         status = CHECK if ch_country.status else CROSS
         ch_country_id = ch_country.id
 
-        builder.button(
-            text=btn_label,
-            callback_data=CountryCF(
-                action=Action.update, channel_country_id=ch_country_id
+        builder.row(
+            InlineKeyboardButton(
+                text=btn_label,
+                callback_data=CountryCF(
+                    action=Action.update, channel_country_id=ch_country_id
+                ).pack(),
+            ),
+            InlineKeyboardButton(
+                text=status,
+                callback_data=CountryCF(
+                    action=Action.update, channel_country_id=ch_country_id
+                ).pack(),
             ),
         )
-        builder.button(
-            text=status,
-            callback_data=CountryCF(
-                action=Action.update, channel_country_id=ch_country_id
-            ),
-        )
-    builder.adjust(2)
+        if ch_country.country.has_region():
+            builder.row(
+                InlineKeyboardButton(
+                    text=REGIONS,
+                    callback_data=CountryCF(
+                        action=Action.region, channel_country_id=ch_country_id
+                    ).pack(),
+                )
+            )
 
     back_button = InlineKeyboardButton(
         text="<< Назад",

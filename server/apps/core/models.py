@@ -41,6 +41,9 @@ class Country(models.Model):
     def get_full_country_name(self):
         return dict(COUNTRIES).get(self.name, "Unknown country")
 
+    def has_region(self):
+        return Region.objects.filter(country=self).exists()
+
     class Meta:
         verbose_name = "Страна"
         verbose_name_plural = "Страны"
