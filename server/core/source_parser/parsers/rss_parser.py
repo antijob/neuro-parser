@@ -1,4 +1,4 @@
-from .base_parser import ParserBase, ArticleData
+from .base_parser import ParserBase
 from ..utils import is_correct_article_link, get_absolute_url, is_rss_link
 from lxml import cssselect
 import re
@@ -24,10 +24,6 @@ class RssParser(ParserBase):
     @classmethod
     def can_handle(cls, url: str) -> bool:
         return re.match(r"https?://.*\.(rss|xml|feed)$", url)
-
-    @classmethod
-    def parse_raw_data(cls, url: str, data) -> ArticleData:
-        raise NotImplementedError("RSS parser does not implement parse_raw_data")
 
     @classmethod
     def extract_urls(cls, source_url: str, document=None) -> Iterable[str]:

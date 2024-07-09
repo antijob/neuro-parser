@@ -1,13 +1,10 @@
-from typing import Iterable
-
 from selectolax.parser import HTMLParser
-import requests
 import re
 from datetime import datetime
 
 # from ..utils import get_first_sentence
 
-from server.core.parser.parsers.base_parser import ArticleData, ParserBase
+from server.core.article_parser.parsers.base_parser import ArticleData, ParserBase
 
 
 # Why not from ..utils import get_first_sentence ??
@@ -45,14 +42,3 @@ class TgParser(ParserBase):
         original_datetime = datetime.fromisoformat(date_time)
         date = original_datetime.strftime("%Y-%m-%d")
         return ArticleData(title, text, date, url)
-
-    # Почему здесь дополнительный запрос ?
-    @classmethod
-    def extract_urls(cls, url: str, document=None) -> Iterable[str]:
-        if "/s/" not in url:
-            url = url.replace("https://t.me/", "https://t.me/s/")
-        page = requests.get(url)
-        tree = HTMLParser(page.text)
-
-        for node in tree.css("a.tgme_widget_message_date"):
-            yield node.attributes["href"]
