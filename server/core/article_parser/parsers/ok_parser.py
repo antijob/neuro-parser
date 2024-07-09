@@ -2,7 +2,7 @@ from selectolax.parser import HTMLParser
 import re
 from ..utils import convert_date_format, get_first_sentence
 
-from server.core.article_parser.parsers.base_parser import ArticleData, ParserBase
+from .base_parser import ArticleData, ParserBase
 
 
 class OkParser(ParserBase):

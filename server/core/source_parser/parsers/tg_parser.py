@@ -1,9 +1,9 @@
 from typing import Iterable
 
-from lxml import etree
+from lxml import cssselect, etree
 import re
 
-from server.core.article_parser.parsers.base_parser import ParserBase
+from .base_parser import ParserBase
 
 
 class TgParser(ParserBase):
@@ -14,7 +14,7 @@ class TgParser(ParserBase):
     # Почему здесь дополнительный запрос ?
     @classmethod
     def extract_urls(cls, url: str, document=None) -> Iterable[str]:
-        links = CSSSelector("a.tgme_widget_message_date")(document)
+        links = cssselect.CSSSelector("a.tgme_widget_message_date")(document)
 
         for link in links:
             yield link.get("href")

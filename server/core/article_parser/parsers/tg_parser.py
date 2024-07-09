@@ -4,7 +4,7 @@ from datetime import datetime
 
 # from ..utils import get_first_sentence
 
-from server.core.article_parser.parsers.base_parser import ArticleData, ParserBase
+from .base_parser import ArticleData, ParserBase
 
 
 # Why not from ..utils import get_first_sentence ??

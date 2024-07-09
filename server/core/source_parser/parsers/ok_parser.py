@@ -1,9 +1,9 @@
 from typing import Iterable
 
-from lxml import etree
+from lxml import cssselect, etree
 import re
 
-from server.core.article_parser.parsers.base_parser import ParserBase
+from .base_parser import ParserBase
 
 
 class OkParser(ParserBase):
@@ -13,9 +13,7 @@ class OkParser(ParserBase):
 
     @classmethod
     def extract_urls(cls, url: str, document=None) -> Iterable[str]:
-        document = etree.HTML(html)
-
-        links = CSSSelector("a.media-text_a")(document)
+        links = cssselect.CSSSelector("a.media-text_a")(document)
         for link in links:
             news_page_link = "https://ok.ru" + link.get("href")
             yield news_page_link

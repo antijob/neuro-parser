@@ -3,7 +3,7 @@ from goose3.configuration import Configuration
 from urllib.parse import urlparse
 
 
-from server.core.article_parser.parsers.base_parser import ArticleData, ParserBase
+from .base_parser import ArticleData, ParserBase
 from ..utils import convert_date_format
 
 
