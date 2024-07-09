@@ -2,13 +2,13 @@ from typing import Union
 import datetime
 
 from server.libs.morphy import normalize_text
+from server.libs import chat_gpt
+
 from server.apps.core.models import IncidentType, Article, MediaIncident
 
 from transformers import AutoTokenizer, BertForSequenceClassification
 
 from django.conf import settings
-
-from ..libs import chat_gpt
 
 
 # COSINE.PY

@@ -3,7 +3,7 @@ from typing import Iterable
 from urllib.parse import urlparse
 from lxml import cssselect, etree
 
-from server.core.article_parser.parsers.base_parser import ParserBase
+from .base_parser import ParserBase
 from ..utils import (
     is_correct_article_link,
     get_absolute_url,

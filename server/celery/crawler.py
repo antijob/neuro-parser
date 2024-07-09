@@ -2,7 +2,7 @@ from .celery_app import app
 
 from server.apps.core.models import Article, Source
 from server.core.fetcher import Fetcher
-from server.core.source_parser.source_parser import SourceParser
+from server.core.source_parser import SourceParser
 
 
 @app.task(queue="crawler", name="crawl_chain")
