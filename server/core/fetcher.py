@@ -8,7 +8,7 @@ from server.libs.user_agent import session_random_headers
 from typing import Callable, Awaitable, Any, Coroutine, Iterable, List, Dict
 
 from server.apps.core.models import Article, Source
-from server.core.parser.article_parser import ArticleParser
+from server.core.article_parser.article_parser import ArticleParser
 
 
 class BadCodeException(Exception):
@@ -103,6 +103,19 @@ class Fetcher:
             article.text = content
             ArticleParser.postprocess_article(article, content)
             await sync_to_async(article.save, thread_sensitive=True)()
+
+    async def download_source(url: str) -> str:
+        params = {}
+        async with aiohttp.ClientSession(
+            trust_env=True,
+            connector=aiohttp.TCPConnector(ssl=False),
+            headers=session_random_headers(),
+        ) as session:
+            async with session.get(url, params=params) as response:
+                if response.status == 200:
+                    return await response.text()
+                else:
+                    return None
 
     async def create_coroutine(self, source: Source, articles: Dict[str, Article]):
         rps: float = 1  # source.rps

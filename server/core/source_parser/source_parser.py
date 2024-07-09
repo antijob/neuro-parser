@@ -3,8 +3,6 @@ from .parsers.base_parser import ParserBase
 
 import re
 from lxml import etree
-import requests
-from server.libs.user_agent import random_headers
 from lxml.html.clean import Cleaner
 
 from .parsers.vk_parser import VkParser
@@ -14,6 +12,9 @@ from .parsers.common_parser import CommonParser
 from .parsers.rss_parser import RssParser
 
 from server.apps.core.models import Article, Source
+from server.core.fetcher import Fetcher
+
+from asgiref.sync import async_to_sync
 
 
 CLEANER = Cleaner(
@@ -36,43 +37,29 @@ CLEANER = Cleaner(
 )
 
 
-def decoded(response: requests.Response) -> str:
-    encodings = ("utf-8", "cp1251", "cp866", "koi8-r")
-    for encoding in encodings:
-        try:
-            return response.content.decode(encoding)
-        except UnicodeDecodeError:
-            pass
-    return ""
-
-
 # Почти все это -- задача Фетчера
-def get_document(url: str, clean=False):
-    """Get document by given url,
-    cleans it if clean = True and return etree document
+async def get_source_data(url: str) -> str:
+    """Get document by given url"""
+
+    html = await Fetcher.download_source(url)
+    if html:
+        html = html.replace("\xa0", " ")
+    return html
+
+
+def build_document(html, clean=False):
     """
-    headers = random_headers()
-    response: requests.Response
-    try:
-        if url.startswith("https://t.co/"):
-            response = requests.get(url)
-        else:
-            response = requests.get(url, headers=headers, timeout=8)
-    except requests.exceptions.RequestException:
-        return
-    if not response.status_code == 200:
-        return
-    html = decoded(response)
-    html = html.replace("\xa0", " ")
-    if html and clean:
+    Return etree document
+    cleans it if clean = True
+    """
+    if not html:
+        return None
+    if clean:
         html = CLEANER.clean_html(html)
     try:
         document = etree.HTML(html)
     except ValueError:
-        document = etree.HTML(response.content)
-
-    if document is not None:
-        document.set("url", response.url)
+        pass
 
     return document
 
@@ -104,14 +91,18 @@ class SourceParser:
     document_parsers: List[ParserBase] = [RssParser, CommonParser]
 
     @classmethod
-    def extract_all_news_urls(cls, url: str) -> Iterable[str]:
+    async def extract_all_news_urls(cls, url: str) -> Iterable[str]:
+        html = await get_source_data(url)
+        if html is None:
+            return None
+
+        document = build_document(html)
+
         for parser in cls.parsers:
             if parser.can_handle(url):
-                return parser.extract_urls(url)
+                return parser.extract_urls(url, document)
 
-        document = get_document(url)
-        if document is None:
-            return
+        document = build_document(html, clean=True)
 
         for parser in cls.document_parsers:
             if parser.can_handle(url):
@@ -120,7 +111,7 @@ class SourceParser:
 
     @classmethod
     def create_new_articles(cls, source: Source) -> int:
-        urls = cls.extract_all_news_urls(source.url)
+        urls = async_to_sync(cls.extract_all_news_urls)(source.url)
         if not urls:
             return 0
         added = add_articles(source, urls)

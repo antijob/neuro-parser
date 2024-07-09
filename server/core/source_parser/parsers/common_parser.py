@@ -1,14 +1,10 @@
 from typing import Iterable
 
-from goose3 import Goose
-from goose3.configuration import Configuration
 from urllib.parse import urlparse
 from lxml import cssselect, etree
 
-
-from server.core.parser.parsers.base_parser import ArticleData, ParserBase
+from server.core.article_parser.parsers.base_parser import ParserBase
 from ..utils import (
-    convert_date_format,
     is_correct_article_link,
     get_absolute_url,
     is_rss_link,
@@ -309,19 +305,6 @@ class CommonParser(ParserBase):
     @classmethod
     def can_handle(cls, url: str) -> bool:
         return True  # Default parser
-
-    @classmethod
-    def parse_raw_data(cls, url: str, data) -> ArticleData:
-        config = Configuration()
-        config.strict = False
-
-        with Goose(config) as g:
-            article = g.extract(raw_html=data)
-            title = article.title
-            text = article.cleaned_text
-            date = convert_date_format(article.publish_date)
-
-        return ArticleData(title, text, date, url)
 
     @classmethod
     def extract_urls(cls, source_url: str, document) -> Iterable[str]:

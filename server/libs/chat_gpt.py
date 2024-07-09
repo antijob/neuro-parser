@@ -4,6 +4,8 @@
 
 import openai
 from nltk.tokenize import word_tokenize
+from django.conf import settings
+
 
 openai.api_key = settings.CHAT_GPT_KEY
 

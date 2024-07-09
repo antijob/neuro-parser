@@ -1,12 +1,8 @@
-from typing import Iterable
-
-import requests
 from selectolax.parser import HTMLParser
 import re
-from server.libs.user_agent import random_headers
 from ..utils import convert_date_format, get_first_sentence
 
-from server.core.parser.parsers.base_parser import ArticleData, ParserBase
+from server.core.article_parser.parsers.base_parser import ArticleData, ParserBase
 
 
 class OkParser(ParserBase):
@@ -29,12 +25,3 @@ class OkParser(ParserBase):
         if node:
             date = convert_date_format(node.text())
         return ArticleData(title, text, date, url)
-
-    @classmethod
-    def extract_urls(cls, url: str, document=None) -> Iterable[str]:
-        page = requests.get(url, headers=random_headers())
-        tree = HTMLParser(page.text)
-
-        for node in tree.css("a.media-text_a"):
-            news_page_link = "https://ok.ru" + node.attributes["href"]
-            yield news_page_link
