@@ -1,7 +1,12 @@
+import logging
+
+from django.contrib.postgres.fields import ArrayField
 from django.db import models, transaction
+
 from server.apps.core.incident_types import IncidentType
 from server.apps.core.models import Country, Region
-from django.contrib.postgres.fields import ArrayField
+
+logger = logging.getLogger(__name__)
 
 
 class Channel(models.Model):
@@ -13,6 +18,12 @@ class Channel(models.Model):
     channel_id = models.CharField(max_length=32, unique=True)
 
     def save(self, *args, **kwargs):
+        """
+        On add bot to channel creates all possible
+        options for incident types and countries
+        ChannelIncidentType and ChannelCountry relatively
+        To ChannelCountry also add regions
+        """
         is_new = self.pk is None
         with transaction.atomic():
             super().save(*args, **kwargs)
@@ -29,7 +40,12 @@ class Channel(models.Model):
                             channel_incident_type=cit,
                             country=c,
                             status=True,
+                            enabled_regions=(
+                                c.get_region_codes() if c.has_region() else []
+                            ),
                         )
+                        # if c.has_region():
+                        #     cc.enabled_regions = c.get_region_codes()
                         channel_countries.append(cc)
             ChannelIncidentType.objects.bulk_create(channel_incident_types)
             ChannelCountry.objects.bulk_create(channel_countries)
@@ -72,7 +88,9 @@ class ChannelCountry(models.Model):
         ChannelIncidentType, on_delete=models.CASCADE, related_name="subscriptions"
     )
     country = models.ForeignKey(Country, on_delete=models.CASCADE)
-    enabled_regions = ArrayField(models.IntegerField(), blank=True, default=list)
+    enabled_regions = ArrayField(
+        models.CharField(max_length=16), blank=True, default=list
+    )
     status = models.BooleanField(default=True)
 
     class Meta:
@@ -80,3 +98,23 @@ class ChannelCountry(models.Model):
 
     def __str__(self):
         return f"{self.channel_incident_type} - {self.country}"
+
+    def add_region(self, region_code: str) -> None:
+        if not Region.objects.filter(name=region_code).exists():
+            logger.error(f"Region with code: {region_code} not found")
+            return None
+        if region_code in self.enabled_regions:
+            logger.error(f"Region with code: {region_code} already in list")
+            return None
+        self.enabled_regions.append(region_code)
+        self.save()
+
+    def del_region(self, region_code: str) -> None:
+        if not Region.objects.filter(name=region_code).exists():
+            logger.error(f"Region with code: {region_code} not found")
+            return None
+        if region_code not in self.enabled_regions:
+            logger.error(f"Region with code: {region_code} not found in list")
+            return None
+        self.enabled_regions.remove(region_code)
+        self.save()
