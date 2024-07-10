@@ -1,8 +1,5 @@
 from typing import Iterable
-
 import re
-from lxml import cssselect, etree
-
 from .base_parser import ParserBase
 
 
@@ -13,8 +10,6 @@ class VkParser(ParserBase):
 
     @classmethod
     def extract_urls(cls, url: str, document=None) -> Iterable[str]:
-        links = cssselect.CSSSelector("a.PostHeaderSubtitle__link")(document)
-
-        for link in links:
-            news_page_link = "https://vk.com" + link.get("href")
+        for node in document.css("a.PostHeaderSubtitle__link"):
+            news_page_link = "https://vk.com" + node.attributes["href"]
             yield news_page_link
