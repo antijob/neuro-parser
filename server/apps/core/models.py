@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
 import datetime
+import logging
+import re
+from typing import List, Optional
 
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
@@ -41,12 +44,20 @@ class Country(models.Model):
     def get_full_country_name(self):
         return dict(COUNTRIES).get(self.name, "Unknown country")
 
-    def has_region(self):
-        return Region.objects.filter(country=self).exists()
-
     class Meta:
         verbose_name = "Страна"
         verbose_name_plural = "Страны"
+
+    def has_region(self) -> bool:
+        return Region.objects.filter(country=self).exists()
+
+    def get_region_codes(self) -> Optional[List[str]]:
+        if self.has_region():
+            regions = Region.objects.filter(country=self)
+            logger.debug([r.name for r in regions])
+            return [r.name for r in regions]
+        else:
+            return None
 
 
 class Region(models.Model):
@@ -56,12 +67,12 @@ class Region(models.Model):
     def __str__(self) -> str:
         return self.get_full_region_name()
 
-    def get_full_region_name(self):
-        return dict(REGIONS).get(self.name, "Unknown region")
-
     class Meta:
         verbose_name = "Регион"
         verbose_name_plural = "Регионы"
+
+    def get_full_region_name(self):
+        return dict(REGIONS).get(self.name, "Unknown region")
 
 
 class BaseIncident(models.Model):

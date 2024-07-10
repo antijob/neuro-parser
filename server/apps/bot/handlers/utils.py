@@ -1,7 +1,8 @@
 from server.apps.bot.models import Channel
 from django.core.exceptions import ObjectDoesNotExist
-from aiogram.types import Message
-from typing import Optional
+from aiogram.types import CallbackQuery, Message
+from typing import Optional, Any, Union, Callable
+from functools import wraps
 
 import logging
 import inspect
@@ -26,3 +27,23 @@ async def chat_in_db(message: Message) -> Optional[Channel]:
             f"Can't find channel {message.chat.id}, while executing __{inspect.stack()[1].function}__ function"
         )
         return None
+
+
+def check_channel(func: Callable) -> Callable:
+    """
+    Decorator for checking if chat eixtst in db before executing handlre
+    If yes function is executed
+    If no just returns None
+    """
+
+    @wraps(func)
+    async def wrapper(
+        event: Union[Message, CallbackQuery], *args: Any, **kwargs: Any
+    ) -> Any:
+        message = event if isinstance(event, Message) else event.message
+        channel = await chat_in_db(message)
+        if not channel:
+            return None
+        return await func(event, *args, channel=channel, **kwargs)
+
+    return wrapper
