@@ -2,10 +2,11 @@ import asyncio
 import aiohttp
 import time
 from asgiref.sync import sync_to_async
+import re
 
 from server.libs.user_agent import session_random_headers
 
-from typing import Callable, Awaitable, Any, Coroutine, Iterable, List, Dict
+from typing import Coroutine, Iterable, List, Dict
 
 from server.apps.core.models import Article, Source
 from server.core.article_parser import ArticleParser
@@ -48,6 +49,8 @@ class Fetcher:
             await sync_to_async(article.save, thread_sensitive=True)()
 
     async def download_source(url: str) -> str:
+        if re.match(r"https://t\.me/", url) and "/s/" not in url:
+            url = url.replace("https://t.me/", "https://t.me/s/")
         params = {}
         async with aiohttp.ClientSession(
             trust_env=True,

@@ -2,8 +2,9 @@ from typing import List, Iterable
 from .parsers.base_parser import ParserBase
 
 import re
-from lxml import etree
 from lxml.html.clean import Cleaner
+from selectolax.parser import HTMLParser
+
 
 from .parsers.vk_parser import VkParser
 from .parsers.ok_parser import OkParser
@@ -37,7 +38,6 @@ CLEANER = Cleaner(
 )
 
 
-# Почти все это -- задача Фетчера
 async def get_source_data(url: str) -> str:
     """Get document by given url"""
 
@@ -57,7 +57,7 @@ def build_document(html, clean=False):
     if clean:
         html = CLEANER.clean_html(html)
     try:
-        document = etree.HTML(html)
+        document = HTMLParser(html)
     except ValueError:
         pass
 
