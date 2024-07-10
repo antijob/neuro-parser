@@ -1,4 +1,5 @@
 from django.contrib import admin
+from .forms import ChannelCountryForm
 
 from server.apps.bot.models import (
     Channel,
@@ -31,5 +32,6 @@ class ChannelIncidentTypeAdmin(admin.ModelAdmin):
 
 @admin.register(ChannelCountry)
 class ChannelSubscriptionAdmin(admin.ModelAdmin):
+    form = ChannelCountryForm
     list_display = ["channel_incident_type", "country", "enabled_regions", "status"]
     list_filter = ["channel_incident_type", "country", "status"]

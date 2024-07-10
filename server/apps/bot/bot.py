@@ -5,7 +5,7 @@ import sys
 from aiogram import Dispatcher
 
 from server.apps.bot.bot_instance import bot, close_bot
-from server.apps.bot.handlers import category, chat, service, country
+from server.apps.bot.handlers import category, chat, service, country, region
 from server.settings.components.telegram import TELEGRAM_BOT_TOKEN as TOKEN
 
 # bot instance imported from separate file
@@ -16,6 +16,7 @@ dp.include_router(service.router)
 dp.include_router(category.router)
 dp.include_router(chat.router)
 dp.include_router(country.router)
+dp.include_router(region.router)
 
 
 async def main() -> None:
