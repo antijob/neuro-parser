@@ -21,7 +21,7 @@ class Command(BaseCommand):
 
         # Assuming there is a default region
         try:
-            region = Region.objects.first()
+            region = Region.objects.last()
         except Exception as e:
             logger.error(f"Failed to get the default region: {e}")
             return
