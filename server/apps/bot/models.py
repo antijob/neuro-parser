@@ -44,8 +44,6 @@ class Channel(models.Model):
                                 c.get_region_codes() if c.has_region() else []
                             ),
                         )
-                        # if c.has_region():
-                        #     cc.enabled_regions = c.get_region_codes()
                         channel_countries.append(cc)
             ChannelIncidentType.objects.bulk_create(channel_incident_types)
             ChannelCountry.objects.bulk_create(channel_countries)
