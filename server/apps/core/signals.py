@@ -6,14 +6,14 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 from server.apps.bot.bot_instance import bot, close_bot
-from server.apps.bot.models import Channel, ChannelIncidentType
+from server.apps.bot.models import Channel, ChannelCountry, ChannelIncidentType
 
 from .models import IncidentType, MediaIncident
 
 logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 logger = logging.getLogger(__name__)
 
-inc_template = """
+INC_TEMPLATE = """
 <b>Category:</b> {cat}
 <b>Title:</b> {title}
 <b>Country:</b> {country}
@@ -28,35 +28,54 @@ def mediaincident_post_save(sender, instance, created, **kwargs):
     """
     Function that will be executed on creation of
     new instance of MediaIncident model
-    It checks if all statuses are true and if so sends message
-    with bot
+    It checks if all statuses are true and if so sends message to th channel
     """
-    if created:
-        all_channels = Channel.objects.all()
-        msg = inc_template.format(
-            cat=instance.incident_type.description,
-            title=instance.title,
-            country=instance.country,
-            region=instance.region,
-            desc=instance.description,
-            url=" ".join(instance.urls),
-        )
-        for chn in all_channels:
-            try:
-                type_status = ChannelIncidentType.objects.get(
-                    channel=chn, incident_type=instance.incident_type
-                )
-                logger.debug(
-                    f"Chanel_IncidentType: {type_status.channel} {type_status.incident_type} {type_status.status}"
-                )
-                if type_status.status:
-                    logger.info(f"Sending message to channel: {chn.channel_id}")
-                    async_to_sync(bot.send_message)(chat_id=chn.channel_id, text=msg)
+    if not created:
+        return
 
+    all_channels = Channel.objects.all()
+    msg = INC_TEMPLATE.format(
+        cat=instance.incident_type.description,
+        title=instance.title,
+        country=instance.country,
+        region=instance.region,
+        desc=instance.description,
+        url=" ".join(instance.urls),
+    )
+    for chn in all_channels:
+        try:
+            channel_incident = ChannelIncidentType.objects.get(
+                channel=chn, incident_type=instance.incident_type
+            )
+        except Exception as e:
+            logger.error(
+                f"Missing ChannelIncidentType {instance.id} for channel {channel.id}"
+            )
+            return None
+        try:
+            channel_country = ChannelCountry.objects.get(
+                channel_incident_type=channel_incident, country=instance.country
+            )
+        except Exception as e:
+            logger.error(f"Can't gent ChannelCountry: {e} For instance: {instance.id}")
+
+        if (
+            channel_incident.status
+            and channel_country.status
+            and instance.region.name in channel_country.enabled_regions
+        ):
+            try:
+                async_to_sync(bot.send_message)(text=msg, chat_id=chn.channel_id)
             except Exception as e:
-                logger.error(f"An error occurred: {e} In instance: {instance.id}")
-        logger.info("Message sent to all channels")
-        async_to_sync(close_bot)()
+                logger.error(f"Failed to send message to channel {chn.channel_id}: {e}")
+        else:
+            logger.debug(f"Skipping channel {chn.channel_id} due to status checks")
+            # logger.debug(f"Incident type status: {channel_incident.status}")
+            # logger.debug(f"Country status: {channel_country.status}")
+            # logger.debug(
+            #     f"Region status: {instance.region.name in channel_country.enabled_regions}"
+            # )
+    async_to_sync(close_bot)()
 
 
 @receiver(post_save, sender=IncidentType)
