@@ -88,9 +88,9 @@ services:
   web:
     build:
       context: .
-      dockerfile: Dockerfile.prod
+      dockerfile: ./docker/web/Dockerfile.prod
     image: antijob/neuro-parser:$NEURO_PARSER_VERSION
-    command: /bin/bash -c "chmod +x ./entrypoint-prod.sh && ./entrypoint-prod.sh"
+    command: /bin/bash -c "chmod +x ./docker/web/entrypoint-prod.sh && ./docker/web/entrypoint-prod.sh"
     volumes:
       - /root/models:/home/github-actions/code/models
     expose:

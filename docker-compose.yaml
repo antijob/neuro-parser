@@ -33,8 +33,10 @@ services:
       - djangonetwork
 
   web:
-    build: .
-    command: /bin/bash -c "chmod +x ./entrypoint-dev.sh && ./entrypoint-dev.sh"
+    build:
+      context: .
+      dockerfile: ./docker/web/Dockerfile
+    command: /bin/bash -c "chmod +x ./docker/web/entrypoint-dev.sh && ./docker/web/entrypoint-dev.sh"
     volumes:
       - ./models:/code/models
       - .:/code
@@ -98,8 +100,8 @@ services:
     container_name: pgadmin_np
     image: dpage/pgadmin4
     environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-pgadmin4@pgadmin.org}
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-pass}
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
       PGADMIN_CONFIG_SERVER_MODE: "False"
     volumes:
       - .:/code
