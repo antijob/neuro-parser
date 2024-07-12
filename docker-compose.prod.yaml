@@ -8,7 +8,7 @@ services:
       - "--api.dashboard=false"
       - "--certificatesResolvers.letsencrypt.acme.dnsChallenge.delayBeforeCheck=0"
       - "--certificatesResolvers.letsencrypt.acme.dnsChallenge.provider=cloudflare"
-      - "--certificatesResolvers.letsencrypt.acme.email=info@antijob.net"
+      - "--certificatesResolvers.letsencrypt.acme.email=${ACME_EMAIL}"
       - "--certificatesResolvers.letsencrypt.acme.storage=/certificates/acme.json"
       - "--entrypoints.web.http.redirections.entryPoint.scheme=websecure"
       - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
@@ -49,32 +49,10 @@ services:
     env_file:
       - .env
 
-  nginx:
-    image: nginx:1.23
-    restart: unless-stopped
-    volumes:
-      - type: volume
-        source: staticfiles-data
-        target: /usr/share/nginx/html/static
-        read_only: true
-        volume:
-          nocopy: true
-    depends_on:
-      - web
-    networks:
-      - djangonetwork
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.staticfiles.rule=Host(`${HOST}`) && PathPrefix(`/static/`)"
-      - "traefik.http.routers.staticfiles.entrypoints=websecure"
-      - "traefik.http.routers.staticfiles.tls=true"
-      - "traefik.http.routers.staticfiles.tls.certresolver=letsencrypt"
-
   celery:
     image: antijob/neuro-parser:$NEURO_PARSER_VERSION
     command: /bin/bash -c "chmod +x ./celery-start.sh && ./celery-start.sh"
     volumes:
-      - .:/code
       - /root/models:/code/models
     restart: always
     depends_on:
@@ -115,7 +93,6 @@ services:
     command: /bin/bash -c "chmod +x ./entrypoint-prod.sh && ./entrypoint-prod.sh"
     volumes:
       - /root/models:/home/github-actions/code/models
-      - "staticfiles-data:/code/static"
     expose:
       - 8000
     env_file:
@@ -146,7 +123,6 @@ services:
 volumes:
   postgres_data_prod:
   traefik-public-certificates:
-  staticfiles-data:
 networks:
   djangonetwork:
     driver: bridge

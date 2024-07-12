@@ -25,7 +25,6 @@ jobs:
         run: |
           docker image prune -f
 
-
   build:
     name: Build
     needs:
@@ -66,6 +65,8 @@ jobs:
             -e s,^CHAT_GPT_KEY=.*,CHAT_GPT_KEY=$CHAT_GPT_KEY, \
             -e s,^FLOWER_USER=.*,FLOWER_USER=$FLOWER_USER, \
             -e s,^FLOWER_PASSWORD=.*,FLOWER_PASSWORD=$FLOWER_PASSWORD, \
+            -e s,^HOST=.*,HOST=$HOST, \
+            -e s,^ACME_EMAIL=.*,ACME_EMAIL=$ACME_EMAIL, \
             .env
         env:
           POSTGRES_USER: "${{ secrets.POSTGRES_USER }}"
@@ -78,7 +79,7 @@ jobs:
           CHAT_GPT_KEY: "${{ secrets.CHAT_GPT_KEY }}"
           FLOWER_USER: "${{ secrets.FLOWER_USER }}"
           FLOWER_PASSWORD: "${{ secrets.FLOWER_PASSWORD }}"
-
+          ACME_EMAIL: "${{ secrets.ACME_EMAIL }}"
 
       - name: Build python
         id: build
@@ -105,7 +106,6 @@ jobs:
         if: ${{ steps.filter.outputs.web == 'true' || github.event.inputs.runtype == 'force build' }}
         run: docker logout
 
-
   test:
     name: Run tests
     runs-on: ["self-hosted", "antijob-report", "production"]
@@ -115,14 +115,13 @@ jobs:
         run: |
           echo "Running tests..."
 
-
   start_staging:
     name: Start staging
     needs:
       - test
       - build
     runs-on: ["self-hosted", "neuroparser", "staging"]
-    if: github.ref == 'refs/heads/feat/add-ci'
+    if: github.ref == 'refs/heads/feat/stage'
     environment: staging
     steps:
       - name: Check out repository code
@@ -147,6 +146,7 @@ jobs:
             -e s,^FLOWER_PASSWORD=.*,FLOWER_PASSWORD=$FLOWER_PASSWORD, \
             -e s,^FLOWER_HOST=.*,FLOWER_HOST=$FLOWER_HOST, \
             -e s,^HOST=.*,HOST=$HOST, \
+            -e s,^ACME_EMAIL=.*,ACME_EMAIL=$ACME_EMAIL, \
             .env
           branch=$(echo "${GITHUB_REF#refs/heads/}" | tr '/' '-')
           echo "Branch name with / substituted for - : $branch"
@@ -164,6 +164,7 @@ jobs:
           FLOWER_PASSWORD: "${{ secrets.FLOWER_PASSWORD }}"
           FLOWER_HOST: "${{ secrets.FLOWER_HOST }}"
           HOST: "${{ secrets.HOST }}"
+          ACME_EMAIL: "${{ secrets.ACME_EMAIL }}"
 
       - name: Start the app
         run: |
