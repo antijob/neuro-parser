@@ -54,7 +54,7 @@ services:
       context: .
       dockerfile: ./docker/celery/Dockerfile
     image: antijob/neuro-parser:$NEURO_PARSER_VERSION
-    command: /bin/bash -c "chmod +x ./entrypoint.sh && ./entrypoint.sh"
+    command: /bin/bash -c "chmod +x ./docker/celery/entrypoint.sh && ./docker/celery/entrypoint.sh"
     volumes:
       - /root/models:/code/models
     restart: always
