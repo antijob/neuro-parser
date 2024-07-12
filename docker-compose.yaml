@@ -60,7 +60,7 @@ services:
     build:
       context: .
       dockerfile: ./docker/celery/Dockerfile
-    command: /bin/bash -c "chmod +x ./entrypoint.sh && ./entrypoint.sh"
+    command: /bin/bash -c "chmod +x ./docker/celery/entrypoint.sh && ./docker/celery/entrypoint.sh"
     volumes:
       - .:/code
       - ./models:/code/models
