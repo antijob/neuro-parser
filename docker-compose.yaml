@@ -57,8 +57,10 @@ services:
       - "traefik.http.routers.django.rule=Host(`${HOST}`)"
 
   celery:
-    build: .
-    command: /bin/bash -c "chmod +x ./celery-start.sh && ./celery-start.sh"
+    build:
+      context: .
+      dockerfile: ./docker/celery/Dockerfile
+    command: /bin/bash -c "chmod +x ./entrypoint.sh && ./entrypoint.sh"
     volumes:
       - .:/code
       - ./models:/code/models

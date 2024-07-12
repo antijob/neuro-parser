@@ -50,8 +50,11 @@ services:
       - .env
 
   celery:
+    build:
+      context: .
+      dockerfile: ./docker/celery/Dockerfile
     image: antijob/neuro-parser:$NEURO_PARSER_VERSION
-    command: /bin/bash -c "chmod +x ./celery-start.sh && ./celery-start.sh"
+    command: /bin/bash -c "chmod +x ./entrypoint.sh && ./entrypoint.sh"
     volumes:
       - /root/models:/code/models
     restart: always
