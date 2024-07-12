@@ -121,7 +121,7 @@ jobs:
       - test
       - build
     runs-on: ["self-hosted", "neuroparser", "staging"]
-    if: github.ref == 'refs/heads/feat/stage'
+    if: github.ref == 'refs/heads/feat/add-ci'
     environment: staging
     steps:
       - name: Check out repository code
