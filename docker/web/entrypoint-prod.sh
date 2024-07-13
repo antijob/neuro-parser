@@ -6,6 +6,9 @@ while !</dev/tcp/db/5432; do sleep 1; done
 # Apply database migrations
 python manage.py migrate
 
+# Collect static files
+python manage.py collectstatic --noinput
+
 # Set webhook
 python manage.py set_webhook
 
