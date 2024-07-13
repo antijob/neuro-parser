@@ -57,6 +57,7 @@ services:
     command: /bin/bash -c "chmod +x ./docker/celery/entrypoint.sh && ./docker/celery/entrypoint.sh"
     volumes:
       - /root/models:/code/models
+      - "staticfiles-data:/code/static"
     restart: always
     depends_on:
       - redis
