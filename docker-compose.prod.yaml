@@ -118,7 +118,7 @@ services:
     command: /bin/bash -c "chmod +x ./docker/web/entrypoint-prod.sh && ./docker/web/entrypoint-prod.sh"
     volumes:
       - /root/models:/home/github-actions/code/models
-      - "staticfiles-data:/home/github-actions/code/static"
+      - "staticfiles-data:/home/github-actions/code/public/static"
     expose:
       - 8000
     env_file:
