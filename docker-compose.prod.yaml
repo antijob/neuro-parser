@@ -88,6 +88,28 @@ services:
       - redis
       - web
       - celery
+  ### Use for django-admin static ###
+  nginx:
+    image: nginx:1.23
+    restart: unless-stopped
+    volumes:
+      - type: volume
+        source: staticfiles-data
+        target: /usr/share/nginx/html/static
+        read_only: true
+        volume:
+          nocopy: true
+    depends_on:
+      - web
+    networks:
+      - djangonetwork
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.staticfiles.rule=Host(`${HOST}`) && PathPrefix(`/static/`)"
+      - "traefik.http.routers.staticfiles.entrypoints=websecure"
+      - "traefik.http.routers.staticfiles.tls=true"
+      - "traefik.http.routers.staticfiles.tls.certresolver=letsencrypt"
+
   web:
     build:
       context: .
@@ -124,6 +146,7 @@ services:
       - djangonetwork
 
 volumes:
+  staticfiles-data:
   postgres_data_prod:
   traefik-public-certificates:
 networks:
