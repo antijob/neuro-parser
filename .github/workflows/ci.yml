@@ -79,6 +79,7 @@ jobs:
           CHAT_GPT_KEY: "${{ secrets.CHAT_GPT_KEY }}"
           FLOWER_USER: "${{ secrets.FLOWER_USER }}"
           FLOWER_PASSWORD: "${{ secrets.FLOWER_PASSWORD }}"
+          HOST: "${{ secrets.HOST }}"
           ACME_EMAIL: "${{ secrets.ACME_EMAIL }}"
 
       - name: Build python
