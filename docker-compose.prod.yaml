@@ -121,7 +121,7 @@ services:
       - .env
     environment:
       - DEBUG=False
-      - POSTGRES_NAME=${POSTGRES_NAME}
+      - POSTGRES_DB=${POSTGRES_DB}
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - DJANGO_ALLOWED_HOSTS=${HOST}
