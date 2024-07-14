@@ -1,0 +1,14 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls %}
+
+{% block content %}
+<form action="" method="post">
+    {% csrf_token %}
+    <input type="hidden" name="action" value="broadcast_message" />
+    {% for channel in channels %}
+        <input type="hidden" name="_selected_action" value="{{ channel.pk }}" />
+    {% endfor %}
+    {{ form.as_p }}
+    <input type="submit" name="apply" value="Отправить сообщение" />
+</form>
+{% endblock %}

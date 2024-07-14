@@ -39,7 +39,6 @@ class Country(models.Model):
     def get_region_codes(self) -> Optional[List[str]]:
         if self.has_region():
             regions = Region.objects.filter(country=self)
-            logger.debug([r.name for r in regions])
             return [r.name for r in regions]
         else:
             return None
