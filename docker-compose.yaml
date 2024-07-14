@@ -1,5 +1,3 @@
-version: "3.11"
-
 services:
   traefik:
     image: traefik:2.10
