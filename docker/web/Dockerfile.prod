@@ -64,6 +64,10 @@ COPY --from=builder /usr/src/app/wheels /wheels
 COPY --from=builder /code/requirements.txt .
 RUN pip install --no-cache /wheels/*
 
+# Download nltk data
+RUN python -m nltk.downloader punkt && \
+  python -m nltk.downloader stopwords
+
 # Copy project
 COPY . $APP_HOME
 
@@ -72,9 +76,5 @@ RUN chown -R github-actions:github-actions $APP_HOME
 
 # Change to the app user
 USER github-actions
-
-# Download nltk data
-RUN python -m nltk.downloader punkt && \
-  python -m nltk.downloader stopwords
 
 ENTRYPOINT ["/bin/bash", "-c", "./docker/web/entrypoint-prod.sh"]
