@@ -77,4 +77,4 @@ RUN chown -R github-actions:github-actions $APP_HOME
 USER github-actions
 
 # use entrypoint.sh
-ENTRYPOINT ["/bin/bash", "-c", "./entrypoint.sh"]
+ENTRYPOINT ["/bin/bash", "-c", "./docker/celery/entrypoint.sh"]

@@ -77,4 +77,4 @@ USER github-actions
 RUN python -m nltk.downloader punkt && \
   python -m nltk.downloader stopwords
 
-ENTRYPOINT ["/bin/bash", "-c", "./entrypoint-prod.sh"]
+ENTRYPOINT ["/bin/bash", "-c", "./docker/web/entrypoint-prod.sh"]
