@@ -53,8 +53,7 @@ services:
     build:
       context: .
       dockerfile: ./docker/celery/Dockerfile
-    image: antijob/neuro-parser:$NEURO_PARSER_VERSION
-    command: /bin/bash -c "chmod +x ./docker/celery/entrypoint.sh && ./docker/celery/entrypoint.sh"
+    image: antijob/neuro-parser:${NEURO_PARSER_VERSION}
     volumes:
       - /root/models:/code/models
     restart: always
@@ -88,7 +87,7 @@ services:
       - redis
       - web
       - celery
-  ### Use for django-admin static ###
+
   nginx:
     image: nginx:1.23
     restart: unless-stopped
@@ -97,8 +96,6 @@ services:
         source: staticfiles-data
         target: /usr/share/nginx/html/static
         read_only: true
-        volume:
-          nocopy: true
     depends_on:
       - web
     networks:
@@ -114,8 +111,7 @@ services:
     build:
       context: .
       dockerfile: ./docker/web/Dockerfile.prod
-    image: antijob/neuro-parser:$NEURO_PARSER_VERSION
-    command: /bin/bash -c "chmod +x ./docker/web/entrypoint-prod.sh && ./docker/web/entrypoint-prod.sh"
+    image: antijob/neuro-parser:${NEURO_PARSER_VERSION}
     volumes:
       - /root/models:/home/github-actions/code/models
       - "staticfiles-data:/home/github-actions/code/public/static"
@@ -139,6 +135,7 @@ services:
       - "traefik.http.routers.django.tls.certresolver=letsencrypt"
     networks:
       - djangonetwork
+
   redis:
     image: redis:alpine
     expose:
@@ -150,6 +147,7 @@ volumes:
   staticfiles-data:
   postgres_data_prod:
   traefik-public-certificates:
+
 networks:
   djangonetwork:
     driver: bridge

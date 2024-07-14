@@ -1,10 +1,12 @@
+version: "3.11"
+
 services:
   traefik:
-    image: traefik:latest
+    image: traefik:2.10
     container_name: "traefik"
     command:
       - "--accessLog=true"
-      - "--api.insecure=true"
+      - "--api.dashboard=true"
       - "--entrypoints.web.address=:80"
       - "--log.level=INFO"
       - "--providers.docker.exposedByDefault=false"
@@ -13,15 +15,13 @@ services:
       - 81:8080
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
-      - .:/code
     networks:
       - djangonetwork
 
   db:
     image: postgres:13.4-alpine
     volumes:
-      - ~/.parser/data/db:/var/lib/postgresql/data
-      - .:/code
+      - postgres_data:/var/lib/postgresql/data
     environment:
       - POSTGRES_DB=${POSTGRES_DB}
       - POSTGRES_USER=${POSTGRES_USER}
@@ -36,10 +36,9 @@ services:
     build:
       context: .
       dockerfile: ./docker/web/Dockerfile
-    command: /bin/bash -c "chmod +x ./docker/web/entrypoint-dev.sh && ./docker/web/entrypoint-dev.sh"
     volumes:
       - ./models:/code/models
-      - .:/code
+      - ./static:/code/static
     expose:
       - 8000
     env_file:
@@ -60,9 +59,7 @@ services:
     build:
       context: .
       dockerfile: ./docker/celery/Dockerfile
-    command: /bin/bash -c "chmod +x ./docker/celery/entrypoint.sh && ./docker/celery/entrypoint.sh"
     volumes:
-      - .:/code
       - ./models:/code/models
     restart: always
     depends_on:
@@ -106,7 +103,7 @@ services:
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
       PGADMIN_CONFIG_SERVER_MODE: "False"
     volumes:
-      - .:/code
+      - pgadmin_data:/var/lib/pgadmin
     ports:
       - "${PGADMIN_PORT:-5050}:80"
     networks:
@@ -116,3 +113,7 @@ services:
 networks:
   djangonetwork:
     driver: bridge
+
+volumes:
+  postgres_data:
+  pgadmin_data:

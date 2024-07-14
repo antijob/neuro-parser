@@ -1,8 +1,16 @@
-FROM python:3.9
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
-ENV TRANSFORMERS_CACHE=/tmp
+FROM python:3.9-slim
+
+# Установка переменных окружения
+ENV PYTHONDONTWRITEBYTECODE=1 \
+  PYTHONUNBUFFERED=1 \
+  TRANSFORMERS_CACHE=/tmp
+
+# Установка рабочей директории
 WORKDIR /code
+
+# Копирование файла requirements.txt и установка зависимостей
 COPY requirements.txt /code/
-RUN pip install --upgrade pip
-RUN pip install -r requirements.txt
+RUN pip install --upgrade pip && \
+  pip install --no-cache-dir -r requirements.txt
+
+ENTRYPOINT ["/bin/bash", "-c", "./entrypoint-dev.sh"]
