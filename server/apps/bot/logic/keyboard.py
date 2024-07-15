@@ -8,7 +8,7 @@ from server.apps.bot.logic.messages import (
     REGION_MESSAGE,
 )
 from server.apps.bot.models import Channel, CountryStatus, RegionStatus, TypeStatus
-from server.apps.core.incident_types import IncidentType
+from server.apps.core.models import IncidentType
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

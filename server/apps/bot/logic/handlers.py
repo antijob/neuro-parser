@@ -14,8 +14,7 @@ from server.apps.bot.logic.messages import (
     HELP_COMMAND_MESSAGE,
 )
 from server.apps.bot.models import Channel, TypeStatus, CountryStatus, RegionStatus
-from server.apps.core.incident_types import IncidentType
-from server.apps.core.models import Country, Region
+from server.apps.core.models import Country, Region, IncidentType
 from server.settings.components.telegram import TELEGRAM_BOT_NAME
 
 

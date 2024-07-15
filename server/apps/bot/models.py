@@ -1,6 +1,5 @@
 from django.db import models
-from server.apps.core.incident_types import IncidentType
-from server.apps.core.models import Country, Region
+from server.apps.core.models import Country, Region, IncidentType
 
 
 class Channel(models.Model):

@@ -1,8 +1,7 @@
 from django.core.management.base import BaseCommand
 
 from server.apps.bot.models import Channel, CountryStatus, RegionStatus, TypeStatus
-from server.apps.core.incident_types import IncidentType
-from server.apps.core.models import Country, Region
+from server.apps.core.models import IncidentType, Country, Region
 
 import logging
 
