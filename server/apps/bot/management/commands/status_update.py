@@ -3,7 +3,7 @@ from django.core.management.base import BaseCommand
 from django.db import transaction
 from server.apps.bot.models import Channel, ChannelIncidentType, ChannelCountry
 from server.apps.core.incident_types import IncidentType
-from server.apps.core.models import Country, Region
+from server.apps.core.models import Country
 
 logger = logging.getLogger(__name__)
 
@@ -14,21 +14,25 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         with transaction.atomic():
             all_channels = Channel.objects.all()
+            result = (0, 0)
             for channel in all_channels:
-                self.process_channel(channel)
+                result = self.process_channel(channel)
+                logger.info(
+                    f"Created {result[0]} ChannelIncidentType and {result[1]} ChannelCountry for channel {channel}"
+                )
 
         logger.info("All statuses created or updated successfully")
 
     def process_channel(self, channel):
         # Process IncidentTypes
+        cit_created = 0
+        cc_created = 0
         for incident_type in IncidentType.objects.all():
             channel_incident_type, created = ChannelIncidentType.objects.get_or_create(
                 channel=channel, incident_type=incident_type, defaults={"status": True}
             )
             if created:
-                logger.info(
-                    f"Created ChannelIncidentType for channel {channel.channel_id} and incident type {incident_type}"
-                )
+                cit_created += 1
 
             # Process Countries for each ChannelIncidentType
             for country in Country.objects.all():
@@ -43,6 +47,6 @@ class Command(BaseCommand):
                     },
                 )
                 if created:
-                    logger.info(
-                        f"Created ChannelCountry for channel {channel.channel_id}, incident type {incident_type}, and country {country}"
-                    )
+                    cc_created += 1
+
+            return (cit_created, cc_created)
