@@ -27,7 +27,6 @@ COPY . .
 # install python dependencies
 COPY requirements.txt .
 RUN pip wheel --no-cache-dir --no-deps --wheel-dir /usr/src/app/wheels -r requirements.txt
-RUN python -m nltk.downloader punkt
-RUN python -m nltk.downloader stopwords
+
 
 ENTRYPOINT ["/bin/bash", "-c", "./docker/web/entrypoint-prod.sh"]
