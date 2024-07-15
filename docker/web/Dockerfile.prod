@@ -75,6 +75,6 @@ COPY . $APP_HOME
 RUN chown -R github-actions:github-actions $APP_HOME
 
 # Change to the app user
-USER github-actions
+USER root
 
 ENTRYPOINT ["/bin/bash", "-c", "./docker/web/entrypoint-prod.sh"]
