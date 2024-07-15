@@ -36,7 +36,6 @@ services:
       dockerfile: ./docker/web/Dockerfile
     volumes:
       - ./models:/code/models
-      - ./static:/code/static
     expose:
       - 8000
     env_file:

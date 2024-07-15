@@ -13,6 +13,7 @@ WORKDIR /code
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
+ENV PDM_CHECK_UPDATE=false
 
 # Install system dependencies
 RUN apt-get update && \
@@ -38,10 +39,10 @@ RUN pip install --upgrade pip setuptools wheel && \
   pip install flake8==6.0.0
 
 # install PDM
-RUN pip install -U pdm
-ENV PDM_CHECK_UPDATE=false
+RUN pip install -U pip && pip install pdm
+
 # copy project files
-COPY pyproject.toml pdm.lock ./
+COPY pyproject.toml pdm.lock README.md ./
 
 # install python dependencies
 RUN pdm install --check --prod --no-editable
