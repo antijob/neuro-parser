@@ -48,8 +48,8 @@ class IncidentType(models.Model):
 
     def process_batch_model(self, batch):
         incidents_count = 0
-        tokenizer = item.get_tokenizer()
-        model = model.get_model()
+        tokenizer = self.get_tokenizer()
+        model = self.get_model()
         for art in batch:
             relevance = rate_with_model_and_tokenizer(
                 art.normalized_text(), model, tokenizer
