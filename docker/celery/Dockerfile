@@ -35,9 +35,14 @@ RUN apt-get update && \
 RUN pip install --upgrade pip setuptools wheel && \
   pip install flake8==6.0.0
 
-# copy and install python dependencies
-COPY requirements.txt .
-RUN pip wheel --no-cache-dir --no-deps --wheel-dir /usr/src/app/wheels -r requirements.txt
+# install PDM
+RUN pip install -U pip && pip install pdm
+
+# copy project files
+COPY pyproject.toml pdm.lock README.md ./
+
+# install python dependencies
+RUN pdm install --check --prod --no-editable
 
 #########
 # FINAL #
@@ -57,11 +62,9 @@ ENV APP_HOME=/home/github-actions/code
 ENV TRANSFORMERS_CACHE=/tmp
 WORKDIR $APP_HOME
 
-# install dependencies
-COPY --from=builder /usr/src/app/wheels /wheels
-COPY --from=builder /code/requirements.txt .
-RUN pip install --upgrade pip && \
-  pip install --no-cache /wheels/*
+# retrieve packages from build stage
+COPY --from=builder /code/.venv/ $APP_HOME/.venv
+ENV PATH="$APP_HOME/.venv/bin:$PATH"
 
 # download nltk data
 RUN python -m nltk.downloader punkt && \

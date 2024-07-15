@@ -47,7 +47,7 @@ jobs:
               - 'server/**'
               - 'docker/**'
               - '*.py'
-              - 'requirements.txt'
+              - 'pyproject.toml'
 
       - name: Prepare .env
         if: ${{ steps.filter.outputs.web == 'true' || github.event.inputs.runType == 'Force build' }}
