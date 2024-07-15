@@ -110,6 +110,7 @@ services:
       context: .
       dockerfile: ./docker/web/Dockerfile.prod
     image: antijob/neuro-parser:${NEURO_PARSER_VERSION}
+    user: github-actions:github-actions
     volumes:
       - /root/models:/home/github-actions/code/models
       - "staticfiles-data:/home/github-actions/code/public/static"
