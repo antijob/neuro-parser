@@ -8,10 +8,10 @@ from magic_filter import F
 from server.apps.bot.data.messages import (
     COUNTRY_MESSAGE,
 )
-from server.apps.bot.handlers.utils import chat_in_db, check_channel
+from server.apps.bot.handlers.utils import check_channel
 from server.apps.bot.keyboards.country_kb import country_keyboard
 from server.apps.bot.keyboards.region_kb import RegionCF, region_keyboard
-from server.apps.bot.models import ChannelCountry, Channel
+from server.apps.bot.models import Channel, ChannelCountry
 
 logger = logging.getLogger(__name__)
 router = Router()
