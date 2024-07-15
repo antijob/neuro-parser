@@ -7,7 +7,7 @@ from asgiref.sync import sync_to_async
 from magic_filter import F
 
 from server.apps.bot.data.messages import CATEGORIES_MESSAGE, COUNTRY_MESSAGE
-from server.apps.bot.handlers.utils import chat_in_db, check_channel
+from server.apps.bot.handlers.utils import check_channel
 from server.apps.bot.keyboards.category_kb import (
     CategoryCallbackFactory,
     category_keyboard,
