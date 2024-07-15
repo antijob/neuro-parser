@@ -45,8 +45,7 @@ jobs:
           filters: |
             web:
               - 'server/**'
-              - 'Dockerfile.prod'
-              - 'Dockerfile'
+              - 'docker/**'
               - '*.py'
               - 'requirements.txt'
 
