@@ -38,12 +38,13 @@ RUN pip install --upgrade pip setuptools wheel && \
   pip install flake8==6.0.0
 
 # install PDM
-RUN curl -sSL https://raw.githubusercontent.com/pdm-project/pdm/main/install-pdm.py | python3 -
-
+RUN pip install -U pdm
+ENV PDM_CHECK_UPDATE=false
 # copy project files
 COPY pyproject.toml pdm.lock ./
+
 # install python dependencies
-RUN /root/.local/bin/pdm install --prod --no-lock --no-editable
+RUN pdm install --check --prod --no-editable
 
 #########
 # FINAL #
@@ -63,9 +64,9 @@ ENV APP_HOME=/home/github-actions/code
 ENV TRANSFORMERS_CACHE=/tmp
 WORKDIR $APP_HOME
 
-# copy dependencies from builder
-COPY --from=builder /root/.local /root/.local
-ENV PATH=/root/.local/bin:$PATH
+# retrieve packages from build stage
+COPY --from=builder $APP_HOME/.venv/ $APP_HOME/.venv
+ENV PATH="$APP_HOME/.venv/bin:$PATH"
 
 # Download nltk data
 RUN python -m nltk.downloader punkt && \
