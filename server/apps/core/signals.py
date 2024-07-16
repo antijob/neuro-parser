@@ -44,6 +44,11 @@ def mediaincident_post_save(sender, instance, created, **kwargs):
                 f"Missing ChannelIncidentType {instance.id} for channel {channel.id}"
             )
             return None
+
+        # At first check if that category allowed for this chat
+        if not channel_incident.allowed:
+            continue
+
         try:
             channel_country = ChannelCountry.objects.get(
                 channel_incident_type=channel_incident, country=instance.country
