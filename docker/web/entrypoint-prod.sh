@@ -35,9 +35,9 @@ python manage.py collectstatic --noinput
 log "Setting webhook..."
 python manage.py set_webhook
 
-# Run the status update script
-log "Running the status update script..."
-python manage.py status_update
+# # Run the status update script
+# log "Running the status update script..."
+# python manage.py status_update
 
 # Start the Django application
 log "Starting the Django application..."
