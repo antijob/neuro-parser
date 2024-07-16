@@ -7,20 +7,12 @@ from django.dispatch import receiver
 
 from server.apps.bot.bot_instance import bot, close_bot
 from server.apps.bot.models import Channel, ChannelCountry, ChannelIncidentType
+from server.apps.core.data.messages import NEW_INCIDENT_TEMPLATE
 
 from .models import IncidentType, MediaIncident
 
 logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 logger = logging.getLogger(__name__)
-
-INC_TEMPLATE = """
-<b>Category:</b> {cat}
-<b>Title:</b> {title}
-<b>Country:</b> {country}
-<b>Region:</b> {region}
-<b>Description:</b> {desc}
-<b>URLs:</b> {url}
-"""
 
 
 @receiver(post_save, sender=MediaIncident)
@@ -34,7 +26,7 @@ def mediaincident_post_save(sender, instance, created, **kwargs):
         return
 
     all_channels = Channel.objects.all()
-    msg = INC_TEMPLATE.format(
+    msg = NEW_INCIDENT_TEMPLATE.format(
         cat=instance.incident_type.description,
         title=instance.title,
         country=instance.country,
