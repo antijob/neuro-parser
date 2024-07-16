@@ -31,7 +31,7 @@ services:
       - djangonetwork
 
   web:
-    command: /bin/bash -c "chmod +x ./docker/celery/entrypoint-dev.sh && ./docker/celery/entrypoint-dev.sh"
+    command: /bin/bash -c "chmod +x ./docker/web/entrypoint-dev.sh && ./docker/web/entrypoint-dev.sh"
     build:
       context: .
       dockerfile: ./docker/web/Dockerfile
