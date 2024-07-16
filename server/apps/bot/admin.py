@@ -1,4 +1,5 @@
 from django.contrib import admin
+
 from .forms import ChannelCountryForm
 
 from server.apps.bot.models import (
@@ -26,8 +27,21 @@ class ChannelAdmin(admin.ModelAdmin):
 
 @admin.register(ChannelIncidentType)
 class ChannelIncidentTypeAdmin(admin.ModelAdmin):
-    list_display = ["channel", "incident_type", "status"]
+    list_display = ["channel", "incident_type", "status", "allowed"]
     inlines = [ChannelSubscriptionInline]
+    list_filter = ["channel", "incident_type", "allowed"]
+
+    def switch_allowance(self, request, queryset):
+        for obj in queryset:
+            obj.allowed = not obj.allowed
+            obj.save()
+        self.message_user(
+            request, f"For {queryset.count()} models allowance was switched."
+        )
+
+    switch_allowance.short_description = "Изменить доступность категории для канала"
+
+    actions = [switch_allowance]
 
 
 @admin.register(ChannelCountry)
