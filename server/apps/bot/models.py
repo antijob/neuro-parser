@@ -59,7 +59,8 @@ class Channel(models.Model):
 class ChannelIncidentType(models.Model):
     """
     Model that connects channels + incident types
-    and status field
+    status: field to turn on and off in user settings
+    allowed: field to turn on and off for admin
     """
 
     channel = models.ForeignKey(
@@ -67,6 +68,7 @@ class ChannelIncidentType(models.Model):
     )
     incident_type = models.ForeignKey(IncidentType, on_delete=models.CASCADE)
     status = models.BooleanField(default=True)
+    allowed = models.BooleanField(default=True)
 
     def __str__(self):
         return f"{self.channel} - {self.incident_type}"
