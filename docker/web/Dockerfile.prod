@@ -81,5 +81,3 @@ RUN chown -R github-actions:github-actions $APP_HOME
 
 # Change to the app user
 USER root
-
-ENTRYPOINT ["/bin/bash", "-c", "./docker/web/entrypoint-prod.sh"]

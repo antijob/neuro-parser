@@ -78,6 +78,3 @@ RUN chown -R github-actions:github-actions $APP_HOME
 
 # change to the app user
 USER github-actions
-
-# use entrypoint.sh
-ENTRYPOINT ["/bin/bash", "-c", "./docker/celery/entrypoint.sh"]

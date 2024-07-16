@@ -48,6 +48,7 @@ services:
       - .env
 
   celery:
+    command: /bin/bash -c "chmod +x ./docker/celery/entrypoint.sh && ./docker/celery/entrypoint.sh"
     build:
       context: .
       dockerfile: ./docker/celery/Dockerfile
@@ -57,6 +58,7 @@ services:
     restart: always
     depends_on:
       - redis
+      - db
     networks:
       - djangonetwork
 
@@ -106,6 +108,7 @@ services:
       - "traefik.http.routers.staticfiles.tls.certresolver=letsencrypt"
 
   web:
+    command: /bin/bash -c "chmod +x ./docker/web/entrypoint-prod.sh && ./docker/web/entrypoint-prod.sh"
     build:
       context: .
       dockerfile: ./docker/web/Dockerfile.prod

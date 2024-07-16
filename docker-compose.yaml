@@ -31,6 +31,7 @@ services:
       - djangonetwork
 
   web:
+    command: /bin/bash -c "chmod +x ./docker/celery/entrypoint-dev.sh && ./docker/celery/entrypoint-dev.sh"
     build:
       context: .
       dockerfile: ./docker/web/Dockerfile
@@ -53,6 +54,7 @@ services:
       - "traefik.http.routers.django.rule=Host(`${HOST}`)"
 
   celery:
+    command: /bin/bash -c "chmod +x ./docker/celery/entrypoint.sh && ./docker/celery/entrypoint.sh"
     build:
       context: .
       dockerfile: ./docker/celery/Dockerfile
