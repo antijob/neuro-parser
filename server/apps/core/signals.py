@@ -3,10 +3,11 @@ import sys
 
 from asgiref.sync import async_to_sync
 from django.db.models.signals import post_save
+from django.db import transaction
 from django.dispatch import receiver
 
 from server.apps.bot.bot_instance import bot, close_bot
-from server.apps.bot.models import Channel, ChannelCountry, ChannelIncidentType
+from server.apps.bot.models import Channel, ChannelCountry, ChannelIncidentType, Country
 from server.apps.core.data.messages import NEW_INCIDENT_TEMPLATE
 
 from .models import IncidentType, MediaIncident
@@ -77,20 +78,35 @@ def mediaincident_post_save(sender, instance, created, **kwargs):
 
 @receiver(post_save, sender=IncidentType)
 def incidenttype_post_save(sender, instance, created, **kwargs):
-    # TODO: rewrite
     """
     Executes on creation of new instance of IncidentType model
-    Creates status (TypeStatus) for each channel in order to guarantee
+    Creates status for each channel in order to guarantee
     that message about new incident will be sent to users
     """
+    logger.debug(f"Signal: {sender} - {created}")
     if created:
-        all_channels = Channel.objects.all()
-        for chn in all_channels:
-            try:
-                ChannelIncidentType.objects.create(
-                    incident_type=instance, channel=chn, status=True
-                )
-            except Exception as e:
-                logger.error(
-                    f"An error in signal on creation TypeStatus: {e} \nInstance: {instance.id}"
-                )
+        with transaction.atomic():
+            for chn in Channel.objects.all():
+                try:
+                    channel_incident_types = []
+                    channel_countries = []
+                    cit = ChannelIncidentType(
+                        channel=chn, incident_type=instance, status=True, allowed=False
+                    )
+                    channel_incident_types.append(cit)
+                    for c in Country.objects.all():
+                        cc = ChannelCountry(
+                            channel_incident_type=cit,
+                            country=c,
+                            status=True,
+                            enabled_regions=(
+                                c.get_region_codes() if c.has_region() else []
+                            ),
+                        )
+                        channel_countries.append(cc)
+                    ChannelIncidentType.objects.bulk_create(channel_incident_types)
+                    ChannelCountry.objects.bulk_create(channel_countries)
+                except Exception as e:
+                    logger.error(
+                        f"An error in signal on creation TypeStatus: {e} \nInstance: {instance.id}"
+                    )
