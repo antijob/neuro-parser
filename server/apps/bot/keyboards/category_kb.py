@@ -24,8 +24,13 @@ class CategoryCallbackFactory(CallbackData, prefix="cat"):
 def category_keyboard(chn: Channel) -> InlineKeyboardMarkup:
     """
     Creates inline keyboard for all types of incidents that we have in IncidentType model.
+    IncidentTypes that are not allowed for this channel are not shown
     """
-    types = ChannelIncidentType.objects.filter(channel=chn).order_by("id")
+    types = (
+        ChannelIncidentType.objects.filter(channel=chn)
+        .exclude(allowed=False)
+        .order_by("id")
+    )
     builder = InlineKeyboardBuilder()
 
     for item in types:
