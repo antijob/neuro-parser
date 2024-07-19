@@ -41,6 +41,9 @@ RUN pip install --upgrade pip setuptools wheel && \
 # install PDM
 RUN pip install -U pip && pip install pdm
 
+# copy files
+COPY pyproject.toml pdm.lock README.md /code/
+
 # generate requirements.txt
 RUN pdm export --no-hashes -o requirements.txt
 
