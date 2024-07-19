@@ -48,10 +48,10 @@ services:
       - .env
 
   celery:
-    command: /bin/bash -c "chmod +x ./docker/celery/entrypoint.sh && ./docker/celery/entrypoint.sh"
     build:
       context: .
-      dockerfile: ./docker/celery/Dockerfile
+      dockerfile: ./docker/web/Dockerfile.prod
+    command: /bin/bash -c "chmod +x ./docker/celery/entrypoint.sh && ./docker/celery/entrypoint.sh"
     image: antijob/neuro-parser:${NEURO_PARSER_VERSION}
     volumes:
       - /root/models:/code/models

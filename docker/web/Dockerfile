@@ -1,6 +1,6 @@
 FROM python:3.9-slim
 
-# setup enviroments
+# setup environments
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 ENV TRANSFORMERS_CACHE=/tmp
@@ -17,11 +17,11 @@ RUN apt-get update && \
 # install PDM
 RUN pip install -U pip && pip install pdm
 
-# copy project files
-COPY pyproject.toml pdm.lock README.md ./
+# copy files
+COPY pyproject.toml pdm.lock README.md /code/
 
-# install python dependencies
-RUN pdm install --check --dev --no-editable
+# generate requirements.txt
+RUN pdm export --no-hashes -o requirements.txt
 
-# set entrypoint
-ENTRYPOINT ["/bin/bash", "-c", "./docker/web/entrypoint-dev.sh"]
+# install requirements.txt
+RUN pip install -r requirements.txt

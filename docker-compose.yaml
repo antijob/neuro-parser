@@ -37,6 +37,7 @@ services:
       dockerfile: ./docker/web/Dockerfile
     volumes:
       - ./models:/code/models
+      - .:/code
     expose:
       - 8000
     env_file:
@@ -54,12 +55,13 @@ services:
       - "traefik.http.routers.django.rule=Host(`${HOST}`)"
 
   celery:
-    command: /bin/bash -c "chmod +x ./docker/celery/entrypoint.sh && ./docker/celery/entrypoint.sh"
     build:
       context: .
-      dockerfile: ./docker/celery/Dockerfile
+      dockerfile: ./docker/web/Dockerfile
+    command: /bin/bash -c "chmod +x ./docker/celery/entrypoint.sh && ./docker/celery/entrypoint.sh"
     volumes:
       - ./models:/code/models
+      - .:/code
     restart: always
     depends_on:
       - redis
