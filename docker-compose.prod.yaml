@@ -1,5 +1,3 @@
-version: "3.11"
-
 services:
   traefik:
     image: "traefik:2.10"
@@ -8,7 +6,7 @@ services:
       - "--api.dashboard=false"
       - "--certificatesResolvers.letsencrypt.acme.dnsChallenge.delayBeforeCheck=0"
       - "--certificatesResolvers.letsencrypt.acme.dnsChallenge.provider=cloudflare"
-      - "--certificatesResolvers.letsencrypt.acme.email=info@antijob.net"
+      - "--certificatesResolvers.letsencrypt.acme.email=${ACME_EMAIL}"
       - "--certificatesResolvers.letsencrypt.acme.storage=/certificates/acme.json"
       - "--entrypoints.web.http.redirections.entryPoint.scheme=websecure"
       - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
@@ -49,36 +47,18 @@ services:
     env_file:
       - .env
 
-  nginx:
-    image: nginx:1.23
-    restart: unless-stopped
-    volumes:
-      - type: volume
-        source: staticfiles-data
-        target: /usr/share/nginx/html/static
-        read_only: true
-        volume:
-          nocopy: true
-    depends_on:
-      - web
-    networks:
-      - djangonetwork
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.staticfiles.rule=Host(`${HOST}`) && PathPrefix(`/static/`)"
-      - "traefik.http.routers.staticfiles.entrypoints=websecure"
-      - "traefik.http.routers.staticfiles.tls=true"
-      - "traefik.http.routers.staticfiles.tls.certresolver=letsencrypt"
-
   celery:
-    build: .
-    command: /bin/bash -c "chmod +x ./celery-start.sh && ./celery-start.sh"
+    build:
+      context: .
+      dockerfile: ./docker/web/Dockerfile.prod
+    command: /bin/bash -c "chmod +x ./docker/celery/entrypoint.sh && ./docker/celery/entrypoint.sh"
+    image: antijob/neuro-parser:${NEURO_PARSER_VERSION}
     volumes:
-      - .:/code
       - /root/models:/code/models
     restart: always
     depends_on:
       - redis
+      - db
     networks:
       - djangonetwork
 
@@ -107,21 +87,42 @@ services:
       - redis
       - web
       - celery
+
+  nginx:
+    image: nginx:1.23
+    restart: unless-stopped
+    volumes:
+      - type: volume
+        source: staticfiles-data
+        target: /usr/share/nginx/html/static
+        read_only: true
+    depends_on:
+      - web
+    networks:
+      - djangonetwork
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.staticfiles.rule=Host(`${HOST}`) && PathPrefix(`/static/`)"
+      - "traefik.http.routers.staticfiles.entrypoints=websecure"
+      - "traefik.http.routers.staticfiles.tls=true"
+      - "traefik.http.routers.staticfiles.tls.certresolver=letsencrypt"
+
   web:
+    command: /bin/bash -c "chmod +x ./docker/web/entrypoint-prod.sh && ./docker/web/entrypoint-prod.sh"
     build:
       context: .
-      dockerfile: Dockerfile.prod
-    command: /bin/bash -c "chmod +x ./entrypoint-prod.sh && ./entrypoint-prod.sh"
+      dockerfile: ./docker/web/Dockerfile.prod
+    image: antijob/neuro-parser:${NEURO_PARSER_VERSION}
     volumes:
       - /root/models:/home/github-actions/code/models
-      - "staticfiles-data:/code/static"
+      - "staticfiles-data:/home/github-actions/code/public/static"
     expose:
       - 8000
     env_file:
       - .env
     environment:
       - DEBUG=False
-      - POSTGRES_NAME=${POSTGRES_NAME}
+      - POSTGRES_DB=${POSTGRES_DB}
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - DJANGO_ALLOWED_HOSTS=${HOST}
@@ -135,6 +136,7 @@ services:
       - "traefik.http.routers.django.tls.certresolver=letsencrypt"
     networks:
       - djangonetwork
+
   redis:
     image: redis:alpine
     expose:
@@ -143,9 +145,10 @@ services:
       - djangonetwork
 
 volumes:
+  staticfiles-data:
   postgres_data_prod:
   traefik-public-certificates:
-  staticfiles-data:
+
 networks:
   djangonetwork:
     driver: bridge
