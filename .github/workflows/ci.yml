@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      - feat/add-ci
+      - stage
   workflow_dispatch:
     inputs:
       runType:
@@ -127,7 +127,7 @@ jobs:
       - test
       - build
     runs-on: ["self-hosted", "neuroparser", "staging"]
-    if: github.ref == 'refs/heads/feat/add-ci'
+    if: github.ref == 'refs/heads/stage'
     environment: staging
     steps:
       - name: Check out repository code
@@ -180,7 +180,7 @@ jobs:
         run: |
           docker compose -f docker-compose.prod.yaml pull
           docker compose -f docker-compose.prod.yaml up -d
-          
+
       - name: logout from docker registry
         if: ${{ always() }}
         run: docker logout
