@@ -107,6 +107,20 @@ services:
       - "traefik.http.routers.staticfiles.tls=true"
       - "traefik.http.routers.staticfiles.tls.certresolver=letsencrypt"
 
+  bot:
+    build:
+      context: .
+      dockerfile: ./docker/web/Dockerfile.prod
+    command: /bin/bash -c "chmod +x ./docker/bot/entrypoint.sh && ./docker/bot/entrypoint.sh"
+    volumes:
+      - .:/code
+    restart: always
+    depends_on:
+      - redis
+      - web
+    networks:
+      - djangonetwork
+
   web:
     command: /bin/bash -c "chmod +x ./docker/web/entrypoint-prod.sh && ./docker/web/entrypoint-prod.sh"
     build:

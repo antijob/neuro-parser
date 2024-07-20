@@ -68,6 +68,20 @@ services:
     networks:
       - djangonetwork
 
+  bot:
+    build:
+      context: .
+      dockerfile: ./docker/web/Dockerfile
+    command: /bin/bash -c "chmod +x ./docker/bot/entrypoint.sh && ./docker/bot/entrypoint.sh"
+    volumes:
+      - .:/code
+    restart: always
+    depends_on:
+      - redis
+      - web
+    networks:
+      - djangonetwork
+
   flower:
     image: mher/flower
     container_name: flower
