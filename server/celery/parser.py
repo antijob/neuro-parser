@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 from itertools import islice
 from celery import group
 
-from core.incident_predictor import IncidentPredictor
+from server.core.incident_predictor import IncidentPredictor
 
 
 def split_every(n, iterable):
