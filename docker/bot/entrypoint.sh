@@ -23,18 +23,6 @@ for i in {1..60}; do
   sleep 1
 done
 
-# Apply database migrations
-log "Applying database migrations..."
-python manage.py migrate
-
-# Collect static files
-log "Collecting static files..."
-python manage.py collectstatic --noinput
-
-# Run the status update script
-log "Running the status update script..."
-python manage.py status_update
-
-# Start the Django application
-log "Starting the Django application..."
-gunicorn --bind 0.0.0.0:8000 server.wsgi
+# Run the bot
+log "Running the bot..."
+python -m server.apps.bot.bot
