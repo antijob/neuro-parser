@@ -189,7 +189,7 @@ jobs:
     needs:
       - test
       - build
-    runs-on: ["self-hosted", "neuroparser", "prod"]
+    runs-on: ["self-hosted", "neuroparser", "production"]
     if: github.ref == 'refs/heads/main'
     environment: prod
     steps:
