@@ -18,14 +18,10 @@ pdm lock
 # update all packages 
 pdm update
 
-# generate requirements.txt
-pdm export --no-hashes -o requirements.txt
-
 # add new package to pyproject.toml
 pdm add <package_name>
 ```
 
-docker still use generated requirements.txt file
 git should contain both pyproject.toml and pdm.lock files 
 
 
