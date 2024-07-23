@@ -19,7 +19,7 @@ on:
 jobs:
   clean:
     name: Clean images
-    runs-on: ["self-hosted", "antijob-report", "production"]
+    runs-on: ["self-hosted", "neuroparser", "production"]
     steps:
       - name: Clean unused images and network
         run: |
@@ -114,7 +114,7 @@ jobs:
 
   test:
     name: Run tests
-    runs-on: ["self-hosted", "antijob-report", "production"]
+    runs-on: ["self-hosted", "neuroparser", "production"]
     if: ${{ always() }}
     steps:
       - name: Here we run tests
