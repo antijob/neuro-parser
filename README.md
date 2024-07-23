@@ -27,15 +27,9 @@ git should contain both pyproject.toml and pdm.lock files
 
 ## Running local
 
-Firstly modify `config/.env`, create database and replace to apps.
+Firstly modify `.env.template` to `.env`, and fill required variables.
 
-Run `docker-compose up -d` inside root directory for start local container.
-
-After that run migrations inside container:
-
-```
-docker <PYTHON_CONTAINER_ID> python manage.py migrate
-```
+Run `docker-compose up -d` inside local directory for start container.
 
 Add for you `/etc/hosts` file record which resolve domain for local traefik
 
@@ -50,15 +44,9 @@ Or use api `http://report.local/api`
 
 ## Running production
 
-Firstly modify `config/.env` and create database and replace to apps.
+Firstly modify `.env.template` to `.env`, and fill required variables.
 
 Run `docker-compose -f docker-compose.prod.yaml up -d` inside root directory for start local container.
-
-After that run migrations inside container:
-
-```
-docker <PYTHON_CONTAINER_ID> python manage.py migrate
-```
 
 ## Contributing
 
