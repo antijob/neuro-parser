@@ -54,7 +54,7 @@ services:
     command: /bin/bash -c "chmod +x ./docker/celery/entrypoint.sh && ./docker/celery/entrypoint.sh"
     image: antijob/neuro-parser:${NEURO_PARSER_VERSION}
     volumes:
-      - /root/models:/code/models
+      - /root/models:/home/github-actions/code/models
     restart: always
     depends_on:
       - redis
