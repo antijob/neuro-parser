@@ -30,5 +30,5 @@ def fetch_sources(status):
         articles = Article.objects.filter(source=source, is_downloaded=False)
         if articles.exists():
             fetcher.add_coroutine(source, articles)
-    fetcher.await_all_coroutines()
-    return "Fetcher fetched some amount of urls"
+    fetched_count = fetcher.await_all_coroutines()
+    return f"Fetcher fetched {fetched_count} urls"

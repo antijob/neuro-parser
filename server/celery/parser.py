@@ -58,13 +58,13 @@ def plan_incidents(status):
     task_group.apply_async()
     return f"Group of create_incidents tasks submitted"
 
-
 @app.task(queue="parser")
 def create_incidents(batch):
     articles_batch = [Article.objects.get(url=url) for url in batch]
     incidents_count = 0
 
-    incidents_count = IncidentPredictor.predict_batch(articles_batch)
+    predictor = IncidentPredictor();
+    incidents_count = predictor.predict_batch(articles_batch)
 
     for art in articles_batch:
         art.is_parsed = True

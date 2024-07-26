@@ -1,4 +1,4 @@
-from typing import List, Iterable
+from typing import Iterable
 from .parsers.base_parser import ParserBase
 
 import re
@@ -64,7 +64,7 @@ def build_document(html, clean=False):
     return document
 
 
-def add_articles(source: Source, urls: List[str]) -> List[Article]:
+def add_articles(source: Source, urls: list[str]) -> list[Article]:
     pattern = re.compile(r"https?://(?P<url_without_method>.+)")
     added = []
 
@@ -87,8 +87,8 @@ def add_articles(source: Source, urls: List[str]) -> List[Article]:
 
 
 class SourceParser:
-    parsers: List[ParserBase] = [VkParser, OkParser, TgParser]
-    document_parsers: List[ParserBase] = [RssParser, CommonParser]
+    parsers: list[ParserBase] = [VkParser, OkParser, TgParser]
+    document_parsers: list[ParserBase] = [RssParser, CommonParser]
 
     @classmethod
     async def extract_all_news_urls(cls, url: str) -> Iterable[str]:

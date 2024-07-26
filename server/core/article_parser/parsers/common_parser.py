@@ -13,7 +13,7 @@ class CommonParser(ParserBase):
         return True  # Default parser
 
     @classmethod
-    def parse_raw_data(cls, url: str, data) -> ArticleData:
+    def parse_raw_data(cls, data) -> ArticleData:
         config = Configuration()
         config.strict = False
 
@@ -23,4 +23,4 @@ class CommonParser(ParserBase):
             text = article.cleaned_text
             date = convert_date_format(article.publish_date)
 
-        return ArticleData(title, text, date, url)
+        return ArticleData(title, text, date)

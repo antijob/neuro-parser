@@ -11,7 +11,7 @@ class OkParser(ParserBase):
         return re.match(r"https://ok\.ru/", url)
 
     @classmethod
-    def parse_raw_data(cls, url: str, data) -> ArticleData:
+    def parse_raw_data(cls, data) -> ArticleData:
         tree = HTMLParser(data)
         text = tree.css_first("div.media-text_cnt_tx").text()
         if text:
@@ -24,4 +24,4 @@ class OkParser(ParserBase):
         date = ""
         if node:
             date = convert_date_format(node.text())
-        return ArticleData(title, text, date, url)
+        return ArticleData(title, text, date)

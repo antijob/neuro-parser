@@ -25,7 +25,7 @@ class TgParser(ParserBase):
         return re.match(r"https://t\.me/", url)
 
     @classmethod
-    def parse_raw_data(cls, url: str, data) -> ArticleData:
+    def parse_raw_data(cls, data) -> ArticleData:
         tree = HTMLParser(data)
         text_tag = tree.css_first("div.tgme_widget_message_text")
         if text_tag is not None:
@@ -41,4 +41,4 @@ class TgParser(ParserBase):
         date_time = time_tag.attributes["datetime"]
         original_datetime = datetime.fromisoformat(date_time)
         date = original_datetime.strftime("%Y-%m-%d")
-        return ArticleData(title, text, date, url)
+        return ArticleData(title, text, date)

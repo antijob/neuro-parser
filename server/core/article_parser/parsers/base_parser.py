@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from collections import namedtuple
 
-ArticleData = namedtuple("ArticleData", "title text date final_url")
+ArticleData = namedtuple("ArticleData", "title text date")
 
 
 class ParserBase(ABC):
@@ -12,5 +12,5 @@ class ParserBase(ABC):
 
     @classmethod
     @abstractmethod
-    def parse_raw_data(cls, url: str, data) -> ArticleData:
+    def parse_raw_data(cls, data) -> ArticleData:
         pass

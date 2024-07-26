@@ -139,7 +139,8 @@ def create_incident_from_article(article):
         if not article.is_downloaded:
             Fetcher.download(article)
 
-        incident = IncidentPredictor.predict(article)
+        predictor = IncidentPredictor()
+        incident = predictor.predict(article)
     return incident, not exists
 
 

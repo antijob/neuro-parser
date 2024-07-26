@@ -11,7 +11,7 @@ class VkParser(ParserBase):
         return re.match(r"https://vk\.com/", url)
 
     @classmethod
-    def parse_raw_data(cls, url: str, data) -> ArticleData:
+    def parse_raw_data(cls, data) -> ArticleData:
         tree = HTMLParser(data)
         wall_post = tree.css_first("div.wall_post_text")
         text = wall_post.text() if wall_post else None
@@ -25,4 +25,4 @@ class VkParser(ParserBase):
             tree.css_first("time.PostHeaderSubtitle__item").text()
         )
 
-        return ArticleData(title, text, date, url)
+        return ArticleData(title, text, date)
