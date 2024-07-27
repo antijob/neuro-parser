@@ -179,6 +179,7 @@ jobs:
       - name: Start the app
         run: |
           docker compose -f docker-compose.prod.yaml pull
+          docker compose down
           docker compose -f docker-compose.prod.yaml up -d
 
       - name: logout from docker registry
@@ -242,6 +243,7 @@ jobs:
       - name: Start the app
         run: |
           docker compose -f docker-compose.prod.yaml pull
+          docker compose down
           docker compose -f docker-compose.prod.yaml up -d
 
       - name: logout from docker registry

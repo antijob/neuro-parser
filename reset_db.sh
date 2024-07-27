@@ -8,7 +8,7 @@ docker-compose up -d
 
 # Пересоздать рабочую базу с нуля
 docker-compose exec db psql -U postgres -d postgres -c 'DROP DATABASE "neural-parser";'
-docker-compose exec db psql -U postgres -d postgres -c 'CREATE DATABASE "neural-parser";'
+docker-compose exec db psql -U postgres -d postgres -c 'CREATE DATABASE "report_antijob";'
 
 # Применить миграции
 # docker-compose exec web python manage.py makemigrations
