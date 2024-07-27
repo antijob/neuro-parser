@@ -9,7 +9,7 @@ A neural parser is a tool for parsing and analyzing news and content to search f
 For managing Python packages, we use [PDM](https://pdm-project.org/):
 
 ```
-# install all locked packages 
+# install all locked packages from lock file
 pdm install
 
 # resolve all dependencies and lock packages to lock file
@@ -27,15 +27,9 @@ git should contain both pyproject.toml and pdm.lock files
 
 ## Running local
 
-Firstly modify `config/.env`, create database and replace to apps.
+Firstly create `.env` from `.env.template` and create database.
 
 Run `docker-compose up -d` inside root directory for start local container.
-
-After that run migrations inside container:
-
-```
-docker <PYTHON_CONTAINER_ID> python manage.py migrate
-```
 
 Add for you `/etc/hosts` file record which resolve domain for local traefik
 
@@ -50,15 +44,11 @@ Or use api `http://report.local/api`
 
 ## Running production
 
-Firstly modify `config/.env` and create database and replace to apps.
+
+Firstly modify `config/.env`, create database.
 
 Run `docker-compose -f docker-compose.prod.yaml up -d` inside root directory for start local container.
 
-After that run migrations inside container:
-
-```
-docker <PYTHON_CONTAINER_ID> python manage.py migrate
-```
 
 ## Contributing
 
@@ -75,29 +65,14 @@ To install it you need to register new bot with BotFather
 Then add settings to .env file
 ```
 TELEGRAM_BOT_TOKEN=
-TELEGRAM_BOT_NAME=
-TELEGRAM_BOT_URL=
 ```
 * TELEGRAM_BOT_TOKEN - Token from BotFather
-* TELEGRAM_BOT_NAME - name that you gave to the bot
-* TELEGRAM_BOT_URL - url for web hooks. Is's should be endpoint on your site, by defauls it - yoursite.com/bot/
 
-In local machine you should have tunnel for webhook. You can create this with [ngrok](https://dashboard.ngrok.com)
-
-`ngrok http --host-header=rewrite report.local:80`
-
-Don't, forget to use ngrok https domain in `TELEGRAM_BOT_URL=` env variable. Example:
-
-`TELEGRAM_BOT_URL=https://21a0-91-151-136-184.ngrok-free.app/bot`. Don't forget update container.
-
-To manually register your web hook address on Telegram servers you can run that command
-
-`python3 manage.py set_webhook`
-
-After that you need to create new telegram chat and add bot there. That's all bot remember that group 
+Then you need to create new telegram chat and add bot there. That's all bot remember that group 
 and will send notifications there. If you want receive notifications only for some of existing categories
 use command ```/categ``` for bot settings. 
 Also you can go to Django admin and check Bot section to explore channels that are saved. 
 
 Thank you for your contributions to the Neural Parser project!
+
 
