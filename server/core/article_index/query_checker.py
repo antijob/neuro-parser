@@ -3,7 +3,6 @@ from .article_index import ArticleIndex
 
 from server.apps.core.models import Article
 from django.db.models import QuerySet
-from typing import List
 
 
 RATIO_THRESHOLD = 0.5
@@ -18,14 +17,14 @@ def calc_ratio(a: str, b: str) -> float:
     return 0
 
 
-def reindex_and_detect_duplicates(query: QuerySet) -> List[str]:
+def reindex_and_detect_duplicates(query: QuerySet) -> list[str]:
     articleIndex = ArticleIndex()
     articleIndex.load()
 
     duplicate_urls = []
 
     for article in query:
-        if not article.text:
+        if not article.text and not article.title:
             duplicate_urls.append(article.url)
             continue
 
