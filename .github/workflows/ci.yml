@@ -164,8 +164,8 @@ jobs:
           POSTGRES_PASSWORD: "${{ secrets.POSTGRES_PASSWORD }}"
           SENTRY_DSN: "${{ secrets.SENTRY_DSN }}"
           TELEGRAM_BOT_TOKEN: "${{ secrets.TELEGRAM_BOT_TOKEN }}"
-          TELEGRAM_BOT_NAME: "${{ vars.TELEGRAM_BOT_NAME }}"
-          TELEGRAM_BOT_URL: "${{ vars.TELEGRAM_BOT_URL }}"
+          TELEGRAM_BOT_NAME: "${{ vars.TELEGRAM_BOT_NAME_STAGE }}"
+          TELEGRAM_BOT_URL: "${{ vars.TELEGRAM_BOT_URL_STAGE }}"
           DJANGO_KEY: "${{ secrets.DJANGO_KEY}}"
           CF_DNS_API_TOKEN: "${{ secrets.CF_DNS_API_TOKEN }}"
           API_TOKEN: "${{ secrets.API_TOKEN }}"
@@ -173,7 +173,7 @@ jobs:
           FLOWER_USER: "${{ secrets.FLOWER_USER }}"
           FLOWER_PASSWORD: "${{ secrets.FLOWER_PASSWORD }}"
           FLOWER_HOST: "${{ vars.FLOWER_HOST }}"
-          HOST: "${{ vars.HOST }}"
+          HOST: "${{ vars.HOST_STAGE }}"
           ACME_EMAIL: "${{ secrets.ACME_EMAIL }}"
 
       - name: Start the app
