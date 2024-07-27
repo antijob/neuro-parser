@@ -6,12 +6,7 @@ from django.db import models
 from django.urls import reverse
 
 from server.apps.core.data.regions import COUNTRIES, REGIONS
-from server.apps.core.logic.region import region_code
 from server.apps.users.models import User
-
-
-from server.settings.components.common import MODELS_DIR
-
 
 class IncidentType(models.Model):
     model_path = models.CharField(max_length=100, null=True)
@@ -24,17 +19,6 @@ class IncidentType(models.Model):
     should_sent_to_bot = models.BooleanField(
         default=True, verbose_name="Показывать в боте"
     )
-
-    @property
-    def model_directory(self):
-        return MODELS_DIR.joinpath(self.model_path) if self.model_path else None
-
-    @classmethod
-    def get_choices(cls):
-        return [
-            (incident_type.id, incident_type.description)
-            for incident_type in cls.objects.all()
-        ]
 
     def __str__(self) -> str:
         return str(self.description)

@@ -106,7 +106,7 @@ class Fetcher:
                     statistics.exception()
 
         logger.info(f"Coroutine finished. Statistics: {statistics}")
-        return statistics.postprocess
+        return statistics._postprocess
 
     def add_coroutine(self, source: Source, articles: Iterable[Article]):
         articles_dict: dict[str, Article] = {a.url: a for a in articles}

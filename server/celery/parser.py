@@ -1,3 +1,5 @@
+import logging
+
 from .celery_app import app
 from server.apps.core.models import Article
 from server.core.article_index.query_checker import mark_duplicates
@@ -9,6 +11,9 @@ from celery import group
 
 from server.core.incident_predictor import IncidentPredictor
 
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 def split_every(n, iterable):
     i = iter(iterable)
@@ -60,16 +65,21 @@ def plan_incidents(status):
 
 @app.task(queue="parser")
 def create_incidents(batch):
-    articles_batch = [Article.objects.get(url=url) for url in batch]
-    incidents_count = 0
+    try:
+        articles_batch = [Article.objects.get(url=url) for url in batch]
+        incidents_count = 0
 
-    predictor = IncidentPredictor();
-    incidents_count = predictor.predict_batch(articles_batch)
+        predictor = IncidentPredictor()
+        incidents_count = predictor.predict_batch(articles_batch)
 
-    for art in articles_batch:
-        art.is_parsed = True
-        art.save()
-    return f"Batch finished. Incidents created: {incidents_count}"
+        for art in articles_batch:
+            art.is_parsed = True
+            art.save()
+
+        return f"Batch finished. Incidents created: {incidents_count}"
+    except Exception as e:
+        logger.error(f"Error in create_incidents: {e}")
+        return f"Batch failed due to an error: {e}"
 
 
 @app.task(queue="parser")
