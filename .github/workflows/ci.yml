@@ -30,7 +30,7 @@ jobs:
     needs:
       - clean
     runs-on: "ubuntu-latest"
-    environment: Staging
+    environment: ${{ github.ref == 'refs/heads/main' && 'Prod' || github.ref == 'refs/heads/stage' && 'Staging' || 'Unknown' }}
     outputs:
       branch_name: ${{ steps.build.outputs.branch_name }}
     steps:
