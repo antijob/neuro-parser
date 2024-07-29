@@ -33,7 +33,8 @@ class IncidentTypeAdmin(admin.ModelAdmin):
         for obj in queryset:
             obj.is_active = False
             obj.save()
-        self.message_user(request, f"{queryset.count()} models will be switched.")
+        self.message_user(
+            request, f"{queryset.count()} models will be switched.")
 
     disable_models.short_description = "Disable models"
 
@@ -41,7 +42,8 @@ class IncidentTypeAdmin(admin.ModelAdmin):
         for obj in queryset:
             obj.is_active = True
             obj.save()
-        self.message_user(request, f"{queryset.count()} models will be switched.")
+        self.message_user(
+            request, f"{queryset.count()} models will be switched.")
 
     enable_models.short_description = "Enable models"
 
@@ -49,6 +51,7 @@ class IncidentTypeAdmin(admin.ModelAdmin):
 @admin.register(MediaIncident)
 class MediaIncidentAdmin(admin.ModelAdmin):
     list_display = ("any_title", "incident_type", "status", "rate_article")
+    search_fields = ['any_title']
 
     def rate_article(self, obj):
         if obj.related_article:
@@ -70,12 +73,14 @@ class ArticleAdmin(admin.ModelAdmin):
     )
     ordering = ("-publication_date",)
     actions = ["force_parse"]
+    search_fields = ['url', 'title']
 
     def force_parse(self, request, queryset):
         for obj in queryset:
             obj.is_parsed = False
             obj.save()
-        self.message_user(request, f"{queryset.count()} articles will be parsed.")
+        self.message_user(
+            request, f"{queryset.count()} articles will be parsed.")
 
     force_parse.short_description = "Force parse"
 
@@ -84,6 +89,7 @@ class ArticleAdmin(admin.ModelAdmin):
 class SourceAdmin(admin.ModelAdmin):
     list_display = ("url", "country", "region", "is_active")
     actions = ["activate", "deactivate"]
+    search_fields = ['url']
 
     def save_model(self, request, obj, form, change):
         urls = obj.url.split()
@@ -105,13 +111,15 @@ class SourceAdmin(admin.ModelAdmin):
         for obj in queryset:
             obj.is_active = True
             obj.save()
-        self.message_user(request, f"{queryset.count()} sources were deactivate.")
+        self.message_user(
+            request, f"{queryset.count()} sources were deactivate.")
 
     def deactivate(self, request, queryset):
         for obj in queryset:
             obj.is_active = False
             obj.save()
-        self.message_user(request, f"{queryset.count()} sources were deactivate.")
+        self.message_user(
+            request, f"{queryset.count()} sources were deactivate.")
 
     activate.short_description = "Activate sources"
     deactivate.short_description = "Deactivate sources"
