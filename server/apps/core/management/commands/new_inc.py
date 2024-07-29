@@ -3,8 +3,7 @@ from datetime import date
 
 from django.core.management.base import BaseCommand
 
-from server.apps.core.incident_types import IncidentType
-from server.apps.core.models import MediaIncident, Country, Region, User, Article
+from server.apps.core.models import IncidentType, MediaIncident, Country, Region, User, Article
 
 logger = logging.getLogger(__name__)
 

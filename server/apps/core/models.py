@@ -1,20 +1,34 @@
 # -*- coding: utf-8 -*-
 import datetime
-import re
 
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.urls import reverse
 
 from server.apps.core.data.regions import COUNTRIES, REGIONS
-from server.apps.core.incident_types import IncidentType
-from server.apps.core.logic.grabber.classificator import category
-from server.apps.core.logic.grabber.region import region_code
-from server.apps.core.logic.morphy import normalize_text
 from server.apps.users.models import User
-from server.core.parser.source_parser import SourceParser
 
-from server.core.parser.article_parser import ArticleParser
+class IncidentType(models.Model):
+    model_path = models.CharField(max_length=100, null=True)
+    treshold = models.FloatField("Treshold для модели", default=1)
+    description = models.CharField(
+        "Название модели", max_length=128, null=True, blank=True
+    )
+    chat_gpt_prompt = models.TextField("Chat-GPR промпт", null=True, blank=True)
+    is_active = models.BooleanField(verbose_name="Активный", default=False)
+    should_sent_to_bot = models.BooleanField(
+        default=True, verbose_name="Показывать в боте"
+    )
+
+    def __str__(self) -> str:
+        return str(self.description)
+
+    class Meta:
+        verbose_name = "Тип инцидента"
+        verbose_name_plural = "Типы инцидентов"
+
+
+DEFAULT_COUNTRY_ID: int = 11  # RUssia
 
 
 class Country(models.Model):
@@ -139,22 +153,6 @@ class BaseIncident(models.Model):
         except IndexError:
             return ""
 
-    def region_name(self):
-        # return dict(self.REGIONS).get(self.region)
-        return self.region.name
-
-    def category_name(self):
-        return self.incident_type.description
-
-    @classmethod
-    def available_statuses(cls):
-        available_statuses = list(cls.ACTIVE_STATUSES) + [cls.COMPLETED]
-        return [
-            (status, name)
-            for status, name in cls.STATUSES
-            if status in available_statuses
-        ]
-
 
 class MediaIncident(BaseIncident):
     duplicate = models.ForeignKey(
@@ -178,22 +176,6 @@ class MediaIncident(BaseIncident):
             )
         return ""
 
-    @classmethod
-    def create_with_article(cls, article, incident_type):
-        return cls.objects.create(
-            urls=[article.url],
-            status=cls.UNPROCESSED,
-            title=article.any_title(),
-            public_title=article.any_title(),
-            create_date=article.publication_date or datetime.date.today(),
-            description=article.text,
-            related_article=article,
-            public_description=article.text,
-            incident_type=incident_type,
-            region=article.region,
-            country=article.country,
-        )
-
     class Meta:
         verbose_name = "Инцидент из СМИ"
         verbose_name_plural = "Инциденты из СМИ"
@@ -214,33 +196,6 @@ class Source(models.Model):
     class Meta:
         verbose_name = "Источник"
         verbose_name_plural = "Источники"
-
-    def add_articles(self, urls):
-        p = re.compile(r"https?\:\/\/(?P<url_without_method>.+)")
-        added = []
-        for url in urls:
-            match = p.match(url)
-            if not match:
-                continue
-            url_without_method = match.group("url_without_method")
-            if Article.objects.filter(url__iendswith=url_without_method).exists():
-                continue
-            try:
-                added += [Article.objects.create(url=url, source=self)]
-            except Exception as e:
-                raise type(e)(f"When add_articles with {url} exception happend: ", e)
-        return added
-
-    def update(self):
-        urls = SourceParser.extract_all_news_urls(self.url)
-        if not urls:
-            return 0
-        added = self.add_articles(urls)
-        self.save()
-        return len(added)
-
-    # def grab_archive(self, first_page_url=None, first_page=1):
-    #     return source_parser.grab_archive(self, first_page_url, first_page)
 
     def __str__(self):
         return "Source [{}]".format(self.url)
@@ -278,17 +233,13 @@ class Article(models.Model):
     create_date = models.DateField("Дата создания", auto_now_add=True)
     publication_date = models.DateField("Дата публикации", null=True, blank=True)
 
-    class Meta:
-        verbose_name = "Cтатья"
-        verbose_name_plural = "Статьи"
-
     def save(self, *args, **kwargs):
         self.title = self.any_title()
         super().save(*args, **kwargs)
 
-    def download(self):
-        raw_data = ArticleParser.get_article(self.url)
-        ArticleParser.postprocess_raw_data(self, raw_data)
+    class Meta:
+        verbose_name = "Cтатья"
+        verbose_name_plural = "Статьи"
 
     def any_title(self):
         if self.title:
@@ -317,27 +268,3 @@ class Article(models.Model):
     def country(self):
         country = self.source.country if self.source else "RUS"
         return country
-
-    def normalized_text(self):
-        return normalize_text(self.text)
-
-    # ToDo: made self.incident field contain multiple incidents
-    def create_incident(self, force=False):
-        if self.is_incident_created and not force:
-            return self.incident
-
-        if not self.text:
-            return
-        normalized_text = normalize_text(self.text)
-        incident_types = category.predict_incident_type(normalized_text, self)
-        if not incident_types:
-            return None
-
-        for incident_type in incident_types:
-            MediaIncident.create_with_article(self, incident_type)
-        self.is_incident_created = True
-        self.save()
-        return self.incident
-
-    def create_incident_with_type(self, incident_type):
-        return MediaIncident.create_with_article(self, incident_type)
