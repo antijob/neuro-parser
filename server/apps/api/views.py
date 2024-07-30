@@ -1,7 +1,6 @@
 from rest_framework import generics, status, viewsets
 from rest_framework.response import Response
 from rest_framework.decorators import action, api_view, schema
-from rest_framework.throttling import UserRateThrottle
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 
@@ -71,7 +70,56 @@ class SourceViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAdminOrReadOnly]
 
     @swagger_auto_schema(
-        operation_description="Retrieve articles by source with optional filtering and sorting",
+        operation_description="Retrieve sources with optional filtering and sorting",
+        manual_parameters=[
+            openapi.Parameter(
+                "limit",
+                openapi.IN_QUERY,
+                description="Limit the number of results",
+                type=openapi.TYPE_INTEGER,
+            ),
+            openapi.Parameter(
+                "order_by",
+                openapi.IN_QUERY,
+                description="Order by field (e.g., 'name', 'created_at')",
+                type=openapi.TYPE_STRING,
+            ),
+        ],
+        responses={200: SourceSerializer(many=True)},
+    )
+    def list(self, request, *args, **kwargs):
+        try:
+            sources = Source.objects.all()
+
+            # Apply ordering
+            try:
+                order_by = request.query_params.get("order_by", None)
+                if order_by:
+                    sources = sources.order_by(order_by)
+            except Exception as e:
+                return Response(
+                    {"error": f"Invalid order_by value: {str(e)}"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            # Apply limit
+            try:
+                limit = request.query_params.get("limit", None)
+                if limit:
+                    limit = int(limit)
+                    sources = sources[:limit]
+            except ValueError:
+                return Response(
+                    {"error": "Invalid limit value"}, status=status.HTTP_400_BAD_REQUEST
+                )
+
+            serializer = SourceSerializer(sources, many=True)
+            return Response(serializer.data)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    @swagger_auto_schema(
+        operation_description="Retrieve sources with optional filtering and sorting",
         manual_parameters=[
             openapi.Parameter(
                 "limit",
@@ -180,6 +228,162 @@ class ArticleViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAdminOrRestrictedPost]
 
     @swagger_auto_schema(
+        operation_description="Retrieve articles with optional filtering and sorting",
+        manual_parameters=[
+            openapi.Parameter(
+                "limit",
+                openapi.IN_QUERY,
+                description="Limit the number of results",
+                type=openapi.TYPE_INTEGER,
+            ),
+            openapi.Parameter(
+                "order_by",
+                openapi.IN_QUERY,
+                description="Order by field (e.g., 'published_at', 'title')",
+                type=openapi.TYPE_STRING,
+            ),
+        ],
+        responses={200: ArticleSerializer(many=True)},
+    )
+    def list(self, request, *args, **kwargs):
+        try:
+            articles = Article.objects.all()
+
+            # Apply ordering
+            try:
+                order_by = request.query_params.get("order_by", None)
+                if order_by:
+                    articles = articles.order_by(order_by)
+            except Exception as e:
+                return Response(
+                    {"error": f"Invalid order_by value: {str(e)}"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            # Apply limit
+            try:
+                limit = request.query_params.get("limit", None)
+                if limit:
+                    limit = int(limit)
+                    articles = articles[:limit]
+            except ValueError:
+                return Response(
+                    {"error": "Invalid limit value"}, status=status.HTTP_400_BAD_REQUEST
+                )
+
+            serializer = ArticleSerializer(articles, many=True)
+            return Response(serializer.data)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    @swagger_auto_schema(
+        operation_description="Retrieve media incidents by source with optional filtering and sorting",
+        manual_parameters=[
+            openapi.Parameter(
+                "limit",
+                openapi.IN_QUERY,
+                description="Limit the number of results",
+                type=openapi.TYPE_INTEGER,
+            ),
+            openapi.Parameter(
+                "order_by",
+                openapi.IN_QUERY,
+                description="Order by field (e.g., 'detected_at', 'description')",
+                type=openapi.TYPE_STRING,
+            ),
+        ],
+        responses={200: MediaIncidentSerializer(many=True)},
+    )
+    @action(detail=True, methods=["get"])
+    def media_incidents(self, request, pk=None):
+        try:
+            source = self.get_object()
+            articles = Article.objects.filter(source=source)
+            incidents = MediaIncident.objects.filter(article__in=articles)
+
+            # Apply ordering
+            try:
+                order_by = request.query_params.get("order_by", None)
+                if order_by:
+                    incidents = incidents.order_by(order_by)
+            except Exception as e:
+                return Response(
+                    {"error": f"Invalid order_by value: {str(e)}"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            # Apply limit
+            try:
+                limit = request.query_params.get("limit", None)
+                if limit:
+                    limit = int(limit)
+                    incidents = incidents[:limit]
+            except ValueError:
+                return Response(
+                    {"error": "Invalid limit value"}, status=status.HTTP_400_BAD_REQUEST
+                )
+
+            serializer = MediaIncidentSerializer(incidents, many=True)
+            return Response(serializer.data)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ArticleViewSet(viewsets.ModelViewSet):
+    queryset = Article.objects.all()
+    serializer_class = ArticleSerializer
+    permission_classes = [IsAdminOrRestrictedPost]
+
+    @swagger_auto_schema(
+        operation_description="Retrieve articles with optional filtering and sorting",
+        manual_parameters=[
+            openapi.Parameter(
+                "limit",
+                openapi.IN_QUERY,
+                description="Limit the number of results",
+                type=openapi.TYPE_INTEGER,
+            ),
+            openapi.Parameter(
+                "order_by",
+                openapi.IN_QUERY,
+                description="Order by field (e.g., 'published_at', 'title')",
+                type=openapi.TYPE_STRING,
+            ),
+        ],
+        responses={200: ArticleSerializer(many=True)},
+    )
+    def list(self, request, *args, **kwargs):
+        try:
+            articles = Article.objects.all()
+
+            # Apply ordering
+            try:
+                order_by = request.query_params.get("order_by", None)
+                if order_by:
+                    articles = articles.order_by(order_by)
+            except Exception as e:
+                return Response(
+                    {"error": f"Invalid order_by value: {str(e)}"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            # Apply limit
+            try:
+                limit = request.query_params.get("limit", None)
+                if limit:
+                    limit = int(limit)
+                    articles = articles[:limit]
+            except ValueError:
+                return Response(
+                    {"error": "Invalid limit value"}, status=status.HTTP_400_BAD_REQUEST
+                )
+
+            serializer = ArticleSerializer(articles, many=True)
+            return Response(serializer.data)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    @swagger_auto_schema(
         operation_description="Retrieve articles by URL",
         responses={200: ArticleSerializer(many=True)},
     )
@@ -191,12 +395,6 @@ class ArticleViewSet(viewsets.ModelViewSet):
             return Response(serializer.data)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
-    class UserRateThrottle(UserRateThrottle):
-        rate = "10/hour"
-
-    class AdminRateThrottle(UserRateThrottle):
-        rate = "100/hour"
 
     @swagger_auto_schema(
         operation_description="Fetch article from URL",
@@ -219,13 +417,13 @@ class ArticleViewSet(viewsets.ModelViewSet):
                     {"error": "URL is required"}, status=status.HTTP_400_BAD_REQUEST
                 )
 
-            # Создание объекта Article
+            # Create an Article object
             article = Article.objects.create(url=url)
 
-            # Вызов внешних методов
+            # Call external methods
             Fetcher.fetch_article(article)
 
-            # Сериализация и возврат объекта Article
+            # Serialize and return the Article object
             article_serializer = self.get_serializer(article)
             return Response({"article": article_serializer.data})
         except Exception as e:
@@ -247,12 +445,8 @@ class ArticleViewSet(viewsets.ModelViewSet):
             predictor = IncidentPredictor()
             incidents = predictor.predict(article)
 
-            # Сериализация и возврат созданных MediaIncident
+            # Serialize and return the created MediaIncident
             incidents_serializer = MediaIncidentSerializer(incidents, many=True)
             return Response({"incidents": incidents_serializer.data})
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
-    # throttle_classes = [UserRateThrottle]
-    # if request.user.is_staff:
-    #     throttle_classes = [AdminRateThrottle]
