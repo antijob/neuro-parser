@@ -202,9 +202,9 @@ API_TOKEN = c("API_TOKEN", default=None)
 API_RPS = c("API_RPS", default="1/second")
 
 REST_FRAMEWORK = {
-    "DEFAULT_AUTHENTICATION_CLASSES": (
-        "server.apps.api.authentication.EnvTokenAuthentication",
-    ),
+    # "DEFAULT_AUTHENTICATION_CLASSES": (
+    #     "server.apps.api.authentication.EnvTokenAuthentication",
+    # ),
     "DEFAULT_THROTTLE_CLASSES": [
         "rest_framework.throttling.UserRateThrottle",
     ],
@@ -214,6 +214,7 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",
     ],
+    'EXCEPTION_HANDLER': 'server.apps.api.exception_handler.custom_exception_handler',
 }
 
 REPLICATE_API_TOKEN = c("REPLICATE_API_TOKEN")
