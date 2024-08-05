@@ -1,8 +1,11 @@
+import asyncio
 import logging
 
 from aiogram import Router
+from aiogram.exceptions import TelegramRetryAfter, TelegramBadRequest
 from aiogram.types import CallbackQuery
 from asgiref.sync import sync_to_async
+from django.db import transaction
 from magic_filter import F
 
 from server.apps.bot.data.messages import (
@@ -17,8 +20,7 @@ logger = logging.getLogger(__name__)
 router = Router()
 
 
-@router.callback_query(RegionCF.filter(F.action == "add_region"))
-@router.callback_query(RegionCF.filter(F.action == "del_region"))
+@router.callback_query(RegionCF.filter(F.action.in_(["add_region", "del_region"])))
 @check_channel
 async def category_config_callback(
     callback: CallbackQuery, callback_data: RegionCF, channel: Channel
@@ -27,21 +29,64 @@ async def category_config_callback(
     Handle callbacks for adding or deleting a region.
     Update the ChannelCountry object and refresh the region keyboard.
     """
-    try:
-        channel_country = await sync_to_async(ChannelCountry.objects.get)(
-            id=int(callback_data.channel_country_id)
-        )
-        if callback_data.action == "add_region":
-            await sync_to_async(channel_country.add_region)(callback_data.region_code)
-        if callback_data.action == "del_region":
-            await sync_to_async(channel_country.del_region)(callback_data.region_code)
-    except Exception as e:
-        logger.error(f"Error while adding or deleting reigion: {e}")
-        return
+    logger.info("Callback received with data: %s", callback_data)
 
-    keyboard = await region_keyboard(channel_country.id, callback_data.page)
-    await callback.message.edit_reply_markup(reply_markup=keyboard)
-    await callback.answer()
+    max_retries = 3
+    for attempt in range(max_retries):
+        try:
+            logger.info("Attempt %d for processing callback", attempt + 1)
+
+            def handle_transactional_logic(callback_data: RegionCF):
+                with transaction.atomic():
+                    logger.info("Entering transaction block")
+                    channel_country = ChannelCountry.objects.select_for_update().get(
+                        id=int(callback_data.channel_country_id)
+                    )
+                    logger.info("ChannelCountry object fetched: %s", channel_country)
+
+                    if callback_data.action == "add_region":
+                        channel_country.add_region(callback_data.region_code)
+                        logger.info("Added region: %s", callback_data.region_code)
+                    elif callback_data.action == "del_region":
+                        channel_country.del_region(callback_data.region_code)
+                        logger.info("Deleted region: %s", callback_data.region_code)
+
+                    return channel_country.id
+
+            channel_country_id = await sync_to_async(
+                handle_transactional_logic, thread_sensitive=True
+            )(callback_data)
+
+            keyboard = await region_keyboard(channel_country_id, callback_data.page)
+
+            await callback.message.edit_reply_markup(reply_markup=keyboard)
+            await callback.answer()
+            logger.info("Callback processing completed successfully")
+            break
+
+        except TelegramRetryAfter as e:
+            logger.warning(
+                f"Telegram API retry after exception: {e.retry_after} seconds"
+            )
+            if attempt == max_retries - 1:
+                logger.error(f"Max retries reached for Telegram API: {e}")
+                await callback.answer(
+                    "Извините, произошла ошибка. Попробуйте позже.", show_alert=True
+                )
+                return
+            await asyncio.sleep(e.retry_after)
+            logger.info(f"Retrying after {e.retry_after} seconds")
+
+        except TelegramBadRequest as e:
+            logger.error(f"Telegram API error: {e}")
+            return
+
+        except Exception as e:
+            logger.error(f"Error while adding or deleting region: {e}")
+            await callback.answer(
+                "Произошла ошибка при обновлении региона.", show_alert=True
+            )
+            return
 
 
 @router.callback_query(RegionCF.filter(F.action == "page_back"))
