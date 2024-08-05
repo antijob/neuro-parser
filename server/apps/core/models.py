@@ -8,6 +8,7 @@ from django.urls import reverse
 from server.apps.core.data.regions import COUNTRIES, REGIONS
 from server.apps.users.models import User
 
+
 class IncidentType(models.Model):
     model_path = models.CharField(max_length=100, null=True)
     treshold = models.FloatField("Treshold для модели", default=1)
@@ -140,7 +141,6 @@ class BaseIncident(models.Model):
         return ""
 
 
-
 class MediaIncident(BaseIncident):
     duplicate = models.ForeignKey(
         "self",
@@ -188,7 +188,7 @@ class Article(models.Model):
         null=True,
         blank=True,
     )
-    url = models.TextField(primary_key=True, verbose_name="URL", default="", blank=True)
+    url = models.URLField(primary_key=True, verbose_name="URL", default="", blank=True)
     title = models.TextField(
         verbose_name="Заголовок", default="", blank=True, null=True
     )
@@ -199,13 +199,9 @@ class Article(models.Model):
         verbose_name="Инцидент создан", default=False
     )
     is_duplicate = models.BooleanField(verbose_name="Дубликат", default=False)
-    duplicate_url = models.TextField(
-        verbose_name="Дубликат чего", null=True, blank=True
-    )
+    duplicate_url = models.URLField(verbose_name="Дубликат чего", null=True, blank=True)
     is_redirect = models.BooleanField(verbose_name="Редирект", default=False)
-    redirect_url = models.TextField(
-        verbose_name="Редирект куда", null=True, blank=True
-    )
+    redirect_url = models.URLField(verbose_name="Редирект куда", null=True, blank=True)
 
     rate = models.JSONField(verbose_name="Оценка релевантности", default=dict)
     incident = models.OneToOneField(

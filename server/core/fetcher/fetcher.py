@@ -15,19 +15,21 @@ from .statistics import CoroutineStatistics
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+
 class BadCodeException(Exception):
     def __init__(self, code):
         super().__init__("Bad code")
         self.code = code
+
 
 async def fetch_url(session: aiohttp.ClientSession, url: str) -> tuple[str, str]:
     params = {}
     if url.startswith("https://t.me/"):
         params = {"embed": "1"}
     try:
-        async with session.get(url, params=params) as response:
+        async with session.get(url, params=params, allow_redirects=True) as response:
             if response.ok:
-                return [await response.text(), response.url]
+                return [await response.text(), str(response.url)]
             else:
                 raise BadCodeException(response.status)
     except aiohttp.ClientError as e:
@@ -37,34 +39,39 @@ async def fetch_url(session: aiohttp.ClientSession, url: str) -> tuple[str, str]
         logger.error(f"Unexpected error occurred while fetching URL {url}: {e}")
         raise
 
+
 class Fetcher:
     def __init__(self):
         self.coroutines: list[Coroutine] = []
 
     @staticmethod
-    async def fetch_article(session: aiohttp.ClientSession, article: Article) -> tuple[Article, str]:
+    async def fetch_article(
+        session: aiohttp.ClientSession, article: Article, source: Source
+    ) -> tuple[Article, str]:
         content, resolved_url = await fetch_url(session, article.url)
         if article.url != resolved_url:
             article.redirect_url = resolved_url
             article.is_redirect = True
             await sync_to_async(article.save, thread_sensitive=True)()
 
-            if not Article.objects.filter(url=resolved_url).exists():
-                article = Article.objects.create(url=resolved_url, source=article.source)
-        article.text = content
+            article, _ = await sync_to_async(Article.objects.get_or_create)(
+                url=resolved_url
+            )
+            article.source = source
+        # article.text = content
         ArticleParser.postprocess_article(article, content)
         await sync_to_async(article.save, thread_sensitive=True)()
 
         return article, resolved_url
 
-    async def download(self, article: Article) -> Article:
+    async def download(self, article: Article, source: Source) -> Article:
         try:
             async with aiohttp.ClientSession(
                 trust_env=True,
                 connector=aiohttp.TCPConnector(ssl=False),
                 headers=session_random_headers(),
             ) as session:
-                article, _ = await self.fetch_article(session, article.url)
+                article, _ = await self.fetch_article(session, article.url, source)
                 return article
         except Exception as e:
             logger.error(f"Error downloading article {article.url}: {e}")
@@ -89,7 +96,9 @@ class Fetcher:
             logger.error(f"Network error occurred while fetching source URL {url}: {e}")
             return None
         except Exception as e:
-            logger.error(f"Unexpected error occurred while fetching source URL {url}: {e}")
+            logger.error(
+                f"Unexpected error occurred while fetching source URL {url}: {e}"
+            )
             return None
 
     async def create_coroutine(self, source: Source, articles: dict[str, Article]):
@@ -109,7 +118,7 @@ class Fetcher:
 
             for url, article in articles.items():
                 try:
-                    await self.fetch_article(session, article)
+                    await self.fetch_article(session, article, source)
                     statistics.fetch()
                     statistics.postprocess()
 
