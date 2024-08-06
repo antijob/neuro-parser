@@ -196,33 +196,13 @@ PASSWORD_HASHERS = [
     "django.contrib.auth.hashers.Argon2PasswordHasher",
 ]
 
-# REST API
 
-API_TOKEN = c("API_TOKEN", default=None)
-API_RPS = c("API_RPS", default="1/second")
-
-REST_FRAMEWORK = {
-    "DEFAULT_AUTHENTICATION_CLASSES": (
-        "server.apps.api.authentication.EnvTokenAuthentication",
-    ),
-    "DEFAULT_THROTTLE_CLASSES": [
-        "rest_framework.throttling.UserRateThrottle",
-    ],
-    "DEFAULT_THROTTLE_RATES": {
-        "user": API_RPS,
-    },
-    "DEFAULT_PERMISSION_CLASSES": [
-        "rest_framework.permissions.IsAuthenticated",
-    ],
-}
-
-CHAT_GPT_KEY = c("CHAT_GPT_KEY")
+REPLICATE_API_TOKEN = c("REPLICATE_API_TOKEN")
+REPLICATE_MODEL_NAME = c("REPLICATE_MODEL_NAME")
 
 CONTACT_FORM_EMAILS = ["agorarights@gmail.com"]
 
 MAX_UPLOAD_SIZE = 20971520
-ACCOUNT_ADAPTER = "server.apps.core.logic.account_adapter.CustomAccountAdapter"
-ACCOUNT_ALLOW_SIGNUPS = False
 
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 

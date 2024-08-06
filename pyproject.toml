@@ -32,7 +32,6 @@ dependencies = [
     "xlsxwriter<2,>=1",
     "navec==0.9.0",
     "slovnet==0.4.0",
-    "python-telegram-bot==13.15",
     "pillow==9.0.0",
     "bcrypt==3.2.0",
     "goose3<4.0,>=3.1",
@@ -47,12 +46,32 @@ dependencies = [
     "simhash<3.0.0,>=2.1.2",
     "aiohttp<4.0.0,>=3.8.6",
     "lxml[html_clean]<6,>=5",
+    "aiogram>=3.8.0",
+    "numpy<2",
+    "replicate>=0.31.0",
+    "sumy>=0.11.0",
+    "drf-yasg>=1.21.7",
+    "pytest-django>=4.8.0",
+    "Telethon==1.36.0",
 ]
 name = "neuro-parser"
 version = "0.1.0"
 description = ""
 readme = "README.md"
 
+[tool.pdm.dev-dependencies]
+lint = [
+    "flake8",
+    "black"
+]
+test = ["pytest", "pytest-cov", "pytest-django", "pytest-md-report"]
+doc = ["mkdocs"]
+
 [build-system]
 requires = ["pdm-backend"]
 build-backend = "pdm.backend"
+
+[tool.black]
+line-length = 88
+target-version = ['py39']
+skip-string-normalization = false

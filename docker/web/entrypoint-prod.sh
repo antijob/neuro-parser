@@ -31,10 +31,6 @@ python manage.py migrate
 log "Collecting static files..."
 python manage.py collectstatic --noinput
 
-# Set webhook
-log "Setting webhook..."
-python manage.py set_webhook
-
 # Run the status update script
 log "Running the status update script..."
 python manage.py status_update

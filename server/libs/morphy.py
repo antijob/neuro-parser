@@ -12,6 +12,7 @@ logger = logging.getLogger(__name__)
 _nltk_initialized = False
 _cached_stop_words = {}
 
+
 def initialize_nltk_resources():
     global _nltk_initialized, _cached_stop_words
     if not _nltk_initialized:
@@ -25,7 +26,12 @@ def initialize_nltk_resources():
             logger.error(f"Error initializing NLTK resources: {e}")
             raise
 
+
 def normalize_text(text, language='russian'):
+    if not text:
+        logger.error("Text to normalize doesn't exist")
+        return ""
+
     try:
         initialize_nltk_resources()
     except Exception as e:

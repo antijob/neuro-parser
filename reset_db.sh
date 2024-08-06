@@ -1,16 +1,38 @@
 #!/bin/bash
 
-# Остановить сервер
-docker-compose down -v
+# Function to run a command and check for errors
+run_command() {
+  echo "Executing: $1"
+  if ! eval "$1"; then
+    echo "Error executing command: $1" >&2
+    exit 1
+  fi
+}
 
-# Поднять сервер с новой базой данных
-docker-compose up -d
+# Stop the server
+run_command "docker-compose down -v"
 
-# Пересоздать рабочую базу с нуля
-docker-compose exec db psql -U postgres -d postgres -c 'DROP DATABASE "neural-parser";'
-docker-compose exec db psql -U postgres -d postgres -c 'CREATE DATABASE "report_antijob";'
+# Start the server with a new database
+run_command "docker-compose up -d"
 
-# Применить миграции
-# docker-compose exec web python manage.py makemigrations
-docker-compose exec web python manage.py migrate
-docker-compose exec web python manage.py createsuperuser --noinput --email np@np.com
+# Wait for db initialization
+echo "Waiting for db initialization..."
+sleep 30
+
+# Recreate the working database from scratch
+run_command "docker-compose exec db psql -U postgres -d postgres -c 'DROP DATABASE IF EXISTS \"neural-parser\";'"
+run_command "docker-compose exec db psql -U postgres -d postgres -c 'CREATE DATABASE \"neural-parser\";'"
+
+# Restore db dump
+run_command "docker-compose exec db psql -U postgres -d neural-parser -f /code/dump.sql"
+
+# Apply migrations
+# run_command "docker-compose exec web python manage.py migrate"
+
+# Create superuser
+run_command "docker-compose exec web python manage.py createsuperuser --noinput --email np@np.com"
+
+# Apply fixtures
+# run_command "docker compose exec web python manage.py loaddata incident_types.json"
+
+echo "Database reset process completed successfully"
