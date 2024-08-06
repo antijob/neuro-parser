@@ -23,6 +23,7 @@ import torch
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+
 def rate_with_model_and_tokenizer(normalized_text, model, tokenizer):
     try:
         encoding = tokenizer(
@@ -54,6 +55,7 @@ def rate_with_model_and_tokenizer(normalized_text, model, tokenizer):
 
 # 1 -- unique url pipeline
 # 2 -- urls batch pipeline
+
 
 class IncidentPredictor:
     current_incident_type: IncidentType
@@ -141,29 +143,5 @@ class IncidentPredictor:
             logger.error(f"Error in predict_batch: {e}")
             raise
 
-    # def predict(self, article: Article) -> Union[MediaIncident, None]:
-    #     try:
-    #         for incident_type in IncidentType.objects.all():
-    #             if not incident_type.is_active:
-    #                 continue
-
-    #             self.setup_incident_type(incident_type)
-    #             normalized_text = normalize_text(article.text)
-
-    #             if self.is_gpt_setup:
-    #                 is_incident = chat_gpt.predict_is_incident(
-    #                     normalized_text,
-    #                     incident_type.chat_gpt_prompt,
-    #                     incident_type.description,
-    #                     article,
-    #                 )
-    #                 if is_incident:
-    #                     return self._create_incident(article)
-
-    #             if not incident_type.model_path:
-    #                 continue
-    #             if is_incident:
-    #                 return self._create_incident(article)
-    #     except Exception as e:
-    #         print(f"Error in predict: {e}")
-    #     return None
+    def predict(self, article: Article) -> int:  # ToDo: -> Union[MediaIncident, None]:
+        return self.predict_batch([article])
