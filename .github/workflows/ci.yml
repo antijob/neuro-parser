@@ -95,7 +95,7 @@ jobs:
           branch=$(echo "${GITHUB_REF#refs/heads/}" | tr '/' '-')
           echo "Branch name with / substituted for - : $branch"
           NEURO_PARSER_VERSION=${branch} \
-            docker-compose -f docker-compose.prod.yaml build web
+            docker compose -f docker-compose.prod.yaml build web
 
       - name: login to docker registry
         if: ${{ steps.filter.outputs.web == 'true' || github.event.inputs.runtype == 'force build' }}
@@ -107,7 +107,7 @@ jobs:
           branch=$(echo "${GITHUB_REF#refs/heads/}" | tr '/' '-')
           echo "Branch name with / substituted for - : $branch"
           NEURO_PARSER_VERSION=${branch} \
-            docker-compose -f docker-compose.prod.yaml push web
+            docker compose -f docker-compose.prod.yaml push web
 
       - name: logout from docker registry
         if: ${{ steps.filter.outputs.web == 'true' || github.event.inputs.runtype == 'force build' }}
