@@ -51,7 +51,7 @@ class IncidentTypeAdmin(admin.ModelAdmin):
 @admin.register(MediaIncident)
 class MediaIncidentAdmin(admin.ModelAdmin):
     list_display = ("any_title", "incident_type", "status", "rate_article")
-    search_fields = ['any_title']
+    search_fields = ["title"]
 
     def rate_article(self, obj):
         if obj.related_article:
