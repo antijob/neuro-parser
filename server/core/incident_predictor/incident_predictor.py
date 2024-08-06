@@ -107,3 +107,6 @@ class IncidentPredictor:
         except Exception as e:
             logger.error(f"Error in predict_batch: {e}")
             raise
+
+    def predict(self, article: Article) -> int:  # ToDo: -> Union[MediaIncident, None]:
+        return self.predict_batch([article])
