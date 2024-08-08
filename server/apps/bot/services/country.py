@@ -1,5 +1,5 @@
 import logging
-from typing import List, Optional
+from typing import List
 
 from django.db import transaction
 
@@ -8,8 +8,8 @@ from server.apps.bot.models import (
     ChannelCountry,
     ChannelIncidentType,
 )
-from server.apps.core.models import Country, Region
 from server.apps.core.incident_types import IncidentType
+from server.apps.core.models import Country, Region
 
 logger = logging.getLogger(__name__)
 

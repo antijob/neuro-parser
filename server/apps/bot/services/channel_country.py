@@ -1,6 +1,7 @@
-from server.apps.core.models import Region
-from server.apps.bot.models import ChannelCountry
 import logging
+
+from server.apps.bot.models import ChannelCountry
+from server.apps.core.models import Region
 
 logger = logging.getLogger(__name__)
 
