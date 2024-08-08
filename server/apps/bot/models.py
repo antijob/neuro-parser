@@ -4,7 +4,7 @@ from django.contrib.postgres.fields import ArrayField
 from django.db import models
 
 from server.apps.core.incident_types import IncidentType
-from server.apps.core.models import Country, Region
+from server.apps.core.models import Country
 
 logger = logging.getLogger(__name__)
 
@@ -64,23 +64,3 @@ class ChannelCountry(models.Model):
 
     def __str__(self):
         return f"{self.channel_incident_type} - {self.country}"
-
-    def add_region(self, region_code: str) -> None:
-        if not Region.objects.filter(name=region_code).exists():
-            logger.error(f"Region with code: {region_code} not found")
-            return None
-        if region_code in self.enabled_regions:
-            logger.error(f"Region with code: {region_code} already in list")
-            return None
-        self.enabled_regions.append(region_code)
-        self.save()
-
-    def del_region(self, region_code: str) -> None:
-        if not Region.objects.filter(name=region_code).exists():
-            logger.error(f"Region with code: {region_code} not found")
-            return None
-        if region_code not in self.enabled_regions:
-            logger.error(f"Region with code: {region_code} not found in list")
-            return None
-        self.enabled_regions.remove(region_code)
-        self.save()

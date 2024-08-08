@@ -4,7 +4,7 @@ from django.db import transaction
 from server.apps.bot.models import Channel, ChannelIncidentType, ChannelCountry
 from server.apps.core.incident_types import IncidentType
 from server.apps.core.models import Country
-from server.apps.bot.services import get_region_codes
+from server.apps.bot.services.country import get_region_codes
 
 logger = logging.getLogger(__name__)
 
