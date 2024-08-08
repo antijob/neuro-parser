@@ -1,11 +1,12 @@
 from django.contrib import admin
-from .forms import ChannelCountryForm
 
 from server.apps.bot.models import (
     Channel,
-    ChannelIncidentType,
     ChannelCountry,
+    ChannelIncidentType,
 )
+
+from .forms import ChannelCountryForm
 
 
 class ChannelIncidentTypeInline(admin.TabularInline):
