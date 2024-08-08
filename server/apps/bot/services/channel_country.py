@@ -6,6 +6,9 @@ logger = logging.getLogger(__name__)
 
 
 def add_region(chn_country: ChannelCountry, region_code: str) -> None:
+    """
+    Adds a new region code to the enabled_regions list of a ChannelCountry object.
+    """
     if not Region.objects.filter(name=region_code).exists():
         logger.error(f"Region with code: {region_code} not found")
         return None
@@ -17,6 +20,9 @@ def add_region(chn_country: ChannelCountry, region_code: str) -> None:
 
 
 def del_region(chn_country: ChannelCountry, region_code: str) -> None:
+    """
+    Removes a region code from the enabled_regions list of a ChannelCountry object.
+    """
     if not Region.objects.filter(name=region_code).exists():
         logger.error(f"Region with code: {region_code} not found")
         return None
