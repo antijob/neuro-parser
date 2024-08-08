@@ -2,9 +2,10 @@ import asyncio
 import logging
 
 from aiogram import Router
-from aiogram.exceptions import TelegramRetryAfter, TelegramBadRequest
+from aiogram.exceptions import TelegramBadRequest, TelegramRetryAfter
 from aiogram.types import CallbackQuery
 from asgiref.sync import sync_to_async
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
 from magic_filter import F
 
@@ -38,11 +39,16 @@ async def category_config_callback(
 
             def handle_transactional_logic(callback_data: RegionCF):
                 with transaction.atomic():
-                    logger.info("Entering transaction block")
-                    channel_country = ChannelCountry.objects.select_for_update().get(
-                        id=int(callback_data.channel_country_id)
-                    )
-                    logger.info("ChannelCountry object fetched: %s", channel_country)
+                    try:
+                        channel_country = (
+                            ChannelCountry.objects.select_for_update().get(
+                                id=int(callback_data.channel_country_id)
+                            )
+                        )
+                    except ObjectDoesNotExist:
+                        logger.error(
+                            f"ChannelCountry object not found: {callback_data}"
+                        )
 
                     if callback_data.action == "add_region":
                         channel_country.add_region(callback_data.region_code)
