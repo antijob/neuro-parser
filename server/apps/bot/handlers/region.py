@@ -16,6 +16,7 @@ from server.apps.bot.handlers.utils import check_channel
 from server.apps.bot.keyboards.country_kb import country_keyboard
 from server.apps.bot.keyboards.region_kb import RegionCF, region_keyboard
 from server.apps.bot.models import Channel, ChannelCountry
+from server.apps.bot.services.channel_country import add_region, del_region
 
 logger = logging.getLogger(__name__)
 router = Router()
@@ -51,10 +52,10 @@ async def category_config_callback(
                         )
 
                     if callback_data.action == "add_region":
-                        channel_country.add_region(callback_data.region_code)
+                        add_region(channel_country, callback_data.region_code)
                         logger.info("Added region: %s", callback_data.region_code)
                     elif callback_data.action == "del_region":
-                        channel_country.del_region(callback_data.region_code)
+                        del_region(channel_country, callback_data.region_code)
                         logger.info("Deleted region: %s", callback_data.region_code)
 
                     return channel_country.id

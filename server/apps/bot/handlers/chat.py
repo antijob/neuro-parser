@@ -11,7 +11,7 @@ from asgiref.sync import sync_to_async
 
 from server.apps.bot.data.messages import ADD_MESSAGE
 from server.apps.bot.models import Channel
-from server.apps.bot.services import create_settings
+from server.apps.bot.services.country import create_settings
 
 logger = logging.getLogger(__name__)
 
