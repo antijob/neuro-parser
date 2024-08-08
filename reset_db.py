@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 
 import argparse
+import logging
 import subprocess
 import sys
-import logging
+import time
 
 logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+    level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -55,6 +56,8 @@ def main():
     run_command("docker-compose up -d")
 
     # Пересоздать рабочую базу с нуля
+    logger.info("Waiting for db initialization...")
+    time.sleep(10)
     run_command(
         "docker-compose exec db psql -U postgres -d postgres -c 'DROP DATABASE IF EXISTS \"neural-parser\";'"
     )
