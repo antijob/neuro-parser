@@ -21,17 +21,14 @@ def has_region(country: Country) -> bool:
     return Region.objects.filter(country=country).exists()
 
 
-def get_region_codes(country: Country) -> List[Optional[str]]:
+def get_region_codes(country: Country) -> List[str]:
     """
     Return list of regions codes
     if country has regions
     or empty list if not
     """
     regions = Region.objects.filter(country=country)
-    if bool(regions):
-        return [r.name for r in regions]
-    else:
-        return []
+    return [r.name for r in regions]
 
 
 def create_settings(chn: Channel):
