@@ -11,6 +11,7 @@ from asgiref.sync import sync_to_async
 
 from server.apps.bot.data.messages import ADD_MESSAGE
 from server.apps.bot.models import Channel
+from server.apps.bot.services import create_settings
 
 logger = logging.getLogger(__name__)
 
@@ -21,17 +22,20 @@ router = Router()
 async def new_chat_member(event: ChatMemberUpdated, bot: Bot):
     """
     on add to chat send welcome message and create
-    status objects for all IncidentTypes, Country and Region
+    new channel object with all possible settings turned on
     """
-    if event.new_chat_member.user.id == bot.id:
-        try:
-            await sync_to_async(Channel.objects.create)(channel_id=event.chat.id)
-        except Exception as e:
-            logger.error(
-                f"Error in add bot in chat {event.chat.title} with id: {event.chat.id} exception happend: {e}"
-            )
+    if event.new_chat_member.user.id != bot.id:
+        return
+    try:
+        channel = await sync_to_async(Channel.objects.create)(channel_id=event.chat.id)
+        logger.debug(f"Channel added: {channel}")
+        await sync_to_async(create_settings)(channel)
+    except Exception as e:
+        logger.error(
+            f"Error in add bot in chat {event.chat.title} with id: {event.chat.id} exception happend: {e}"
+        )
 
-        await event.answer(f"Бот добавлен в чат - {event.chat.title}. {ADD_MESSAGE}")
+    await event.answer(f"Бот добавлен в чат - {event.chat.title}. {ADD_MESSAGE}")
 
 
 @router.my_chat_member(ChatMemberUpdatedFilter(member_status_changed=LEAVE_TRANSITION))
