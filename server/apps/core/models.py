@@ -2,7 +2,6 @@
 import datetime
 import logging
 import re
-from typing import List, Optional
 
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
@@ -47,17 +46,6 @@ class Country(models.Model):
     class Meta:
         verbose_name = "Страна"
         verbose_name_plural = "Страны"
-
-    def has_region(self) -> bool:
-        return Region.objects.filter(country=self).exists()
-
-    def get_region_codes(self) -> Optional[List[str]]:
-        if self.has_region():
-            regions = Region.objects.filter(country=self)
-            logger.debug([r.name for r in regions])
-            return [r.name for r in regions]
-        else:
-            return None
 
 
 class Region(models.Model):

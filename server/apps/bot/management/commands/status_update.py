@@ -4,6 +4,7 @@ from django.db import transaction
 from server.apps.bot.models import Channel, ChannelIncidentType, ChannelCountry
 from server.apps.core.incident_types import IncidentType
 from server.apps.core.models import Country
+from server.apps.bot.services import get_region_codes
 
 logger = logging.getLogger(__name__)
 
@@ -41,9 +42,7 @@ class Command(BaseCommand):
                     country=country,
                     defaults={
                         "status": True,
-                        "enabled_regions": (
-                            country.get_region_codes() if country.has_region() else []
-                        ),
+                        "enabled_regions": (get_region_codes(country)),
                     },
                 )
                 if created:
