@@ -1,7 +1,7 @@
 import logging
 
 from django.contrib.postgres.fields import ArrayField
-from django.db import models, transaction
+from django.db import models
 
 from server.apps.core.incident_types import IncidentType
 from server.apps.core.models import Country, Region
@@ -11,42 +11,10 @@ logger = logging.getLogger(__name__)
 
 class Channel(models.Model):
     """
-    List of channels to send incidents
-    on save: add all possible options for incident types and countries
+    List of channels that bot added to
     """
 
     channel_id = models.CharField(max_length=32, unique=True)
-
-    def save(self, *args, **kwargs):
-        """
-        On add bot to channel creates all possible
-        options for incident types and countries
-        ChannelIncidentType and ChannelCountry relatively
-        To ChannelCountry also add regions
-        """
-        is_new = self.pk is None
-        with transaction.atomic():
-            super().save(*args, **kwargs)
-            if is_new:
-                channel_incident_types = []
-                channel_countries = []
-                for it in IncidentType.objects.all():
-                    cit = ChannelIncidentType(
-                        channel=self, incident_type=it, status=True
-                    )
-                    channel_incident_types.append(cit)
-                    for c in Country.objects.all():
-                        cc = ChannelCountry(
-                            channel_incident_type=cit,
-                            country=c,
-                            status=True,
-                            enabled_regions=(
-                                c.get_region_codes() if c.has_region() else []
-                            ),
-                        )
-                        channel_countries.append(cc)
-            ChannelIncidentType.objects.bulk_create(channel_incident_types)
-            ChannelCountry.objects.bulk_create(channel_countries)
 
     def __str__(self):
         return f"{self.channel_id}"
