@@ -7,9 +7,8 @@ from server.apps.bot.models import (
     Channel,
     ChannelCountry,
     ChannelIncidentType,
-    Country,
-    Region,
 )
+from server.apps.core.models import Country, Region
 from server.apps.core.incident_types import IncidentType
 
 logger = logging.getLogger(__name__)

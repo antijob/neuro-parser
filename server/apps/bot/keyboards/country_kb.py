@@ -12,6 +12,7 @@ from server.apps.bot.models import (
     ChannelCountry,
     ChannelIncidentType,
 )
+from server.apps.bot.services.country import has_region
 
 logger = logging.getLogger(__name__)
 
@@ -58,7 +59,7 @@ def country_keyboard(cit: ChannelIncidentType) -> Optional[InlineKeyboardMarkup]
                 ).pack(),
             ),
         )
-        if ch_country.country.has_region():
+        if has_region(ch_country.country):
             builder.row(
                 InlineKeyboardButton(
                     text=REGIONS,
