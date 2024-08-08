@@ -5,7 +5,7 @@ import sys
 from aiogram import Dispatcher
 
 from server.apps.bot.bot_instance import bot, close_bot
-from server.apps.bot.handlers import category, chat, service, country, region
+from server.apps.bot.handlers import category, chat, country, region, service
 
 # bot instance imported from separate file
 dp = Dispatcher()
