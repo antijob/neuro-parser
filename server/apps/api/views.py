@@ -5,6 +5,7 @@ from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 
 from server.apps.core.models import Source, Article, MediaIncident, IncidentType
+from server.core.incident_predictor import IncidentPredictor
 from .serializers import (
     MediaIncidentSerializer,
     IncidentTypeSerializer,
