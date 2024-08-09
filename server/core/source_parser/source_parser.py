@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import Iterable, Optional
 from .parsers.base_parser import ParserBase
 
 import re
@@ -38,7 +38,7 @@ CLEANER = Cleaner(
 )
 
 
-async def get_source_data(url: str) -> str:
+async def get_source_data(url: str) -> Optional[str]:
     """Get document by given url"""
 
     html = await Fetcher.download_source(url)

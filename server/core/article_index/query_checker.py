@@ -17,7 +17,7 @@ def calc_ratio(a: str, b: str) -> float:
     return 0
 
 
-def reindex_and_detect_duplicates(query: QuerySet) -> list[str]:
+def mark_duplicates(query: QuerySet) -> None:
     articleIndex = ArticleIndex()
     articleIndex.load()
 
@@ -34,17 +34,12 @@ def reindex_and_detect_duplicates(query: QuerySet) -> list[str]:
             for n_article in Article.objects.filter(url__in=neighbours):
                 if calc_ratio(n_article.text, article.text) >= RATIO_THRESHOLD:
                     duplicate_urls.append(article.url)
+                    article.is_duplicate = True
+                    article.duplicate_url = n_article.url
+                    article.save()
                     break
 
         if article.url not in duplicate_urls:
             articleIndex.add(article)
 
     articleIndex.save()
-
-    return duplicate_urls
-
-
-def mark_duplicates(query: QuerySet) -> None:
-    duplicate_urls = reindex_and_detect_duplicates(query)
-    duplicates_query = query.filter(url__in=duplicate_urls)
-    duplicates_query.update(is_duplicate=True)
