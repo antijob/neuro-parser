@@ -91,9 +91,10 @@ class IncidentPredictor:
             logger.error(f"Error in _create_incident: {e}")
             return None  # Default value if an error occurs
 
-    def predict_batch(self, batch: list[Article]) -> int:
+    def predict_batch(self, batch: list[Article]) -> list[MediaIncident]:
         try:
             incidents_count: int = 0
+            result_incidents: list[MediaIncident] = []
             for incident_type in IncidentType.objects.all():
                 if not incident_type.is_active:
                     continue
@@ -101,12 +102,13 @@ class IncidentPredictor:
                 self.setup_incident_type(incident_type)
                 for article in batch:
                     if self._is_incident(article, incident_type):
-                        self._create_incident(article, incident_type)
+                        result_incidents.append(
+                            self._create_incident(article, incident_type))
                         incidents_count += 1
-            return incidents_count
+            return result_incidents
         except Exception as e:
             logger.error(f"Error in predict_batch: {e}")
             raise
 
-    def predict(self, article: Article) -> int:  # ToDo: -> Union[MediaIncident, None]:
+    def predict(self, article: Article) -> list[MediaIncident]:
         return self.predict_batch([article])

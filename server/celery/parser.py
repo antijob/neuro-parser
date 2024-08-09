@@ -15,6 +15,7 @@ from server.core.incident_predictor import IncidentPredictor
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+
 def split_every(n, iterable):
     i = iter(iterable)
     piece = list(islice(i, n))
@@ -40,13 +41,13 @@ def parse_chain():
 
     if len(articles) == 0:
         return "No candidates"
-    (delete_duplicate_articles.s() | plan_incidents.s()).apply_async()
+    (mark_duplicate_articles.s() | plan_incidents.s()).apply_async()
 
     return f"Start chain with {len(articles)} urlsss"
 
 
 @app.task(queue="parser")
-def delete_duplicate_articles():
+def mark_duplicate_articles():
     articles = get_parse_candidates()
     mark_duplicates(articles)
     dups = articles.filter(is_duplicate=True)
@@ -63,14 +64,15 @@ def plan_incidents(status):
     task_group.apply_async()
     return f"Group of create_incidents tasks submitted"
 
+
 @app.task(queue="parser")
 def create_incidents(batch):
     try:
         articles_batch = [Article.objects.get(url=url) for url in batch]
-        incidents_count = 0
 
         predictor = IncidentPredictor()
-        incidents_count = predictor.predict_batch(articles_batch)
+        incidents_created = predictor.predict_batch(articles_batch)
+        incidents_count = len(incidents_created)
 
         for art in articles_batch:
             art.is_parsed = True
