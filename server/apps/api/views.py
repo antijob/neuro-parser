@@ -341,6 +341,55 @@ class ArticleViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAdminOrRestrictedPost]
 
     @swagger_auto_schema(
+        operation_description="Retrieve articles with optional filtering and sorting",
+        manual_parameters=[
+            openapi.Parameter(
+                "limit",
+                openapi.IN_QUERY,
+                description="Limit the number of results",
+                type=openapi.TYPE_INTEGER,
+            ),
+            openapi.Parameter(
+                "order_by",
+                openapi.IN_QUERY,
+                description="Order by field (e.g., 'name', 'created_at')",
+                type=openapi.TYPE_STRING,
+            ),
+        ],
+        responses={200: SourceSerializer(many=True)},
+    )
+    def list(self, request, *args, **kwargs):
+        try:
+            articles = Article.objects.all()
+
+            # Apply ordering
+            try:
+                order_by = request.query_params.get("order_by", None)
+                if order_by:
+                    articles = articles.order_by(order_by)
+            except Exception as e:
+                return Response(
+                    {"error": f"Invalid order_by value: {str(e)}"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            # Apply limit
+            try:
+                limit = request.query_params.get("limit", None)
+                if limit:
+                    limit = int(limit)
+                    articles = articles[:limit]
+            except ValueError:
+                return Response(
+                    {"error": "Invalid limit value"}, status=status.HTTP_400_BAD_REQUEST
+                )
+
+            serializer = ArticleSerializer(articles, many=True)
+            return Response(serializer.data)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    @swagger_auto_schema(
         operation_description="Retrieve a single article by URL",
         manual_parameters=[
             openapi.Parameter(
