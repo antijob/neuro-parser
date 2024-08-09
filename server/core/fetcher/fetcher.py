@@ -14,10 +14,12 @@ from .statistics import CoroutineStatistics
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+
 class BadCodeException(Exception):
     def __init__(self, code):
         super().__init__("Bad code")
         self.code = code
+
 
 async def fetch_url(session: aiohttp.ClientSession, url: str) -> str:
     params = {}
@@ -36,11 +38,13 @@ async def fetch_url(session: aiohttp.ClientSession, url: str) -> str:
         logger.error(f"Unexpected error occurred while fetching URL {url}: {e}")
         raise
 
+
 class Fetcher:
     def __init__(self):
         self.coroutines: list[Coroutine] = []
 
-    async def download(self, article: Article) -> None:
+    @staticmethod
+    async def download_article(article: Article) -> None:
         try:
             async with aiohttp.ClientSession(
                 trust_env=True,
@@ -73,7 +77,9 @@ class Fetcher:
             logger.error(f"Network error occurred while fetching source URL {url}: {e}")
             return None
         except Exception as e:
-            logger.error(f"Unexpected error occurred while fetching source URL {url}: {e}")
+            logger.error(
+                f"Unexpected error occurred while fetching source URL {url}: {e}"
+            )
             return None
 
     async def create_coroutine(self, source: Source, articles: dict[str, Article]):
