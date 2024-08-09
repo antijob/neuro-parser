@@ -1,20 +1,30 @@
+import logging
+from asgiref.sync import async_to_sync
+
+
 from rest_framework import status, viewsets
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 
+
 from server.apps.core.models import Source, Article, MediaIncident, IncidentType
+from server.core.fetcher import Fetcher
 from server.core.incident_predictor import IncidentPredictor
+
+
 from .serializers import (
     MediaIncidentSerializer,
     IncidentTypeSerializer,
     ArticleSerializer,
     SourceSerializer,
 )
-from server.core.fetcher import Fetcher
-from server.core.incident_predictor import IncidentPredictor
 from .permissions import IsAdminOrReadOnly, IsAdminOrRestrictedPost
+
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 class IncidentTypeViewSet(viewsets.ReadOnlyModelViewSet):
@@ -438,7 +448,7 @@ class ArticleViewSet(viewsets.ModelViewSet):
             article, created = Article.objects.get_or_create(url=url)
 
             if created or not article.is_downloaded:
-                Fetcher.fetch_article(article)
+                async_to_sync(Fetcher.download_article)(article)
 
             article_serializer = self.get_serializer(article)
             return Response({"article": article_serializer.data})
