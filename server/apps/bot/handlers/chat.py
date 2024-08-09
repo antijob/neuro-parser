@@ -48,14 +48,17 @@ async def left_chat_member(event: ChatMemberUpdated, bot: Bot):
         f"Left chat member event triggered. Bot ID: {bot.id}, Left member ID: {event.old_chat_member.user.id}"
     )
 
-    if event.old_chat_member.user.id == bot.id:
-        try:
+    if event.old_chat_member.user.id != bot.id:
+        return
+    try:
 
-            @sync_to_async
-            def delete_channel():
-                Channel.objects.filter(channel_id=event.chat.id).delete()
+        @sync_to_async
+        def delete_channel():
+            Channel.objects.filter(channel_id=event.chat.id).delete()
 
-            await delete_channel()
-        except Exception as e:
-            logger.error(f"Can't delete channel for chat ID {event.chat.id}: {e}")
-    logger.info("Left chat member event completed.")
+        await delete_channel()
+    except Exception as e:
+        logger.error(f"Can't delete channel for chat ID {event.chat.id}: {e}")
+
+
+logger.info("Left chat member event completed.")
