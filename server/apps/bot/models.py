@@ -3,8 +3,7 @@ import logging
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
 
-from server.apps.core.incident_types import IncidentType
-from server.apps.core.models import Country
+from server.apps.core.models import Country, IncidentType
 
 logger = logging.getLogger(__name__)
 
