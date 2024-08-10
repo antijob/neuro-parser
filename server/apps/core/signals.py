@@ -7,6 +7,7 @@ from django.dispatch import receiver
 
 from server.apps.bot.bot_instance import bot, close_bot
 from server.apps.bot.models import Channel, ChannelCountry, ChannelIncidentType
+from server.apps.bot.services.country import create_settings
 from server.apps.core.data.messages import NEW_INCIDENT_TEMPLATE
 
 from .models import IncidentType, MediaIncident
@@ -72,19 +73,15 @@ def mediaincident_post_save(sender, instance, created, **kwargs):
 
 @receiver(post_save, sender=IncidentType)
 def incidenttype_post_save(sender, instance, created, **kwargs):
-    # TODO: rewrite
     """
     Executes on creation of new instance of IncidentType model
-    Creates status (TypeStatus) for each channel in order to guarantee
-    that message about new incident will be sent to users
+    and craetes settings for all channels with that incident type
     """
     if created:
         all_channels = Channel.objects.all()
         for chn in all_channels:
             try:
-                ChannelIncidentType.objects.create(
-                    incident_type=instance, channel=chn, status=True
-                )
+                create_settings(chn)
             except Exception as e:
                 logger.error(
                     f"An error in signal on creation TypeStatus: {e} \nInstance: {instance.id}"
