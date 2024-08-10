@@ -43,15 +43,29 @@ def create_settings(chn: Channel):
         channel_incident_types = []
         channel_countries = []
         for it in IncidentType.objects.all():
-            cit = ChannelIncidentType(channel=chn, incident_type=it, status=True)
-            channel_incident_types.append(cit)
-            for c in Country.objects.all():
-                cc = ChannelCountry(
-                    channel_incident_type=cit,
-                    country=c,
-                    status=True,
-                    enabled_regions=get_region_codes(c),
-                )
-                channel_countries.append(cc)
-        ChannelIncidentType.objects.bulk_create(channel_incident_types)
-        ChannelCountry.objects.bulk_create(channel_countries)
+            if not ChannelIncidentType.objects.filter(
+                channel=chn, incident_type=it
+            ).exists():
+                cit = ChannelIncidentType(channel=chn, incident_type=it, status=True)
+                channel_incident_types.append(cit)
+                for c in Country.objects.all():
+                    if not ChannelCountry.objects.filter(
+                        channel_incident_type=cit, country=c
+                    ).exists():
+                        cc = ChannelCountry(
+                            channel_incident_type=cit,
+                            country=c,
+                            status=True,
+                            enabled_regions=get_region_codes(c),
+                        )
+                        channel_countries.append(cc)
+        if channel_incident_types:
+            try:
+                ChannelIncidentType.objects.bulk_create(channel_incident_types)
+            except Exception as e:
+                logger.error(f"Can't create ChannelIncidentType: {e}")
+        if channel_countries:
+            try:
+                ChannelCountry.objects.bulk_create(channel_countries)
+            except Exception as e:
+                logger.error(f"Can't create ChannelCountry: {e}")
