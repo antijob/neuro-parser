@@ -17,36 +17,18 @@ from django.urls import include, path
 from django.views.generic import TemplateView
 
 from server.apps.api import urls as api_urls
+from server.apps.api.swagger import schema_view
+
 from server.apps.core import urls as main_urls
 from server.apps.users import urls as users_urls
 from server.apps.bot import urls as bot_urls
 
 
 from django.views.generic import TemplateView
-from drf_yasg.views import get_schema_view  # new
-from drf_yasg import openapi  # new
 from django.urls import re_path
 
 
 admin.autodiscover()
-
-
-schema_view = get_schema_view(  # new
-    openapi.Info(
-        title="Snippets API",
-        default_version="v1",
-        description="Test description",
-        terms_of_service="https://www.google.com/policies/terms/",
-        contact=openapi.Contact(email="contact@snippets.local"),
-        license=openapi.License(name="BSD License"),
-    ),
-    # url=f'{settings.APP_URL}/api/v3/',
-    patterns=[
-        path("api/", include(api_urls, namespace="api")),
-    ],
-    public=True,
-    # permission_classes=(permissions.AllowAny,),
-)
 
 
 urlpatterns = [
@@ -74,7 +56,7 @@ urlpatterns = [
     path("", include(bot_urls, namespace="bot")),
     path("", include(main_urls, namespace="core")),
     path("users/", include(users_urls, namespace="users")),
-    path(  # new
+    path(
         "swagger-ui/",
         TemplateView.as_view(
             template_name="swaggerui/swaggerui.html",
@@ -82,7 +64,7 @@ urlpatterns = [
         ),
         name="swagger-ui",
     ),
-    re_path(  # new
+    re_path(
         r"^swagger(?P<format>\.json|\.yaml)$",
         schema_view.without_ui(cache_timeout=0),
         name="schema-json",
