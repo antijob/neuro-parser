@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 import datetime
+import logging
+import re
 
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
@@ -36,7 +38,7 @@ class Country(models.Model):
     name = models.CharField("Страна", choices=COUNTRIES, default="RUS", max_length=100)
 
     def __str__(self) -> str:
-        return self.name
+        return self.get_full_country_name()
 
     def get_full_country_name(self):
         return dict(COUNTRIES).get(self.name, "Unknown country")
@@ -51,14 +53,14 @@ class Region(models.Model):
     country = models.ForeignKey(Country, on_delete=models.CASCADE)
 
     def __str__(self) -> str:
-        return f"{self.name}, {self.country.name}"
-
-    def get_full_region_name(self):
-        return dict(REGIONS).get(self.name, "Unknown region")
+        return self.get_full_region_name()
 
     class Meta:
         verbose_name = "Регион"
         verbose_name_plural = "Регионы"
+
+    def get_full_region_name(self):
+        return dict(REGIONS).get(self.name, "Unknown region")
 
 
 class BaseIncident(models.Model):
