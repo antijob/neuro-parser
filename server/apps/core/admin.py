@@ -33,8 +33,7 @@ class IncidentTypeAdmin(admin.ModelAdmin):
         for obj in queryset:
             obj.is_active = False
             obj.save()
-        self.message_user(
-            request, f"{queryset.count()} models will be switched.")
+        self.message_user(request, f"{queryset.count()} models will be switched.")
 
     disable_models.short_description = "Disable models"
 
@@ -42,8 +41,7 @@ class IncidentTypeAdmin(admin.ModelAdmin):
         for obj in queryset:
             obj.is_active = True
             obj.save()
-        self.message_user(
-            request, f"{queryset.count()} models will be switched.")
+        self.message_user(request, f"{queryset.count()} models will be switched.")
 
     enable_models.short_description = "Enable models"
 
@@ -74,14 +72,13 @@ class ArticleAdmin(admin.ModelAdmin):
     )
     ordering = ("-publication_date",)
     actions = ["force_parse"]
-    search_fields = ['url', 'title']
+    search_fields = ["url", "title"]
 
     def force_parse(self, request, queryset):
         for obj in queryset:
             obj.is_parsed = False
             obj.save()
-        self.message_user(
-            request, f"{queryset.count()} articles will be parsed.")
+        self.message_user(request, f"{queryset.count()} articles will be parsed.")
 
     force_parse.short_description = "Force parse"
 
@@ -90,37 +87,38 @@ class ArticleAdmin(admin.ModelAdmin):
 class SourceAdmin(admin.ModelAdmin):
     list_display = ("url", "country", "region", "is_active")
     actions = ["activate", "deactivate"]
-    search_fields = ['url']
+    search_fields = ["url"]
 
     def save_model(self, request, obj, form, change):
-        urls = obj.url.split()
-        for url in urls:
-            if not url:
-                continue
-            if Source.objects.filter(url=url).exists():
-                continue
+        if change:
+            super().save_model(request, obj, form, change)
+        else:
+            urls = obj.url.split()
+            for url in urls:
+                if not url:
+                    continue
+                if Source.objects.filter(url=url).exists():
+                    continue
 
-            new_source = Source(
-                url=url,
-                is_active=obj.is_active,
-                country=obj.country,
-                region=obj.region,
-            )
-            new_source.save()
+                new_source = Source(
+                    url=url,
+                    is_active=obj.is_active,
+                    country=obj.country,
+                    region=obj.region,
+                )
+                new_source.save()
 
     def activate(self, request, queryset):
         for obj in queryset:
             obj.is_active = True
             obj.save()
-        self.message_user(
-            request, f"{queryset.count()} sources were deactivate.")
+        self.message_user(request, f"{queryset.count()} sources were deactivate.")
 
     def deactivate(self, request, queryset):
         for obj in queryset:
             obj.is_active = False
             obj.save()
-        self.message_user(
-            request, f"{queryset.count()} sources were deactivate.")
+        self.message_user(request, f"{queryset.count()} sources were deactivate.")
 
     activate.short_description = "Activate sources"
     deactivate.short_description = "Deactivate sources"
