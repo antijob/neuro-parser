@@ -15,7 +15,6 @@ from server.apps.bot.models import (
 from .forms import BroadcastForm, ChannelCountryForm
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
 
 
 class ChannelIncidentTypeInline(admin.TabularInline):
@@ -34,11 +33,7 @@ class ChannelAdmin(admin.ModelAdmin):
     inlines = [ChannelIncidentTypeInline]
 
     def broadcast_message(self, request, queryset):
-        logger.debug("Entered broadcast_message function")
-        logger.debug(request.POST)
-
         if "apply" in request.POST:
-            logger.debug("Starting broadcast message")
 
             form = BroadcastForm(request.POST)
 
