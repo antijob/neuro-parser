@@ -18,8 +18,8 @@ pdm lock
 # update all packages 
 pdm update
 
-# add new package to pyproject.toml
-pdm add <package_name>
+# add new package to pyproject.toml without create venv
+pdm add --no-sync <package_name>
 ```
 
 git should contain both pyproject.toml and pdm.lock files 
