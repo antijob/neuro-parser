@@ -1,27 +1,32 @@
+# syntax=docker/dockerfile:1.0.0-experimental #Experemental for fasters building
+
+# Use a base image with Python
 FROM python:3.9-slim
 
-# setup environments
+# Setup environments
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 ENV TRANSFORMERS_CACHE=/tmp
 ENV PDM_CHECK_UPDATE=false
 
-# setup workdir
+
+# Setup workdir
 WORKDIR /code
 
-# install system dependencies for final stage
+# Install system dependencies
 RUN apt-get update && \
   apt-get install -y --no-install-recommends gcc libxml2-dev python3-lxml libxslt-dev libxslt1-dev python3-dev libjpeg-dev libtiff-dev zlib1g-dev libfreetype6-dev liblcms2-dev libwebp-dev postgresql-server-dev-all && \
   apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# install PDM
+# Install PDM
 RUN pip install -U pip && pip install pdm
 
-# copy files
-COPY pyproject.toml pdm.lock README.md /code/
+# Copy dependency management files first to leverage Docker cache
+COPY pyproject.toml pdm.lock /code/
 
-# generate requirements.txt
+# Generate requirements.txt
 RUN pdm export --no-hashes -o requirements.txt
 
-# install requirements.txt
-RUN pip install -r requirements.txt
+# Install dependencies and caching
+RUN --mount=type=cache,target=/root/.cache \
+  pip install -r requirements.txt
