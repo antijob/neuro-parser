@@ -112,7 +112,7 @@ class SourceAdmin(admin.ModelAdmin):
         for obj in queryset:
             obj.is_active = True
             obj.save()
-        self.message_user(request, f"{queryset.count()} sources were deactivate.")
+        self.message_user(request, f"{queryset.count()} sources were activate.")
 
     def deactivate(self, request, queryset):
         for obj in queryset:
