@@ -58,9 +58,10 @@ We welcome contributions from the community. If you would like to contribute to 
 
 If you have questions or need further assistance, please contact us at info@antijob.net.
 
-## Telegram bot
+# Telegram bot
 You can use telegram bot to receive notifications about new incidents.
 
+## Setup
 To install it you need to register new bot with BotFather
 Then add settings to .env file
 ```
@@ -72,6 +73,31 @@ Then you need to create new telegram chat and add bot there. That's all bot reme
 and will send notifications there. If you want receive notifications only for some of existing categories
 use command ```/categ``` for bot settings. 
 Also you can go to Django admin and check Bot section to explore channels that are saved. 
+
+## Message Broadcasting Functionality
+
+This project includes a feature that allows administrators to broadcast messages to multiple channels via the Django admin panel. 
+
+## How to Use
+
+### 1. Selecting Channels
+
+1. Navigate to the Django admin panel of your project.
+2. Open the list of channels (`Channel`).
+3. Select the channels to which you want to send a message.
+
+### 2. Using the Broadcast Function
+
+1. After selecting the channels, choose the action "Send message to selected channels" from the actions dropdown menu.
+2. Click the "Apply" button.
+3. On the new page, enter the message text and confirm the selected channels.
+4. Click the button to send the message.
+
+### 3. Message Handling
+
+- If no channels are selected, you will receive a warning "Channels not selected."
+- Upon successful sending, you will receive a message indicating the number of channels the message was sent to.
+- If an error occurs during sending, you will be notified in the admin panel.
 
 Thank you for your contributions to the Neural Parser project!
 
