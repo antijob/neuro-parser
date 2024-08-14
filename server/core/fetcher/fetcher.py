@@ -5,7 +5,7 @@ import logging
 from typing import Coroutine, Iterable
 from server.apps.core.models import Article, Source
 
-from .utils import fetcher_session, fetch_article, fetch_source, prepare_source_url
+from .client import NPClient
 from .exceptions import BadCodeException, ClientError
 
 from tasks import fetch_source_articles
@@ -22,9 +22,8 @@ class Fetcher:
     @staticmethod
     async def download_article(article: Article, source: Source) -> Optional[Article]:
         try:
-            async with fetcher_session() as session:
-                article, _ = await fetch_article(session, article.url, source)
-                return article
+            async with NPClient() as client:
+                return await client.get_article(article, source)
         except ClientError as e:
             logger.error(
                 f"Network error occurred while fetching source URL {article.url}: {e}"
@@ -42,9 +41,8 @@ class Fetcher:
     @staticmethod
     async def download_source(source: Source) -> Optional[str]:
         try:
-            async with fetcher_session() as session:
-                source_data = await fetch_source(session, source)
-                return source_data
+            async with NPClient() as client:
+                return await client.get_source(source)
         except ClientError as e:
             logger.error(
                 f"Network error occurred while fetching source URL {source.url}: {e}"
