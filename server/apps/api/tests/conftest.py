@@ -3,10 +3,24 @@ import pytest
 from rest_framework.test import APIClient
 from server.apps.core.models import Source, Article, MediaIncident, IncidentType
 
+from server.apps.users.models import User
+
 
 @pytest.fixture
-def api_client():
-    return APIClient()
+def staff_user():
+    return User(email="staff@example.com", password="testpass", is_staff=True)
+
+
+@pytest.fixture
+def regular_user():
+    return User(email="user@example.com", password="testpass")
+
+
+@pytest.fixture
+def api_client(regular_user):
+    api_client = APIClient()
+    api_client.force_authenticate(user=regular_user)
+    return api_client
 
 
 @pytest.fixture
