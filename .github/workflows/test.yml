@@ -11,6 +11,7 @@ jobs:
   test:
     name: Run tests
     runs-on: ["self-hosted", "neuroparser", "production"]
+    environment: Unknown
     steps:
       - name: Check out repository code
         uses: actions/checkout@v3
@@ -19,24 +20,39 @@ jobs:
         run: |
           cp .env.template .env.test
           sed -i \
+            -e s,^TELEGRAM_BOT_TOKEN=.*,TELEGRAM_BOT_TOKEN=$TELEGRAM_BOT_TOKEN, \
             -e s,^API_RPS=.*,API_RPS=$API_RPS, \
             .env.test
         env:
+          TELEGRAM_BOT_TOKEN: "${{ secrets.TELEGRAM_BOT_TOKEN }}"
           API_RPS: "100/minute"
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.x'
-
-      - name: Install dependencies
+      - name: Build Docker image
         run: |
-          pip install -U pip && pip install pdm
-          pdm export --no-hashes -o requirements.txt
-          pip install --no-cache-dir -r requirements.txt
+          ls -a
+          docker build -t server-test -f docker/web/Dockerfile .
 
-      - name: Run pytest
+      # - name: Copy .env.test to Docker container
+      #   run: |
+      #     ls
+      #     docker cp .env.test server-test:/code/.env
+      
+      - name: Run Docker container and execute tests
+        run: |
+          docker run --rm \
+            -v $(pwd):/code \
+            --env-file .env.test \
+            server-test /bin/bash -c "ls -a; pip install pytest-django; python -m pytest"
+    
         env:
-          ENV_FILE: .env.test
-        run: |
-          pytest --ds=myproject.settings_test --env-file .env.test
+          POSTGRES_USER: "${{ secrets.POSTGRES_USER }}"
+          POSTGRES_PASSWORD: "${{ secrets.POSTGRES_PASSWORD }}"
+          DJANGO_KEY: "${{ secrets.DJANGO_KEY}}"
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results
+          path: ./test-results
+
