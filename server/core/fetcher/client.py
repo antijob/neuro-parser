@@ -1,4 +1,3 @@
-import logging
 from typing import Optional
 import aiohttp
 from asgiref.sync import sync_to_async
@@ -10,10 +9,6 @@ from server.core.fetcher.libs.url_preparer import URLPreparer
 
 from server.apps.core.models import Article, Source
 from server.core.article_parser import ArticleParser
-
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
 
 
 class NPClient:

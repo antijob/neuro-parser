@@ -65,10 +65,11 @@ class ArticleAdmin(admin.ModelAdmin):
     list_display = (
         "url",
         "publication_date",
+        "title",
         "is_downloaded",
         "is_parsed",
         "is_duplicate",
-        "title",
+        "is_redirect",
         "rate",
     )
     ordering = ("-publication_date",)

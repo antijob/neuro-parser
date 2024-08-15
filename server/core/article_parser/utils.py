@@ -19,19 +19,30 @@ def get_first_sentence(text: str) -> str:
 # ToDo: fix Invalid date format: только что
 def convert_date_format(date_string: str) -> str:
     """
-    Parse data string and return in format %Y-%m-%d
+    Parse data string and return in format %Y-%m-%d.
+    Handles 'YYYYMMDDTHHMM' format as well.
     """
     current_date = datetime.now().strftime("%Y-%m-%d")
 
     if not date_string:
         return current_date
 
-    date_obj = dateparser.parse(
-        date_string, languages=["en", "ru"], settings={"TIMEZONE": "UTC"}
-    )
-    if date_obj:
-        utc_date = date_obj.strftime("%Y-%m-%d")
-        return utc_date
-    else:
+    try:
+        # Special case for 'YYYYMMDDTHHMM' format
+        if len(date_string) == 13 and "T" in date_string:
+            date_obj = datetime.strptime(date_string, "%Y%m%dT%H%M")
+            return date_obj.strftime("%Y-%m-%d")
+
+        # General case for normal date formats
+        date_obj = dateparser.parse(
+            date_string, languages=["en", "ru"], settings={"TIMEZONE": "UTC"}
+        )
+
+        if date_obj:
+            return date_obj.strftime("%Y-%m-%d")
+        else:
+            raise ValueError
+
+    except ValueError:
         print(f"Invalid date format: {date_string}")
         return current_date
