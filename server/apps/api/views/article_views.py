@@ -1,6 +1,4 @@
-import logging
 from asgiref.sync import async_to_sync
-
 
 from rest_framework import status, viewsets
 from rest_framework.response import Response
@@ -9,7 +7,7 @@ from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 
 
-from server.apps.core.models import Source, Article, MediaIncident, IncidentType
+from server.apps.core.models import Article
 from server.core.fetcher import Fetcher
 from server.core.incident_predictor import IncidentPredictor
 
@@ -19,18 +17,11 @@ from ..serializers import (
     ArticleSerializer,
     SourceSerializer,
 )
-from ..permissions import IsAdminOrReadOnly, IsAdminOrRestrictedPost
-from rest_framework.permissions import AllowAny
-
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
 
 
 class ArticleViewSet(viewsets.ModelViewSet):
     queryset = Article.objects.all()
     serializer_class = ArticleSerializer
-    permission_classes = [AllowAny]
 
     @swagger_auto_schema(
         operation_description="Retrieve articles with optional filtering and sorting",
