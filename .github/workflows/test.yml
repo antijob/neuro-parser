@@ -1,0 +1,42 @@
+name: Test
+
+on:
+  pull_request:
+    branches:
+      - main
+      - stage
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Run tests
+    runs-on: ["self-hosted", "neuroparser", "production"]
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+
+      - name: Prepare .env.test
+        run: |
+          cp .env.template .env.test
+          sed -i \
+            -e s,^API_RPS=.*,API_RPS=$API_RPS, \
+            .env.test
+        env:
+          API_RPS: "100/minute"
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: |
+          pip install -U pip && pip install pdm
+          pdm export --no-hashes -o requirements.txt
+          pip install --no-cache-dir -r requirements.txt
+
+      - name: Run pytest
+        env:
+          ENV_FILE: .env.test
+        run: |
+          pytest --ds=myproject.settings_test --env-file .env.test
