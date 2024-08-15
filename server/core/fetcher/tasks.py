@@ -30,7 +30,6 @@ async def fetch_source_articles(source: Source, articles: list[Article]):
                 await client.get_article(article, source)
 
                 statistics.fetch()
-                statistics.postprocess()
                 await asyncio.sleep(delay)
             except BadCodeException as e:
                 statistics.bad_code(e.code)
@@ -39,4 +38,4 @@ async def fetch_source_articles(source: Source, articles: list[Article]):
                 statistics.exception()
 
     logger.info(f"Task finished. Statistics: {statistics}")
-    return statistics._postprocess
+    return statistics._fetch
