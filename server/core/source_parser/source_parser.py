@@ -40,9 +40,6 @@ CLEANER = Cleaner(
 
 async def get_source_data(source: Source) -> Optional[str]:
     """Get document by given url"""
-
-    url = source.url
-
     html = await Fetcher.download_source(source)
     if html:
         html = html.replace("\xa0", " ")

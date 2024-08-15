@@ -2,11 +2,11 @@ import logging
 from typing import Optional
 import aiohttp
 from asgiref.sync import sync_to_async
-from exceptions import BadCodeException
+from server.core.fetcher.libs.exceptions import BadCodeException
 
 
-from user_agent import session_random_headers
-from url_preparer import URLPreparer
+from server.core.fetcher.libs.user_agent import session_random_headers
+from server.core.fetcher.libs.url_preparer import URLPreparer
 
 from server.apps.core.models import Article, Source
 from server.core.article_parser import ArticleParser
@@ -33,10 +33,7 @@ class NPClient:
         return self
 
     async def __aexit__(self, exc_type, exc_value, traceback):
-        await self._session.aclose()
-
-    async def close(self):
-        await self._session.aclose()
+        await self._session.__aexit__(exc_type, exc_value, traceback)
 
     async def get(self, url: str) -> tuple[str, str]:
         async with self._session.get(url, allow_redirects=True) as response:

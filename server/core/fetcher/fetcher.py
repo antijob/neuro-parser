@@ -6,9 +6,9 @@ from typing import Coroutine, Iterable
 from server.apps.core.models import Article, Source
 
 from .client import NPClient
-from .exceptions import BadCodeException, ClientError
+from .libs.exceptions import BadCodeException, ClientError
 
-from tasks import fetch_source_articles
+from .tasks import fetch_source_articles
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -58,7 +58,7 @@ class Fetcher:
             return None
 
     def add_task(self, source: Source, articles: Iterable[Article]):
-        coro = fetch_source_articles(source, articles)
+        coro = fetch_source_articles(source, list(articles))
         self.coroutines.append(coro)
 
     async def _await(self) -> list[int]:
