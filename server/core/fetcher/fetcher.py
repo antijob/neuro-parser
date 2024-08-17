@@ -5,7 +5,7 @@ import logging
 from typing import Coroutine, Iterable
 from server.apps.core.models import Article, Source
 
-from .client import NPClient
+from .clients import NPClient
 from .libs.exceptions import BadCodeException, ClientError
 
 from .tasks import fetch_source_articles
