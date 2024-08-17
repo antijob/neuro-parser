@@ -5,9 +5,10 @@ import logging
 from typing import Coroutine, Iterable
 from server.apps.core.models import Article, Source
 
-from .utils import fetcher_session, fetch_article, prepare_source_url
-from .statistics import CoroutineStatistics
-from .exceptions import BadCodeException, ClientError
+from .client import NPClient
+from .libs.exceptions import BadCodeException, ClientError
+
+from .tasks import fetch_source_articles
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -21,11 +22,15 @@ class Fetcher:
     @staticmethod
     async def download_article(article: Article, source: Source) -> Optional[Article]:
         try:
-            async with fetcher_session() as session:
-                article, _ = await fetch_article(session, article.url, source)
-                return article
+            async with NPClient() as client:
+                return await client.get_article(article, source)
         except ClientError as e:
-            logger.error(f"Network error occurred while fetching source URL {url}: {e}")
+            logger.error(
+                f"Network error occurred while fetching source URL {article.url}: {e}"
+            )
+            return None
+        except BadCodeException as e:
+            logger.error(f"Fetching bad code for {article.url}: {e.code}")
             return None
         except Exception as e:
             logger.error(
@@ -34,67 +39,40 @@ class Fetcher:
             return None
 
     @staticmethod
-    async def download_source(url: str) -> Optional[str]:
-        url = prepare_source_url(url)
-
+    async def download_source(source: Source) -> Optional[str]:
         try:
-            async with fetcher_session() as session:
-                async with session.get(url) as response:
-                    if response.status != 200:
-                        return None
-
-                    return await response.text()
+            async with NPClient() as client:
+                return await client.get_source(source)
         except ClientError as e:
-            logger.error(f"Network error occurred while fetching source URL {url}: {e}")
+            logger.error(
+                f"Network error occurred while fetching source URL {source.url}: {e}"
+            )
+            return None
+        except BadCodeException as e:
+            logger.error(f"Fetching bad code for {source.url}: {e.code}")
             return None
         except Exception as e:
             logger.error(
-                f"Unexpected error occurred while fetching source URL {url}: {e}"
+                f"Unexpected error occurred while fetching source URL {source.url}: {e}"
             )
             return None
 
-    async def create_coroutine(self, source: Source, articles: dict[str, Article]):
-        rps: float = 1
-        if ".ok.ru" in source.url or "t.me" in source.url:
-            rps = 0.1
-
-        logger.info(f"Start coroutine. Source {source.url}: {len(articles)} articles")
-        statistics = CoroutineStatistics(source.url, len(articles))
-
-        async with fetcher_session() as session:
-            delay = 1 / rps
-
-            for url, article in articles.items():
-                try:
-                    await fetch_article(session, article, source)
-                    statistics.fetch()
-                    statistics.postprocess()
-
-                    await asyncio.sleep(delay)
-                except BadCodeException as e:
-                    statistics.bad_code(e.code)
-                except Exception as e:
-                    logger.error(f"Coroutine {source.url}: {url} exception: {e}")
-                    statistics.exception()
-
-        logger.info(f"Coroutine finished. Statistics: {statistics}")
-        return statistics._postprocess
-
-    def add_coroutine(self, source: Source, articles: Iterable[Article]):
-        articles_dict: dict[str, Article] = {a.url: a for a in articles}
-        coro = self.create_coroutine(source, articles_dict)
+    def add_task(self, source: Source, articles: Iterable[Article]):
+        coro = fetch_source_articles(source, list(articles))
         self.coroutines.append(coro)
 
     async def _await(self) -> list[int]:
         results = await asyncio.gather(*self.coroutines, return_exceptions=False)
         return results
 
-    def await_all_coroutines(self) -> int:
+    def await_tasks(self) -> int:
         results = asyncio.run(self._await())
         fetched_total = 0
         for res in results:
             if isinstance(res, BaseException):
-                logger.error("Coroutine exception: ", exc_info=res)
+                logger.error(
+                    "Coroutine error occured during one of the tasks: ", exc_info=res
+                )
             else:
                 fetched_total += res
 

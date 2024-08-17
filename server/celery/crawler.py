@@ -27,8 +27,10 @@ def fetch_sources(status):
     fetcher = Fetcher()
     sources = Source.objects.filter(is_active=True)
     for source in sources:
-        articles = Article.objects.filter(source=source, is_downloaded=False)
+        articles = Article.objects.filter(
+            source=source, is_downloaded=False, is_redirect=False
+        )
         if articles.exists():
-            fetcher.add_coroutine(source, articles)
-    fetched_count = fetcher.await_all_coroutines()
+            fetcher.add_task(source, articles)
+    fetched_count = fetcher.await_tasks()
     return f"Fetcher fetched {fetched_count} urls"

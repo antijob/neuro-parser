@@ -38,10 +38,9 @@ CLEANER = Cleaner(
 )
 
 
-async def get_source_data(url: str) -> Optional[str]:
+async def get_source_data(source: Source) -> Optional[str]:
     """Get document by given url"""
-
-    html = await Fetcher.download_source(url)
+    html = await Fetcher.download_source(source)
     if html:
         html = html.replace("\xa0", " ")
     return html
@@ -91,8 +90,9 @@ class SourceParser:
     document_parsers: list[ParserBase] = [RssParser, CommonParser]
 
     @classmethod
-    async def extract_all_news_urls(cls, url: str) -> Iterable[str]:
-        html = await get_source_data(url)
+    async def extract_all_news_urls(cls, source: Source) -> Iterable[str]:
+        url = source.url
+        html = await get_source_data(source)
         if html is None:
             return None
 
@@ -111,7 +111,7 @@ class SourceParser:
 
     @classmethod
     def create_new_articles(cls, source: Source) -> int:
-        urls = async_to_sync(cls.extract_all_news_urls)(source.url)
+        urls = async_to_sync(cls.extract_all_news_urls)(source)
         if not urls:
             return 0
         added = add_articles(source, urls)
