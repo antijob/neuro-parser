@@ -1,6 +1,5 @@
 import pytest
-import json
-from server.apps.core.models import Article, MediaIncident
+from server.apps.core.models import Article
 
 
 @pytest.mark.django_db

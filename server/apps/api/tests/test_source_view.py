@@ -1,6 +1,4 @@
 import pytest
-from server.apps.core.models import Source
-
 
 @pytest.mark.django_db
 def test_list_sources(api_client, source):

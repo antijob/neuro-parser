@@ -1,8 +1,5 @@
-from rest_framework import status, viewsets
-from rest_framework.response import Response
-from rest_framework.decorators import action
-from drf_yasg.utils import swagger_auto_schema
-from drf_yasg import openapi
+from rest_framework import viewsets
+
 
 
 from server.apps.core.models import MediaIncident

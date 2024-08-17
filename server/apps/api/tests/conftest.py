@@ -1,8 +1,7 @@
 import pytest
 
 from rest_framework.test import APIClient
-from server.apps.core.models import Source, Article, MediaIncident, IncidentType
-
+from server.apps.core.models import Source, Article
 from server.apps.users.models import User
 
 
