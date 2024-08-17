@@ -11,6 +11,7 @@ from server.apps.bot.models import (
     ChannelCountry,
     ChannelIncidentType,
 )
+from aiogram.exceptions import TelegramNotFound
 
 from .forms import BroadcastForm, ChannelCountryForm
 
@@ -51,6 +52,9 @@ class ChannelAdmin(admin.ModelAdmin):
                         try:
                             await bot.send_message(text=message, chat_id=str(channel))
                             success_count += 1
+                        except TelegramNotFound:
+                            logger.error(f"ChatNotFound for channel {channel}")
+                            continue
                         except Exception as e:
                             logger.error(
                                 f"Failed to send message to channel {channel}: {e}"
@@ -68,7 +72,8 @@ class ChannelAdmin(admin.ModelAdmin):
 
                 success_count = async_to_sync(send_messages)()
                 self.message_user(
-                    request, f"Сообщение отправлено в {success_count} каналов"
+                    request,
+                    f"Сообщение отправлено в {success_count} каналов из {len(channels)}",
                 )
                 return None
         else:
