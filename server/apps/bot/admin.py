@@ -59,13 +59,8 @@ class ChannelAdmin(admin.ModelAdmin):
                             logger.error(
                                 f"Failed to send message to channel {channel}: {e}"
                             )
-                            self.message_user(
-                                request,
-                                "Ошибка при отправке сообщения",
-                                level=messages.ERROR,
-                            )
-                            return None
-                    await asyncio.sleep(2)
+                            continue
+                    await asyncio.sleep(3)
                     await close_bot()
 
                     return success_count
@@ -74,6 +69,7 @@ class ChannelAdmin(admin.ModelAdmin):
                 self.message_user(
                     request,
                     f"Сообщение отправлено в {success_count} каналов из {len(channels)}",
+                    level=messages.INFO,
                 )
                 return None
         else:
