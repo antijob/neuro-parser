@@ -74,7 +74,7 @@ class ArticleAdmin(admin.ModelAdmin):
     )
     ordering = ("-publication_date",)
     actions = ["force_parse"]
-    search_fields = ['url', 'title']
+    search_fields = ["url", "title"]
 
     def force_parse(self, request, queryset):
         for obj in queryset:
@@ -90,30 +90,33 @@ class ArticleAdmin(admin.ModelAdmin):
 class SourceAdmin(admin.ModelAdmin):
     list_display = ("url", "country", "region", "is_active")
     actions = ["activate", "deactivate"]
-    search_fields = ['url']
+    search_fields = ["url"]
 
+    # TODO: найти лучший вариант для сохранения списка источников
     def save_model(self, request, obj, form, change):
-        urls = obj.url.split()
-        for url in urls:
-            if not url:
-                continue
-            if Source.objects.filter(url=url).exists():
-                continue
+        if change:
+            super().save_model(request, obj, form, change)
+        else:
+            urls = obj.url.split()
+            for url in urls:
+                if not url:
+                    continue
+                if Source.objects.filter(url=url).exists():
+                    continue
 
-            new_source = Source(
-                url=url,
-                is_active=obj.is_active,
-                country=obj.country,
-                region=obj.region,
-            )
-            new_source.save()
+                new_source = Source(
+                    url=url,
+                    is_active=obj.is_active,
+                    country=obj.country,
+                    region=obj.region,
+                )
+                new_source.save()
 
     def activate(self, request, queryset):
         for obj in queryset:
             obj.is_active = True
             obj.save()
-        self.message_user(
-            request, f"{queryset.count()} sources were deactivate.")
+        self.message_user(request, f"{queryset.count()} sources were activate.")
 
     def deactivate(self, request, queryset):
         for obj in queryset:
