@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 import datetime
+import logging
+import re
 
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
@@ -7,6 +9,7 @@ from django.urls import reverse
 
 from server.apps.core.data.regions import COUNTRIES, REGIONS
 from server.apps.users.models import User
+
 
 class IncidentType(models.Model):
     model_path = models.CharField(max_length=100, null=True)
@@ -35,7 +38,7 @@ class Country(models.Model):
     name = models.CharField("Страна", choices=COUNTRIES, default="RUS", max_length=100)
 
     def __str__(self) -> str:
-        return self.name
+        return self.get_full_country_name()
 
     def get_full_country_name(self):
         return dict(COUNTRIES).get(self.name, "Unknown country")
@@ -50,14 +53,14 @@ class Region(models.Model):
     country = models.ForeignKey(Country, on_delete=models.CASCADE)
 
     def __str__(self) -> str:
-        return f"{self.name}, {self.country.name}"
-
-    def get_full_region_name(self):
-        return dict(REGIONS).get(self.name, "Unknown region")
+        return self.get_full_region_name()
 
     class Meta:
         verbose_name = "Регион"
         verbose_name_plural = "Регионы"
+
+    def get_full_region_name(self):
+        return dict(REGIONS).get(self.name, "Unknown region")
 
 
 class BaseIncident(models.Model):
@@ -128,12 +131,6 @@ class BaseIncident(models.Model):
     def __str__(self):
         return "[{}]".format(self.any_title())
 
-    def processed(self):
-        return self.status != self.UNPROCESSED
-
-    def processed_and_accepted(self):
-        return self.status in self.ACTIVE_STATUSES
-
     def any_title(self):
         return self.public_title or self.title or self.any_description()[:200] + "..."
 
@@ -144,14 +141,6 @@ class BaseIncident(models.Model):
         if self.description:
             return self.description
         return ""
-
-    def status_color(self):
-        try:
-            return ["danger", "warning", "success", "success", "success", "secondary"][
-                self.status
-            ]
-        except IndexError:
-            return ""
 
 
 class MediaIncident(BaseIncident):
@@ -166,15 +155,6 @@ class MediaIncident(BaseIncident):
 
     def get_absolute_url(self):
         return reverse("core:dashboard-mediaincident-update", args=[self.pk])
-
-    def get_description(self):
-        if self.public_description:
-            return (
-                self.public_description[150] + "..."
-                if len(self.public_description) >= 160
-                else self.public_description
-            )
-        return ""
 
     class Meta:
         verbose_name = "Инцидент из СМИ"
@@ -210,7 +190,7 @@ class Article(models.Model):
         null=True,
         blank=True,
     )
-    url = models.TextField(primary_key=True, verbose_name="URL", default="", blank=True)
+    url = models.URLField(primary_key=True, verbose_name="URL", default="", blank=True)
     title = models.TextField(
         verbose_name="Заголовок", default="", blank=True, null=True
     )
@@ -221,6 +201,10 @@ class Article(models.Model):
         verbose_name="Инцидент создан", default=False
     )
     is_duplicate = models.BooleanField(verbose_name="Дубликат", default=False)
+    duplicate_url = models.URLField(verbose_name="Дубликат чего", null=True, blank=True)
+    is_redirect = models.BooleanField(verbose_name="Редирект", default=False)
+    redirect_url = models.URLField(verbose_name="Редирект куда", null=True, blank=True)
+
     rate = models.JSONField(verbose_name="Оценка релевантности", default=dict)
     incident = models.OneToOneField(
         MediaIncident,

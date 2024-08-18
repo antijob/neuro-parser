@@ -7,7 +7,7 @@ from .parsers.ok_parser import OkParser
 from .parsers.common_parser import CommonParser
 from server.apps.core.models import Article
 import datetime
-from asgiref.sync import sync_to_async
+# from asgiref.sync import sync_to_async
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -27,8 +27,9 @@ class ArticleParser:
             logger.error(f"Error parsing article raw data from URL {url}: {e}")
             raise
 
+    # you should save it by yourself
     @classmethod
-    async def postprocess_article(cls, article: Article, data: Any) -> None:
+    def postprocess_article(cls, article: Article, data: Any) -> None:
         try:
             article_data: ArticleData = cls.parse_article_raw_data(article.url, data)
             if article_data:
@@ -38,7 +39,7 @@ class ArticleParser:
                 else:
                     article.publication_date = datetime.date.today()
             article.is_downloaded = True
-            await sync_to_async(article.save, thread_sensitive=True)()
+            # await sync_to_async(article.save, thread_sensitive=True)()
         except ValueError as e:
             logger.warning(f"Value error during postprocessing of article {article.url}: {e}")
         except Exception as e:

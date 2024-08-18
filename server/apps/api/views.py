@@ -62,7 +62,7 @@ class CheckLinkForIncident(CreateAPIView):
             if link:
                 article, created = Article.objects.get_or_create(url=link)
                 if not created or not article.is_downloaded:
-                    Fetcher.download(article)
+                    Fetcher.download_article(article)
                 predictor = IncidentPredictor()
                 incident = predictor.predict(article, force=True)
 
