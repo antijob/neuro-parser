@@ -48,7 +48,7 @@ def rate_with_model_and_tokenizer(normalized_text, model, tokenizer):
             predictions_neg += outputs.logits[0][0].item()
         logits = torch.tensor([predictions_neg, predictions_pos])
         probabilities = torch.nn.functional.softmax(logits, dim=0)
-        return probabilities
+        return probabilities.tolist()
     except Exception as e:
         logger.error(f"Error in rate_with_model_and_tokenizer: {e}")
         return [0, 0]  # Default value if an error occurs
