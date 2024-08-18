@@ -23,6 +23,7 @@ import torch
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+
 def rate_with_model_and_tokenizer(normalized_text, model, tokenizer):
     try:
         encoding = tokenizer(
@@ -36,7 +37,8 @@ def rate_with_model_and_tokenizer(normalized_text, model, tokenizer):
         dataset = torch.utils.data.TensorDataset(
             input_ids,
         )
-        model_iter = torch.utils.data.DataLoader(dataset, batch_size=1, shuffle=False)
+        model_iter = torch.utils.data.DataLoader(
+            dataset, batch_size=1, shuffle=False)
 
         predictions_pos = 0
         predictions_neg = 0
@@ -44,7 +46,9 @@ def rate_with_model_and_tokenizer(normalized_text, model, tokenizer):
             outputs = model(text[0])
             predictions_pos += outputs.logits[0][1].item()
             predictions_neg += outputs.logits[0][0].item()
-        return [predictions_neg, predictions_pos]
+        logits = torch.tensor([predictions_neg, predictions_pos])
+        probabilities = torch.nn.functional.softmax(logits, dim=0)
+        return probabilities
     except Exception as e:
         logger.error(f"Error in rate_with_model_and_tokenizer: {e}")
         return [0, 0]  # Default value if an error occurs
@@ -69,8 +73,7 @@ class IncidentPredictor:
             if it.model_path:
                 model_directory = MODELS_DIR.joinpath(it.model_path)
                 self.tokenizer = AutoTokenizer.from_pretrained(
-                    model_directory, use_fast=False, from_safetensors=True
-                )
+                    model_directory, use_fast=False)
                 self.model = BertForSequenceClassification.from_pretrained(
                     model_directory
                 )
