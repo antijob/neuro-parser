@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import Optional
+from server.apps.core.models import Article, Source
 
 
 class BaseClient(ABC):
@@ -14,13 +15,9 @@ class BaseClient(ABC):
         pass
 
     @abstractmethod
-    async def get(self, url: str) -> tuple[str, str]:
+    async def get_article(self, article: Article, source: Source) -> Article:
         pass
 
     @abstractmethod
-    async def get_article(self, article, source) -> object:
-        pass
-
-    @abstractmethod
-    async def get_source(self, source) -> Optional[str]:
+    async def get_source(self, source: Source) -> Optional[str]:
         pass
