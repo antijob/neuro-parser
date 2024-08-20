@@ -47,7 +47,9 @@ dependencies = [
     "aiohttp<4.0.0,>=3.8.6",
     "lxml[html_clean]<6,>=5",
     "aiogram>=3.8.0",
-    "numpy<2"
+    "numpy<2",
+    "replicate>=0.31.0",
+    "sumy>=0.11.0",
 ]
 name = "neuro-parser"
 version = "0.1.0"
