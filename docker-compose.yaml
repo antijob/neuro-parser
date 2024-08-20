@@ -20,6 +20,7 @@ services:
     image: postgres:13.4-alpine
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - .:/code
     environment:
       - POSTGRES_DB=${POSTGRES_DB}
       - POSTGRES_USER=${POSTGRES_USER}
