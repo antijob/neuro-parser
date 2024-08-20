@@ -216,7 +216,7 @@ REST_FRAMEWORK = {
     ],
 }
 
-CHAT_GPT_KEY = c("CHAT_GPT_KEY")
+REPLICATE_API_TOKEN = c("REPLICATE_API_TOKEN")
 
 CONTACT_FORM_EMAILS = ["agorarights@gmail.com"]
 

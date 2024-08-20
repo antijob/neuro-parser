@@ -102,3 +102,5 @@ This project includes a feature that allows administrators to broadcast messages
 Thank you for your contributions to the Neural Parser project!
 
 
+## Model api
+For external api using [replicate.com](https://replicate.com/) how chipest alternative chatGPT.

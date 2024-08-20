@@ -46,6 +46,7 @@ services:
       - POSTGRES_DB=${POSTGRES_DB}
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - REPLICATE_API_TOKEN=${REPLICATE_API_TOKEN}
     depends_on:
       - db
     networks:
@@ -62,6 +63,8 @@ services:
     volumes:
       - ./models:/code/models
       - .:/code
+    environment:
+      - REPLICATE_API_TOKEN=${REPLICATE_API_TOKEN}
     restart: always
     depends_on:
       - redis
