@@ -51,6 +51,7 @@ class IncidentTypeAdmin(admin.ModelAdmin):
 @admin.register(MediaIncident)
 class MediaIncidentAdmin(admin.ModelAdmin):
     list_display = ("any_title", "incident_type", "status", "rate_article")
+    autocomplete_fields = ["related_article", "duplicate"]
     search_fields = ["title"]
 
     def rate_article(self, obj):
