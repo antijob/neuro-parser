@@ -103,4 +103,8 @@ Thank you for your contributions to the Neural Parser project!
 
 
 ## Model api
-For external api using [replicate.com](https://replicate.com/) how chipest alternative chatGPT.
+For external api using [replicate.com](https://replicate.com/) as a cheap alternative to chatgpt. 
+
+
+## API для внешних моделей
+Для обращения используется сервис [replicate.com](https://replicate.com/) он сильно дешевле chatGPT.
