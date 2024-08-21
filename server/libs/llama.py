@@ -2,6 +2,7 @@ import replicate
 import time
 import logging
 from nltk.tokenize import word_tokenize
+from django.conf import settings
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -18,7 +19,6 @@ SYSTEM_LLM_PROMPT_EXTRA = 'Ты - модель, которая отвечает 
 
 def predict_is_incident(text, prompt, max_new_tokens=512, retries=3):
     if not text or not prompt:
-        logger.error("Text and prompt must be provided")
         return False
 
     # Tolkenize text
@@ -43,7 +43,7 @@ def predict_is_incident(text, prompt, max_new_tokens=512, retries=3):
             }
 
             for event in replicate.stream(
-                "meta/meta-llama-3-8b-instruct",
+                settings.REPLICATE_MODEL_NAME,
                 input=model_input
             ):
                 return event
