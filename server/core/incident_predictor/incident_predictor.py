@@ -101,7 +101,6 @@ class IncidentPredictor:
                 article.save()
 
                 is_incident = bool(re.search(r'[+]', response.data))
-                logger.debug(is_incident)
                 return is_incident
             else:
                 relevance = rate_with_model_and_tokenizer(
