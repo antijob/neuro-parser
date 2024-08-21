@@ -6,10 +6,12 @@ from server.libs.morphy import normalize_text
 from server.libs import chat_gpt
 
 from server.apps.core.models import IncidentType, Article, MediaIncident
+from server.apps.bot.services.inc_post import mediaincident_post
 
 from transformers import AutoTokenizer, BertForSequenceClassification
 
 from server.settings.components.common import MODELS_DIR
+
 
 # COSINE.PY
 import os
@@ -37,8 +39,7 @@ def rate_with_model_and_tokenizer(normalized_text, model, tokenizer):
         dataset = torch.utils.data.TensorDataset(
             input_ids,
         )
-        model_iter = torch.utils.data.DataLoader(
-            dataset, batch_size=1, shuffle=False)
+        model_iter = torch.utils.data.DataLoader(dataset, batch_size=1, shuffle=False)
 
         predictions_pos = 0
         predictions_neg = 0
@@ -59,6 +60,7 @@ def rate_with_model_and_tokenizer(normalized_text, model, tokenizer):
 # 1 -- unique url pipeline
 # 2 -- urls batch pipeline
 
+
 class IncidentPredictor:
     current_incident_type: IncidentType
     tokenizer: any
@@ -73,7 +75,8 @@ class IncidentPredictor:
             if it.model_path:
                 model_directory = MODELS_DIR.joinpath(it.model_path)
                 self.tokenizer = AutoTokenizer.from_pretrained(
-                    model_directory, use_fast=False)
+                    model_directory, use_fast=False
+                )
                 self.model = BertForSequenceClassification.from_pretrained(
                     model_directory
                 )
@@ -110,7 +113,7 @@ class IncidentPredictor:
 
     def _create_incident(self, article: Article) -> MediaIncident:
         try:
-            return MediaIncident.objects.create(
+            mi = MediaIncident.objects.create(
                 urls=[article.url],
                 status=MediaIncident.UNPROCESSED,
                 title=article.any_title(),
@@ -123,6 +126,11 @@ class IncidentPredictor:
                 region=article.region,
                 country=article.country,
             )
+            try:
+                mediaincident_post(mi)
+            except Exception as e:
+                logger.error(f"Error in _create_incident - mediaincident_post: {e}")
+            return mi
         except Exception as e:
             logger.error(f"Error in _create_incident: {e}")
             return None  # Default value if an error occurs
