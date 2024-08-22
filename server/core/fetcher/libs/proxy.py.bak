@@ -1,0 +1,53 @@
+import logging
+from typing import Optional
+
+import aiohttp
+from asgiref.sync import sync_to_async
+from attr import dataclass
+
+from server.apps.core.models import Proxy
+
+logger = logging.getLogger(__name__)
+
+
+@dataclass
+class ProxyData:
+    url: Optional[str] = None
+    login: Optional[str] = None
+    password: Optional[str] = None
+    error_msg: Optional[str] = None
+
+
+class ProxyManager:
+    @staticmethod
+    async def get_proxy() -> ProxyData:
+        while True:
+            proxy = await sync_to_async(
+                Proxy.objects.filter(is_active=True).order_by("?").first
+            )()
+            if proxy is None:
+                return ProxyData(error_msg="Can't find a proxy in dattbase")
+            check_result = await ProxyManager().check_proxy(
+                f"http://{proxy.ip}:{proxy.port}"
+            )
+            if check_result is False:
+                proxy.is_active = False
+                await sync_to_async(proxy.save)()
+            else:
+                proxy_data = ProxyData(
+                    f"{proxy.ip}:{proxy.port}", proxy.login, proxy.password
+                )
+                break
+
+        return proxy_data
+
+    async def check_proxy(self, proxy: str) -> bool:
+        async with aiohttp.ClientSession() as session:
+            try:
+                async with session.get(
+                    "https://example.com", proxy=proxy, timeout=60
+                ) as response:
+                    return response.ok
+            except Exception as e:
+                logger.error(f"Proxy {proxy} check error: {e}")
+                return False

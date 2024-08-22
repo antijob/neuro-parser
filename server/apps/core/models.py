@@ -1,10 +1,14 @@
-# -*- coding: utf-8 -*-
 import datetime
 
 from django.contrib.postgres.fields import ArrayField
+from django.utils.translation import gettext_lazy as _
 from django.db import models
 from django.urls import reverse
-from django.utils import timezone
+from django.core.validators import (
+    validate_ipv4_address,
+    MinValueValidator,
+    MaxValueValidator,
+)
 
 from server.apps.core.data.regions import COUNTRIES, REGIONS
 from server.apps.core.data.llm import SYSTEM_LLM_PROMPT_DEFAULT, LLM_TEMPLATE_DEFAULT
@@ -179,10 +183,10 @@ class Source(models.Model):
     country = models.ForeignKey(
         Country,
         on_delete=models.CASCADE,
-        default=11,
+        default=DEFAULT_COUNTRY_ID,
     )
     region = models.ForeignKey(
-        Region, on_delete=models.CASCADE, default=None, null=True, blank=True
+        Region, on_delete=models.SET_NULL, default=None, null=True, blank=True
     )
 
     class Meta:
@@ -268,3 +272,27 @@ class Article(models.Model):
     def country(self):
         country = self.source.country if self.source else "RUS"
         return country
+
+
+class Proxy(models.Model):
+    ip = models.GenericIPAddressField(
+        _("IP адрес"), protocol="IPv4", validators=[validate_ipv4_address], unique=True
+    )
+    port = models.PositiveIntegerField(
+        _("Порт"),
+        validators=[MinValueValidator(1), MaxValueValidator(65535)],
+        unique=True,
+    )
+    country = models.ForeignKey(
+        Country, on_delete=models.CASCADE, verbose_name=_("Страна")
+    )
+    is_active = models.BooleanField(_("Активен"), default=True)
+
+    def __str__(self):
+        return f"{self.ip}:{self.port}"
+
+    class Meta:
+        verbose_name = _("Прокси")
+        verbose_name_plural = _("Прокси")
+        unique_together = ("ip", "port")
+        ordering = ["country", "ip", "port"]

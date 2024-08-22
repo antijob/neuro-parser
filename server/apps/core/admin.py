@@ -20,7 +20,7 @@ from server.apps.core.models import (
     IncidentType,
     MediaIncident,
     Region,
-    Source,
+    Proxy,
 )
 
 
