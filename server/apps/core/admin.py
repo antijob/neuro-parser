@@ -9,6 +9,7 @@ from server.apps.core.models import (
     IncidentType,
     Country,
     Region,
+    Proxy,
 )
 from server.apps.core.forms import IncidentTypeForm
 
@@ -33,8 +34,7 @@ class IncidentTypeAdmin(admin.ModelAdmin):
         for obj in queryset:
             obj.is_active = False
             obj.save()
-        self.message_user(
-            request, f"{queryset.count()} models will be switched.")
+        self.message_user(request, f"{queryset.count()} models will be switched.")
 
     disable_models.short_description = "Disable models"
 
@@ -42,8 +42,7 @@ class IncidentTypeAdmin(admin.ModelAdmin):
         for obj in queryset:
             obj.is_active = True
             obj.save()
-        self.message_user(
-            request, f"{queryset.count()} models will be switched.")
+        self.message_user(request, f"{queryset.count()} models will be switched.")
 
     enable_models.short_description = "Enable models"
 
@@ -81,15 +80,14 @@ class ArticleAdmin(admin.ModelAdmin):
         for obj in queryset:
             obj.is_parsed = False
             obj.save()
-        self.message_user(
-            request, f"{queryset.count()} articles will be parsed.")
+        self.message_user(request, f"{queryset.count()} articles will be parsed.")
 
     force_parse.short_description = "Force parse"
 
 
 @admin.register(Source)
 class SourceAdmin(admin.ModelAdmin):
-    list_display = ("url", "country", "region", "is_active")
+    list_display = ("url", "country", "region", "is_active", "needs_proxy")
     actions = ["activate", "deactivate"]
     search_fields = ["url"]
 
@@ -123,8 +121,12 @@ class SourceAdmin(admin.ModelAdmin):
         for obj in queryset:
             obj.is_active = False
             obj.save()
-        self.message_user(
-            request, f"{queryset.count()} sources were deactivate.")
+        self.message_user(request, f"{queryset.count()} sources were deactivate.")
 
     activate.short_description = "Activate sources"
     deactivate.short_description = "Deactivate sources"
+
+
+@admin.register(Proxy)
+class ProxyAdmin(admin.ModelAdmin):
+    list_display = ("ip", "port", "country", "is_active")
