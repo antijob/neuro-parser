@@ -9,6 +9,7 @@ from server.apps.core.models import (
     IncidentType,
     Country,
     Region,
+    Proxy,
 )
 from server.apps.core.forms import IncidentTypeForm
 
@@ -87,7 +88,7 @@ class ArticleAdmin(admin.ModelAdmin):
 
 @admin.register(Source)
 class SourceAdmin(admin.ModelAdmin):
-    list_display = ("url", "country", "region", "is_active")
+    list_display = ("url", "country", "region", "is_active", "needs_proxy")
     actions = ["activate", "deactivate"]
     search_fields = ["url"]
 
@@ -125,3 +126,8 @@ class SourceAdmin(admin.ModelAdmin):
 
     activate.short_description = "Activate sources"
     deactivate.short_description = "Deactivate sources"
+
+
+@admin.register(Proxy)
+class ProxyAdmin(admin.ModelAdmin):
+    list_display = ("ip", "port", "country", "is_active")
