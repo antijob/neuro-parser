@@ -1,6 +1,6 @@
 import logging
-from typing import Union
 import datetime
+import asyncio
 
 from server.libs.morphy import normalize_text
 from server.libs import chat_gpt
@@ -127,7 +127,7 @@ class IncidentPredictor:
                 country=article.country,
             )
             try:
-                mediaincident_post(media_incident)
+                asyncio.run(mediaincident_post(media_incident))
             except Exception as e:
                 logger.error(f"Error in _create_incident - mediaincident_post: {e}")
             return media_incident
