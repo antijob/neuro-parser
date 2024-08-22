@@ -4,7 +4,7 @@ import sys
 
 from asgiref.sync import sync_to_async
 
-from server.apps.bot.bot_instance import bot, close_bot
+from server.apps.bot.bot_instance import get_bot
 from server.apps.bot.models import Channel, ChannelCountry, ChannelIncidentType
 from server.apps.core.data.messages import NEW_INCIDENT_TEMPLATE
 from server.apps.core.models import MediaIncident
@@ -53,11 +53,12 @@ async def mediaincident_post(inc: MediaIncident):
                 and channel_country.status
                 and inc.region.name in channel_country.enabled_regions
             ):
-                await bot.send_message(text=msg, chat_id=chn.channel_id)
+
+                async with get_bot() as bot:
+                    await bot.send_message(text=msg, chat_id=chn.channel_id)
             else:
                 logger.info(f"Skipping channel {chn.channel_id} due to status checks")
         except Exception as e:
             logger.error(f"Error processing channel {chn.channel_id}: {e}")
 
     await asyncio.gather(*[send_to_channel(chn) for chn in all_channels])
-    await close_bot()
