@@ -113,7 +113,7 @@ class IncidentPredictor:
 
     def _create_incident(self, article: Article) -> MediaIncident:
         try:
-            mi = MediaIncident.objects.create(
+            media_incident = MediaIncident.objects.create(
                 urls=[article.url],
                 status=MediaIncident.UNPROCESSED,
                 title=article.any_title(),
@@ -127,10 +127,10 @@ class IncidentPredictor:
                 country=article.country,
             )
             try:
-                mediaincident_post(mi)
+                mediaincident_post(media_incident)
             except Exception as e:
                 logger.error(f"Error in _create_incident - mediaincident_post: {e}")
-            return mi
+            return media_incident
         except Exception as e:
             logger.error(f"Error in _create_incident: {e}")
             return None  # Default value if an error occurs
