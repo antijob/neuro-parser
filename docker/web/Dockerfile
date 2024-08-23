@@ -20,6 +20,8 @@ RUN apt-get update && \
 
 # Install PDM
 RUN pip install -U pip && pip install pdm && pip install nltk
+
+# Install NLTK dependencies
 RUN python -m nltk.downloader punkt
 RUN python -m nltk.downloader stopwords
 
