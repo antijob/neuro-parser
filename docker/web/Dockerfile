@@ -19,7 +19,11 @@ RUN apt-get update && \
   apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install PDM
-RUN pip install -U pip && pip install pdm
+RUN pip install -U pip && pip install pdm && pip install nltk
+
+# Install NLTK dependencies
+RUN python -m nltk.downloader punkt
+RUN python -m nltk.downloader stopwords
 
 # Copy dependency management files first to leverage Docker cache
 COPY pyproject.toml pdm.lock /code/
