@@ -16,6 +16,8 @@ SYSTEM_LLM_PROMPT_EXTRA = 'Ты - модель, которая отвечает 
 # Text summarization for economy price.
 # Main llama_promt use in system pront for priority.
 
+# TODO: convert to async
+
 
 def predict_is_incident(text, prompt, max_new_tokens=512, retries=3):
     if not text or not prompt:
