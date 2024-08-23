@@ -1,17 +1,18 @@
+import asyncio
 import logging
 from datetime import date
 
 from django.core.management.base import BaseCommand
 
+from server.apps.bot.services.inc_post import mediaincident_post
 from server.apps.core.models import (
+    Article,
+    Country,
     IncidentType,
     MediaIncident,
-    Country,
     Region,
     User,
-    Article,
 )
-from server.apps.bot.services.inc_post import mediaincident_post
 
 logger = logging.getLogger(__name__)
 
@@ -149,7 +150,6 @@ class Command(BaseCommand):
                 public_title=article.title,
                 public_description=article.text,
             )
-            # media_incident.save()
         except Exception as e:
             logger.error(f"Failed to create an incident: {e}")
             return
@@ -160,6 +160,6 @@ class Command(BaseCommand):
 
         # send a message to the channel
         try:
-            mediaincident_post(media_incident)
+            asyncio.run(mediaincident_post(media_incident))
         except Exception as e:
             logger.error(f"Failed to send a message to the channel: {e}")

@@ -1,17 +1,15 @@
-import asyncio
 import logging
 
 from asgiref.sync import async_to_sync
 from django.contrib import admin, messages
 from django.shortcuts import render
 
-from server.apps.bot.bot_instance import bot, close_bot
+from server.apps.bot.bot_instance import get_bot
 from server.apps.bot.models import (
     Channel,
     ChannelCountry,
     ChannelIncidentType,
 )
-from aiogram.exceptions import TelegramNotFound
 
 from .forms import BroadcastForm, ChannelCountryForm
 
@@ -50,18 +48,16 @@ class ChannelAdmin(admin.ModelAdmin):
                     success_count = 0
                     for channel in channels:
                         try:
-                            await bot.send_message(text=message, chat_id=str(channel))
+                            async with get_bot() as bot:
+                                await bot.send_message(
+                                    text=message, chat_id=str(channel)
+                                )
                             success_count += 1
-                        except TelegramNotFound:
-                            logger.error(f"ChatNotFound for channel {channel}")
-                            continue
                         except Exception as e:
                             logger.error(
                                 f"Failed to send message to channel {channel}: {e}"
                             )
                             continue
-                    await asyncio.sleep(3)
-                    await close_bot()
 
                     return success_count
 
