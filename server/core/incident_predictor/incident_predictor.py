@@ -2,53 +2,17 @@ import logging
 import datetime
 import asyncio
 
-from server.libs.morphy import normalize_text
-from server.libs import llama
-
+from server.libs import llama, bert
 from server.apps.core.models import IncidentType, Article, MediaIncident
 from server.apps.bot.services.inc_post import mediaincident_post
 
 from transformers import AutoTokenizer, BertForSequenceClassification
 
-from server.settings.components.common import MODELS_DIR
-
-
-import re
-import tqdm
-import torch
+from server.settings.components.common import MODELS_DIR, REPLICATE_MODEL_NAME
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-
-
-def rate_with_model_and_tokenizer(normalized_text, model, tokenizer):
-    try:
-        encoding = tokenizer(
-            normalized_text,
-            return_tensors="pt",
-            padding=True,
-            truncation=True,
-            max_length=256,
-        )
-        input_ids = encoding["input_ids"]
-        dataset = torch.utils.data.TensorDataset(
-            input_ids,
-        )
-        model_iter = torch.utils.data.DataLoader(dataset, batch_size=1, shuffle=False)
-
-        predictions_pos = 0
-        predictions_neg = 0
-        for text in tqdm.tqdm(model_iter):
-            outputs = model(text[0])
-            predictions_pos += outputs.logits[0][1].item()
-            predictions_neg += outputs.logits[0][0].item()
-        logits = torch.tensor([predictions_neg, predictions_pos])
-        probabilities = torch.nn.functional.softmax(logits, dim=0)
-        return probabilities.tolist()
-    except Exception as e:
-        logger.error(f"Error in rate_with_model_and_tokenizer: {e}")
-        return [0, 0]  # Default value if an error occurs
 
 
 # THERE SHOULD BE 2 pipelines
@@ -63,13 +27,13 @@ class IncidentPredictor:
     model: any
     is_llm_setup: bool
 
-    def setup_incident_type(self, it: IncidentType):
+    def setup_incident_type(self, incident_type: IncidentType):
         try:
-            self.current_incident_type = it
+            self.current_incident_type = incident_type
 
             self.is_llm_setup = False
-            if it.model_path:
-                model_directory = MODELS_DIR.joinpath(it.model_path)
+            if incident_type.model_path:
+                model_directory = MODELS_DIR.joinpath(incident_type.model_path)
 
                 if not model_directory.exists() or not model_directory.is_dir():
                     raise FileNotFoundError(
@@ -82,7 +46,7 @@ class IncidentPredictor:
                     model_directory
                 )
                 self.model.eval()
-            elif it.llm_prompt:
+            elif incident_type.llm_prompt:
                 self.is_llm_setup = True
         except Exception as e:
             logger.error(f"Error in setup_incident_type: {e}", exc_info=True)
@@ -91,27 +55,15 @@ class IncidentPredictor:
 
     def _is_incident(self, article: Article = None) -> bool:
         try:
-            normalized_text = normalize_text(article.text)
             if self.is_llm_setup:
-                response = llama.predict_is_incident(
-                    normalized_text,
+                return llama.predict_is_incident_llama(
+                    self,
+                    article,
                     self.current_incident_type.llm_prompt,
+                    REPLICATE_MODEL_NAME
                 )
-                article.rate[self.current_incident_type.description] = 'LLM_RESP: ' + response.data
-                article.save()
-
-                is_incident = bool(re.search(r'[+]', response.data))
-                return is_incident
             else:
-                relevance = rate_with_model_and_tokenizer(
-                    normalized_text, self.model, self.tokenizer
-                )
-                article.rate[self.current_incident_type.description] = relevance
-                article.save()
-                is_incident = bool(
-                    relevance[0] - relevance[1] > self.current_incident_type.treshold)
-                # Assuming threshold logic is correct, consider explaining it
-                return is_incident
+                return bert.predict_is_incident_bert(self, article, self.model, self.tokenizer)
         except Exception as e:
             logger.error("Error in _is_incident: %s: %s",
                          e.__class__.__name__, e.args)
