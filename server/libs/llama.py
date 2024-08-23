@@ -1,8 +1,12 @@
 import replicate
 import time
 import logging
+import re
+
 from nltk.tokenize import word_tokenize
-from django.conf import settings
+from server.libs.morphy import normalize_text
+
+from server.apps.core.models import IncidentType, Article
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -19,12 +23,15 @@ SYSTEM_LLM_PROMPT_EXTRA = 'Ты - модель, которая отвечает 
 # TODO: convert to async
 
 
-def predict_is_incident(text, prompt, max_new_tokens=512, retries=3):
-    if not text or not prompt:
+def predict_is_incident_llama(incident: IncidentType, article: Article, prompt: str, model: str, max_new_tokens=512, retries=3) -> bool:
+    if not prompt:
         return False
 
-    # Tolkenize text
-    tokens = word_tokenize(text)
+    # Normalize text
+    normalized_text = normalize_text(article.text)
+
+    # Tokenize text
+    tokens = word_tokenize(normalized_text)
     cut_text = " ".join(tokens[:500] + tokens[-500:])
 
     attempt = 0
@@ -45,20 +52,21 @@ def predict_is_incident(text, prompt, max_new_tokens=512, retries=3):
             }
 
             for event in replicate.stream(
-                settings.REPLICATE_MODEL_NAME,
+                model,
                 input=model_input
             ):
-                return event
+                # save rate
+                article.rate[incident.current_incident_type.description] = 'LLM_RESP: ' + event.data
+                article.save()
+
+                return bool(re.search(r'\+', event.data))
 
         except replicate.exceptions.ReplicateError as e:
             logger.error(
                 "Replicate API error occurred on attempt %d/%d: %s", attempt + 1, retries, e)
-            attempt += 1
-            time.sleep(2)  # wait for 2 seconds before retrying
         except Exception as e:
             logger.error(
                 "Unexpected error occurred on attempt %d/%d: %s", attempt + 1, retries, e)
-            attempt += 1
-            time.sleep(2)  # wait for 2 seconds before retrying
-
+        attempt += 1
+        time.sleep(2)
     return False
