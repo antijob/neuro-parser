@@ -3,6 +3,7 @@
 name: Web tests
 
 on:
+  push:
   pull_request:
     branches:
       - main
