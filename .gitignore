@@ -218,7 +218,10 @@ media/
 
 # Configuration file with private data:
 config/.env
-.env
+# Ignore all secret env vars
+.env*
+# Do not ignore the template file
+!.env.template
 
 # Local settings files:
 *local.py
