@@ -57,13 +57,12 @@ class IncidentPredictor:
         try:
             if self.is_llm_setup:
                 return llama.predict_is_incident_llama(
-                    self,
+                    self.current_incident_type,
                     article,
-                    self.current_incident_type.llm_prompt,
                     REPLICATE_MODEL_NAME
                 )
             else:
-                return bert.predict_is_incident_bert(self, article, self.model, self.tokenizer)
+                return bert.predict_is_incident_bert(self.current_incident_type, article, self.model, self.tokenizer)
         except Exception as e:
             logger.error("Error in _is_incident: %s: %s",
                          e.__class__.__name__, e.args)
@@ -87,7 +86,8 @@ class IncidentPredictor:
             try:
                 asyncio.run(mediaincident_post(media_incident))
             except Exception as e:
-                logger.error(f"Error in _create_incident - mediaincident_post: {e}")
+                logger.error(
+                    f"Error in _create_incident - mediaincident_post: {e}")
             return media_incident
         except Exception as e:
             logger.error(f"Error in _create_incident: {e}")

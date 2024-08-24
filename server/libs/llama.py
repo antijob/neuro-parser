@@ -23,8 +23,8 @@ SYSTEM_LLM_PROMPT_EXTRA = 'Ты - модель, которая отвечает 
 # TODO: convert to async
 
 
-def predict_is_incident_llama(incident: IncidentType, article: Article, prompt: str, model: str, max_new_tokens=512, retries=3) -> bool:
-    if not prompt or not article.text:
+def predict_is_incident_llama(incident: IncidentType, article: Article,  model: str, max_new_tokens=512, retries=3) -> bool:
+    if not incident.llm_prompt or not article.text:
         return False
 
     # Normalize text
@@ -39,7 +39,7 @@ def predict_is_incident_llama(incident: IncidentType, article: Article, prompt: 
         try:
             model_input = {
                 "prompt": cut_text,
-                "system_prompt":  SYSTEM_LLM_PROMPT_EXTRA + prompt,
+                "system_prompt":  SYSTEM_LLM_PROMPT_EXTRA + incident.llm_prompt,
                 "max_new_tokens": max_new_tokens,
                 "top_p": 0.95,
                 "max_tokens": 512,
