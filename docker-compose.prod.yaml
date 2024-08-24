@@ -55,6 +55,8 @@ services:
     image: antijob/neuro-parser:${NEURO_PARSER_VERSION}
     volumes:
       - /root/models:/home/github-actions/code/models
+    environment:
+      - REPLICATE_API_TOKEN=${REPLICATE_API_TOKEN}
     restart: always
     depends_on:
       - redis
@@ -140,6 +142,7 @@ services:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - DJANGO_ALLOWED_HOSTS=${HOST}
+      - REPLICATE_API_TOKEN=${REPLICATE_API_TOKEN}
     depends_on:
       - db
     labels:
