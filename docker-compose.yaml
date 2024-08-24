@@ -48,8 +48,10 @@ services:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - REPLICATE_API_TOKEN=${REPLICATE_API_TOKEN}
+      - API_RPS=${API_RPS}
     depends_on:
       - db
+      - redis
     networks:
       - djangonetwork
     labels:
