@@ -116,8 +116,6 @@ jobs:
   test:
     name: Run tests
     if: ${{ always() }}
-    needs:
-      - build
     uses: "./.github/workflows/tests.web.yml"
     secrets: inherit
 

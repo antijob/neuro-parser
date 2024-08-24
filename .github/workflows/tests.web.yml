@@ -3,11 +3,7 @@
 name: Web tests
 
 on:
-  push:
   pull_request:
-    branches:
-      - main
-      - stage
   workflow_call:
 
 concurrency:
@@ -17,10 +13,20 @@ concurrency:
 jobs:
   test:
     name: Run tests
-    runs-on: ["self-hosted", "neuroparser", "production"]
+    runs-on: ["self-hosted", "neuroparser", "staging"]
     steps:
       - name: Check out repository code
         uses: actions/checkout@v3
+      
+      - name: Build python
+        id: build
+        run: |
+          branch=$(echo "${GITHUB_REF#refs/heads/}" | tr '/' '-')
+          echo "Branch name with / substituted for - : $branch"
+          # use dummy .env.template so build is happy
+          cp .env.template .env
+          NEURO_PARSER_VERSION=${branch} \
+            docker compose -f docker-compose.yaml build web
 
       - name: Prepare .env.test
         run: |
@@ -33,51 +39,56 @@ jobs:
           TELEGRAM_BOT_TOKEN: "non-existing-token"
           API_RPS: "100/minute"
 
-      - name: Run Docker container and execute tests
+      - name: Execute tests in Docker
         env:
           TEST_REPORT_ROOT: artifacts/tests
           TEST_REPORT_OUTPUT: md_report.md
         run: |
           echo "TEST_REPORT_ROOT=${TEST_REPORT_ROOT}" >> "$GITHUB_ENV";
-          echo "REPORT_FILE=${TEST_REPORT_ROOT}/${TEST_REPORT_OUTPUT}" >> "$GITHUB_ENV";
-          docker-compose --env-file .env.test \
+          echo "TEST_REPORT_FILE=${TEST_REPORT_ROOT}/${TEST_REPORT_OUTPUT}" >> "$GITHUB_ENV";
+          mkdir -p ${TEST_REPORT_ROOT};
+          docker compose --env-file .env.test \
             run \
-            -v $(pwd)/$(TEST_REPORT_ROOT):/${TEST_REPORT_ROOT} \
+            -u $UID \
+            -v $(pwd)/${TEST_REPORT_ROOT}:/${TEST_REPORT_ROOT} \
             web pytest . -v \
               --cov \
               --cov-report=lcov:/${TEST_REPORT_ROOT}/.coverage \
               --md-report \
               --md-report-flavor gfm \
               --md-report-output /${TEST_REPORT_ROOT}/${TEST_REPORT_OUTPUT}
-              
-      #       --md-report-exclude-outcomes passed skipped xpassed \
+          
+          # Because python-coverage-comment-action cannot handle any other paths. Amazing.
+          cp ${TEST_REPORT_ROOT}/.coverage .coverage
+
       # Reporting coverage
-      # https://github.com/marketplace/actions/python-coverage-comment
+      # https://github.com/romeovs/lcov-reporter-action
       - name: Coverage comment
-        uses: py-cov-action/python-coverage-comment-action@v3
-        if: always()
+        uses: romeovs/lcov-reporter-action@v0.3.1
+        if: always() && github.event_name == 'pull_request'
         with:
-          GITHUB_TOKEN: ${{ github.token }}
-          COVERAGE_FILE: ${{ env.TEST_REPORT_ROOT }}/.coverage
+          title: "coverage-report"
+          delete-old-comments: true
+          lcov-file: ${{ env.TEST_REPORT_ROOT }}/.coverage
 
       # Reporting to PR details and Job summary
       # https://github.com/thombashi/pytest-md-report
-      - name: Render the report to the PR when tests fail
+      - name: Render the report to the PR
         uses: marocchino/sticky-pull-request-comment@v2
-        if: failure()
+        if: always()
         with:
           header: test-report
           recreate: true
-          path: ${{ env.REPORT_FILE }}
+          path: ${{ env.TEST_REPORT_FILE }}
 
-      - name: Output reports to the job summary when tests fail
-        if: failure()
+      - name: Output reports to the job summary
+        if: always()
         shell: bash
         run: |
-          if [ -f "$REPORT_FILE" ]; then
-            echo "<details><summary>Failed Test Report</summary>" >> $GITHUB_STEP_SUMMARY
+          if [ -f "$TEST_REPORT_FILE" ]; then
+            echo "<details><summary>Test Report</summary>" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
-            cat "$REPORT_FILE" >> $GITHUB_STEP_SUMMARY
+            cat "$TEST_REPORT_FILE" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "</details>" >> $GITHUB_STEP_SUMMARY
           fi
