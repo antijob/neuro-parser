@@ -24,7 +24,7 @@ SYSTEM_LLM_PROMPT_EXTRA = 'Ты - модель, которая отвечает 
 
 
 def predict_is_incident_llama(incident: IncidentType, article: Article, prompt: str, model: str, max_new_tokens=512, retries=3) -> bool:
-    if not prompt:
+    if not prompt or not article.text:
         return False
 
     # Normalize text
