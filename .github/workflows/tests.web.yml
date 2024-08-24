@@ -1,0 +1,81 @@
+# Made in a reusable way
+# Ref: https://docs.github.com/en/actions/sharing-automations/reusing-workflows
+name: Web tests
+
+on:
+  workflow_call:
+    secrets:
+      TELEGRAM_BOT_TOKEN:
+        required: true
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Run tests
+    runs-on: ["self-hosted", "neuroparser", "production"]
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+
+      - name: Prepare .env.test
+        run: |
+          cp .env.template .env.test
+          sed -i \
+            -e s,^TELEGRAM_BOT_TOKEN=.*,TELEGRAM_BOT_TOKEN=$TELEGRAM_BOT_TOKEN, \
+            -e s,^API_RPS=.*,API_RPS=$API_RPS, \
+            .env.test
+        env:
+          TELEGRAM_BOT_TOKEN: "${{ secrets.TELEGRAM_BOT_TOKEN }}"
+          API_RPS: "100/minute"
+
+      - name: Run Docker container and execute tests
+        env:
+          TEST_REPORT_ROOT: artifacts/tests
+          TEST_REPORT_OUTPUT: md_report.md
+        run: |
+          echo "TEST_REPORT_ROOT=${TEST_REPORT_ROOT}" >> "$GITHUB_ENV";
+          echo "REPORT_FILE=${TEST_REPORT_ROOT}/${TEST_REPORT_OUTPUT}" >> "$GITHUB_ENV";
+          docker-compose --env-file .env.test \
+            run \
+            -v $(pwd)/$(TEST_REPORT_ROOT):/${TEST_REPORT_ROOT} \
+            web pytest . -v \
+              --cov \
+              --cov-report=lcov:/${TEST_REPORT_ROOT}/.coverage \
+              --md-report \
+              --md-report-flavor gfm \
+              --md-report-output /${TEST_REPORT_ROOT}/${TEST_REPORT_OUTPUT}
+              
+      #       --md-report-exclude-outcomes passed skipped xpassed \
+      # Reporting coverage
+      # https://github.com/marketplace/actions/python-coverage-comment
+      - name: Coverage comment
+        uses: py-cov-action/python-coverage-comment-action@v3
+        if: always()
+        with:
+          GITHUB_TOKEN: ${{ github.token }}
+          COVERAGE_FILE: ${{ env.TEST_REPORT_ROOT }}/.coverage
+
+      # Reporting to PR details and Job summary
+      # https://github.com/thombashi/pytest-md-report
+      - name: Render the report to the PR when tests fail
+        uses: marocchino/sticky-pull-request-comment@v2
+        if: failure()
+        with:
+          header: test-report
+          recreate: true
+          path: "test_results.md"
+
+      - name: Output reports to the job summary when tests fail
+        if: failure()
+        shell: bash
+        run: |
+          if [ -f "$REPORT_FILE" ]; then
+            echo "<details><summary>Failed Test Report</summary>" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            cat "$REPORT_FILE" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "</details>" >> $GITHUB_STEP_SUMMARY
+          fi
