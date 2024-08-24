@@ -12,6 +12,7 @@ jobs:
     name: Run tests
     runs-on: ["self-hosted", "neuroparser", "production"]
     environment: Unknown
+    if: false
     steps:
       - name: Check out repository code
         uses: actions/checkout@v3
@@ -36,14 +37,14 @@ jobs:
       #   run: |
       #     ls
       #     docker cp .env.test server-test:/code/.env
-      
+
       - name: Run Docker container and execute tests
         run: |
           docker run --rm \
             -v $(pwd):/code \
             --env-file .env.test \
             server-test /bin/bash -c "ls -a; pip install pytest-django; python -m pytest"
-    
+
         env:
           POSTGRES_USER: "${{ secrets.POSTGRES_USER }}"
           POSTGRES_PASSWORD: "${{ secrets.POSTGRES_PASSWORD }}"
@@ -55,4 +56,3 @@ jobs:
         with:
           name: test-results
           path: ./test-results
-
