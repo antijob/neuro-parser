@@ -31,7 +31,7 @@ def predict_is_incident_llama(incident: IncidentType, article: Article, prompt: 
     normalized_text = normalize_text(article.text)
 
     # Tokenize text
-    tokens = word_tokenize(normalized_text)
+    tokens = word_tokenize(article.any_title + normalized_text)
     cut_text = " ".join(tokens[:500] + tokens[-500:])
 
     attempt = 0
@@ -39,7 +39,7 @@ def predict_is_incident_llama(incident: IncidentType, article: Article, prompt: 
         try:
             model_input = {
                 "prompt": cut_text,
-                "system_prompt": prompt + SYSTEM_LLM_PROMPT_EXTRA,
+                "system_prompt":  SYSTEM_LLM_PROMPT_EXTRA + prompt,
                 "max_new_tokens": max_new_tokens,
                 "top_p": 0.95,
                 "max_tokens": 512,
