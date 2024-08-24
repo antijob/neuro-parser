@@ -15,15 +15,31 @@ WORKDIR /code
 
 # Install system dependencies
 RUN apt-get update && \
-  apt-get install -y --no-install-recommends gcc libxml2-dev python3-lxml libxslt-dev libxslt1-dev python3-dev libjpeg-dev libtiff-dev zlib1g-dev libfreetype6-dev liblcms2-dev libwebp-dev postgresql-server-dev-all && \
-  apt-get clean && rm -rf /var/lib/apt/lists/*
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+      gcc \
+      libxml2-dev \
+      python3-lxml \
+      libxslt-dev \
+      libxslt1-dev \
+      python3-dev \
+      libjpeg-dev \
+      libtiff-dev \
+      zlib1g-dev \
+      libfreetype6-dev \
+      liblcms2-dev \
+      libwebp-dev \
+      postgresql-server-dev-all && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 # Install PDM
-RUN pip install -U pip && pip install pdm && pip install nltk
+RUN pip install -U pip && \
+    pip install pdm && \
+    pip install nltk
 
 # Install NLTK dependencies
-RUN python -m nltk.downloader punkt
-RUN python -m nltk.downloader stopwords
+RUN python -m nltk.downloader punkt && \
+    python -m nltk.downloader stopwords
 
 # Copy dependency management files first to leverage Docker cache
 COPY pyproject.toml pdm.lock /code/
