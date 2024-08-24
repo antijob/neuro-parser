@@ -3,10 +3,11 @@
 name: Web tests
 
 on:
+  pull_request:
+    branches:
+      - main
+      - stage
   workflow_call:
-    secrets:
-      TELEGRAM_BOT_TOKEN:
-        required: true
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -28,7 +29,7 @@ jobs:
             -e s,^API_RPS=.*,API_RPS=$API_RPS, \
             .env.test
         env:
-          TELEGRAM_BOT_TOKEN: "${{ secrets.TELEGRAM_BOT_TOKEN }}"
+          TELEGRAM_BOT_TOKEN: "non-existing-token"
           API_RPS: "100/minute"
 
       - name: Run Docker container and execute tests
@@ -66,7 +67,7 @@ jobs:
         with:
           header: test-report
           recreate: true
-          path: "test_results.md"
+          path: ${{ env.REPORT_FILE }}
 
       - name: Output reports to the job summary when tests fail
         if: failure()
