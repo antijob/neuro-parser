@@ -22,15 +22,12 @@ logger = logging.getLogger(__name__)
 
 
 class IncidentPredictor:
-    current_incident_type: IncidentType
     tokenizer: any
     model: any
     is_llm_setup: bool
 
     def setup_incident_type(self, incident_type: IncidentType):
         try:
-            self.current_incident_type = incident_type
-
             self.is_llm_setup = False
             if incident_type.model_path:
                 model_directory = MODELS_DIR.joinpath(incident_type.model_path)
@@ -53,22 +50,23 @@ class IncidentPredictor:
 
     # Как-то надо в этом месте отмечать, что article -- mutable
 
-    def _is_incident(self, article: Article = None) -> bool:
+    def _is_incident(self, article: Article, incident_type: IncidentType) -> bool:
         try:
+            logger.debug(incident_type)
             if self.is_llm_setup:
                 return llama.predict_is_incident_llama(
-                    self.current_incident_type,
+                    incident_type,
                     article,
                     REPLICATE_MODEL_NAME
                 )
             else:
-                return bert.predict_is_incident_bert(self.current_incident_type, article, self.model, self.tokenizer)
+                return bert.predict_is_incident_bert(incident_type, article, self.model, self.tokenizer)
         except Exception as e:
             logger.error("Error in _is_incident: %s: %s",
                          e.__class__.__name__, e.args)
             return False
 
-    def _create_incident(self, article: Article) -> MediaIncident:
+    def _create_incident(self, article: Article, incident_type: IncidentType) -> MediaIncident:
         try:
             media_incident = MediaIncident.objects.create(
                 urls=[article.url],
@@ -79,7 +77,7 @@ class IncidentPredictor:
                 description=article.text,
                 related_article=article,
                 public_description=article.text,
-                incident_type=self.current_incident_type,
+                incident_type=incident_type,
                 region=article.region,
                 country=article.country,
             )
@@ -102,8 +100,8 @@ class IncidentPredictor:
 
                 self.setup_incident_type(incident_type)
                 for article in batch:
-                    if self._is_incident(article):
-                        self._create_incident(article)
+                    if self._is_incident(article, incident_type):
+                        self._create_incident(article, incident_type)
                         incidents_count += 1
             return incidents_count
         except Exception as e:

@@ -23,15 +23,15 @@ SYSTEM_LLM_PROMPT_EXTRA = 'Ты - модель, которая отвечает 
 # TODO: convert to async
 
 
-def predict_is_incident_llama(incident: IncidentType, article: Article,  model: str, max_new_tokens=512, retries=3) -> bool:
-    if not incident.llm_prompt or not article.text:
+def predict_is_incident_llama(incident_type: IncidentType, article: Article,  model: str, max_new_tokens=512, retries=3) -> bool:
+    if not incident_type.llm_prompt or not article.text:
         return False
 
     # Normalize text
     normalized_text = normalize_text(article.text)
 
     # Tokenize text
-    tokens = word_tokenize(article.any_title + normalized_text)
+    tokens = word_tokenize(article.any_title() + normalized_text)
     cut_text = " ".join(tokens[:500] + tokens[-500:])
 
     attempt = 0
@@ -39,7 +39,7 @@ def predict_is_incident_llama(incident: IncidentType, article: Article,  model: 
         try:
             model_input = {
                 "prompt": cut_text,
-                "system_prompt":  SYSTEM_LLM_PROMPT_EXTRA + incident.llm_prompt,
+                "system_prompt":  SYSTEM_LLM_PROMPT_EXTRA + incident_type.llm_prompt,
                 "max_new_tokens": max_new_tokens,
                 "top_p": 0.95,
                 "max_tokens": 512,
@@ -56,7 +56,7 @@ def predict_is_incident_llama(incident: IncidentType, article: Article,  model: 
                 input=model_input
             ):
                 # save rate
-                article.rate[incident.current_incident_type.description] = 'LLM_RESP: ' + event.data
+                article.rate[incident_type.description] = 'LLM_RESP: ' + event.data
                 article.save()
 
                 return bool(re.search(r'\+', event.data))

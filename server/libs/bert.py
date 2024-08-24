@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 # TODO: convert to async
 
 
-def predict_is_incident_bert(incident: IncidentType,  article: Article, model, tokenizer) -> bool:
+def predict_is_incident_bert(incident_type: IncidentType,  article: Article, model, tokenizer) -> bool:
 
     # Normalize text
     normalized_text = normalize_text(article.text)
@@ -48,10 +48,10 @@ def predict_is_incident_bert(incident: IncidentType,  article: Article, model, t
         probabilities = torch.nn.functional.softmax(logits, dim=0).tolist()
 
         # save rate
-        article.rate[incident.current_incident_type.description] = probabilities
+        article.rate[incident_type.description] = probabilities
         article.save()
 
-        return probabilities[0] - probabilities[1] > incident.current_incident_type.treshold
+        return probabilities[0] - probabilities[1] > incident_type.treshold
     except Exception as e:
         logger.error(f"Error in predict_is_incident_bert: {e}")
         return False  # Default value if an error occurs
