@@ -58,6 +58,14 @@ version = "0.1.0"
 description = ""
 readme = "README.md"
 
+[tool.pdm.dev-dependencies]
+lint = [
+    "flake8",
+    "black"
+]
+test = ["pytest", "pytest-cov", "pytest-django", "pytest-md-report"]
+doc = ["mkdocs"]
+
 [build-system]
 requires = ["pdm-backend"]
 build-backend = "pdm.backend"

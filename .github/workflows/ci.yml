@@ -115,12 +115,9 @@ jobs:
 
   test:
     name: Run tests
-    runs-on: ["self-hosted", "neuroparser", "production"]
     if: ${{ always() }}
-    steps:
-      - name: Here we run tests
-        run: |
-          echo "Running tests..."
+    uses: "./.github/workflows/tests.web.yml"
+    secrets: inherit
 
   start_staging:
     name: Start staging
@@ -128,7 +125,7 @@ jobs:
       - test
       - build
     runs-on: ["self-hosted", "neuroparser", "staging"]
-    if: github.ref == 'refs/heads/stage'
+    if: success() && github.ref == 'refs/heads/stage'
     environment: Staging
     steps:
       - name: Check out repository code
@@ -185,13 +182,14 @@ jobs:
       - name: logout from docker registry
         if: ${{ always() }}
         run: docker logout
+
   start_prod:
     name: Start prod
     needs:
       - test
       - build
     runs-on: ["self-hosted", "neuroparser", "production"]
-    if: github.ref == 'refs/heads/main'
+    if: success() && github.ref == 'refs/heads/main'
     environment: Prod
     steps:
       - name: Check out repository code
