@@ -34,7 +34,8 @@ class IncidentPredictor:
 
                 if not model_directory.exists() or not model_directory.is_dir():
                     raise FileNotFoundError(
-                        f"Model directory {model_directory} does not exist or is not a directory.")
+                        f"Model directory {model_directory} does not exist or is not a directory."
+                    )
 
                 self.tokenizer = AutoTokenizer.from_pretrained(
                     model_directory, use_fast=False
@@ -55,18 +56,19 @@ class IncidentPredictor:
             logger.debug(incident_type)
             if self.is_llm_setup:
                 return llama.predict_is_incident_llama(
-                    incident_type,
-                    article,
-                    REPLICATE_MODEL_NAME
+                    incident_type, article, REPLICATE_MODEL_NAME
                 )
             else:
-                return bert.predict_is_incident_bert(incident_type, article, self.model, self.tokenizer)
+                return bert.predict_is_incident_bert(
+                    incident_type, article, self.model, self.tokenizer
+                )
         except Exception as e:
-            logger.error("Error in _is_incident: %s: %s",
-                         e.__class__.__name__, e.args)
+            logger.error("Error in _is_incident: %s: %s", e.__class__.__name__, e.args)
             return False
 
-    def _create_incident(self, article: Article, incident_type: IncidentType) -> MediaIncident:
+    def _create_incident(
+        self, article: Article, incident_type: IncidentType
+    ) -> MediaIncident:
         try:
             media_incident = MediaIncident.objects.create(
                 urls=[article.url],
@@ -81,11 +83,6 @@ class IncidentPredictor:
                 region=article.region,
                 country=article.country,
             )
-            try:
-                asyncio.run(mediaincident_post(media_incident))
-            except Exception as e:
-                logger.error(
-                    f"Error in _create_incident - mediaincident_post: {e}")
             return media_incident
         except Exception as e:
             logger.error(f"Error in _create_incident: {e}")
@@ -103,7 +100,8 @@ class IncidentPredictor:
                 for article in batch:
                     if self._is_incident(article, incident_type):
                         result_incidents.append(
-                            self._create_incident(article, incident_type))
+                            self._create_incident(article, incident_type)
+                        )
                         incidents_count += 1
             return result_incidents
         except Exception as e:
