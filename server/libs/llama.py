@@ -3,9 +3,6 @@ import time
 import logging
 import re
 
-from nltk.tokenize import word_tokenize
-from server.libs.morphy import normalize_text
-
 from server.apps.core.models import IncidentType, Article
 
 # Configure logging
@@ -27,12 +24,11 @@ def predict_is_incident_llama(incident_type: IncidentType, article: Article,  mo
     if not incident_type.llm_prompt or not article.text:
         return False
 
-    # Normalize text
-    normalized_text = normalize_text(article.text)
+    title = article.any_title()
+    full_text = title + article.text
 
-    # Tokenize text
-    tokens = word_tokenize(article.any_title() + normalized_text)
-    cut_text = " ".join(tokens[:500] + tokens[-500:])
+    # Обрезаем текст, оставляя 500 символов до и 500 после
+    cut_text = full_text[:500] + full_text[-500:]
 
     attempt = 0
     while attempt < retries:
