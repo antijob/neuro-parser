@@ -6,11 +6,11 @@ class IncidentTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = IncidentType
         fields = [
-            'id', 
-            'description', 
-            'treshold', 
-            'chat_gpt_prompt', 
-            'is_active', 
+            'id',
+            'description',
+            'treshold',
+            'llm_prompt',
+            'is_active',
             'should_sent_to_bot',
         ]
 
@@ -55,10 +55,12 @@ class MediaIncidentSerializer(serializers.ModelSerializer):
             'public_description'
         ]
 
+
 class ArticleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Article
         fields = '__all__'
+
 
 class SourceSerializer(serializers.ModelSerializer):
     class Meta:
