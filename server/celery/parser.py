@@ -1,15 +1,17 @@
+import asyncio
 import logging
-
-from .celery_app import app
-from server.apps.core.models import Article
-from server.core.article_index.query_checker import mark_duplicates
-from server.settings.components.celery import INCIDENT_BATCH_SIZE
-
 from datetime import datetime, timedelta
 from itertools import islice
+
 from celery import group
 
+from server.apps.bot.services.inc_post import mediaincident_post
+from server.apps.core.models import Article, MediaIncident
+from server.core.article_index.query_checker import mark_duplicates
 from server.core.incident_predictor import IncidentPredictor
+from server.settings.components.celery import INCIDENT_BATCH_SIZE
+
+from .celery_app import app
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -62,7 +64,17 @@ def plan_incidents(status):
         tasks.append(create_incidents.s([art.url for art in batch]))
     task_group = group(tasks)
     task_group.apply_async()
-    return f"Group of create_incidents tasks submitted"
+    return "Group of create_incidents tasks submitted"
+
+
+@app.task(queue="parser")
+def send_incident_notification(media_incident: MediaIncident):
+    try:
+        asyncio.run(mediaincident_post(media_incident))
+        return f"Notification sent for incident: {media_incident}"
+    except Exception as e:
+        logger.error(f"Error in send_incident_notification: {e}")
+        return f"Notification failed due to an error: {e}"
 
 
 @app.task(queue="parser")
@@ -77,6 +89,9 @@ def create_incidents(batch):
         for art in articles_batch:
             art.is_parsed = True
             art.save()
+
+        for incindent in incidents_created:
+            send_incident_notification.delay(incindent)
 
         return f"Batch finished. Incidents created: {incidents_count}"
     except Exception as e:
