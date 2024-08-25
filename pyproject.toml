@@ -50,6 +50,8 @@ dependencies = [
     "numpy<2",
     "replicate>=0.31.0",
     "sumy>=0.11.0",
+    "drf-yasg>=1.21.7",
+    "pytest-django>=4.8.0",
 ]
 name = "neuro-parser"
 version = "0.1.0"
