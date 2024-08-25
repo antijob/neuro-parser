@@ -17,22 +17,18 @@ class Command(BaseCommand):
             logger.info(f"Starting processing {len(all_channels)} channels.")
             for channel in all_channels:
                 result = self.process_channel(channel)
-                logger.info(
-                    f"Processed channel {channel.id}: Created {result[0]} ChannelIncidentType(s) and {result[1]} ChannelCountry(ies)."
-                )
+            logger.info(
+                f"Processed channel {channel.id}: Created {result[0]} ChannelIncidentType(s) and {result[1]} ChannelCountry(ies)."
+            )
 
         logger.info("All statuses created or updated successfully")
 
     def process_channel(self, channel):
         cit_created = 0
         cc_created = 0
-        logger.info(f"Processing channel {channel.id}.")
 
         # Process IncidentTypes
         for incident_type in IncidentType.objects.all():
-            logger.debug(
-                f"Processing incident type {incident_type.id} for channel {channel.id}."
-            )
             channel_incident_type, created = ChannelIncidentType.objects.get_or_create(
                 channel=channel, incident_type=incident_type, defaults={"status": True}
             )
@@ -40,10 +36,6 @@ class Command(BaseCommand):
                 cit_created += 1
                 logger.info(
                     f"Created ChannelIncidentType {channel_incident_type.id} for channel {channel.id} and incident type {incident_type.id}."
-                )
-            else:
-                logger.debug(
-                    f"ChannelIncidentType already exists for channel {channel.id} and incident type {incident_type.id}."
                 )
 
             # Process Countries for each ChannelIncidentType
@@ -63,10 +55,6 @@ class Command(BaseCommand):
                     cc_created += 1
                     logger.info(
                         f"Created ChannelCountry {channel_country.id} for ChannelIncidentType {channel_incident_type.id} and country {country.id}."
-                    )
-                else:
-                    logger.debug(
-                        f"ChannelCountry already exists for ChannelIncidentType {channel_incident_type.id} and country {country.id}."
                     )
 
         return (cit_created, cc_created)
