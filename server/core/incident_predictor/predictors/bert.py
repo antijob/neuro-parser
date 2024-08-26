@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 # TODO: convert to async
 
-from base_predictor import PredictorBase
+from .base_predictor import PredictorBase
 
 from transformers import AutoTokenizer, BertForSequenceClassification
 from server.settings.components.common import MODELS_DIR

@@ -4,11 +4,11 @@ from typing import Optional
 import datetime
 
 from server.apps.core.models import IncidentType, Article, MediaIncident
-from libs.handler import HandlerRegistry
+from server.libs.handler import HandlerRegistry
 
-from predictors.base_predictor import PredictorBase
-from predictors.bert import BertPredictor
-from predictors.llama import LlamaPredictor
+from .predictors.base_predictor import PredictorBase
+from .predictors.bert import BertPredictor
+from .predictors.llama import LlamaPredictor
 
 
 # Configure logging

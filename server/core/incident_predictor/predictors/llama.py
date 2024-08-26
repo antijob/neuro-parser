@@ -6,7 +6,7 @@ import re
 
 from server.apps.core.models import IncidentType, Article
 
-from base_predictor import PredictorBase
+from .base_predictor import PredictorBase
 from server.settings.components.common import REPLICATE_MODEL_NAME
 
 

@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Any
 
 from server.apps.core.models import IncidentType, Article
-from libs.handler import Handler
+from server.libs.handler import Handler
 
 
 class PredictorBase(Handler):
