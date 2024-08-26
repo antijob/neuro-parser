@@ -13,7 +13,7 @@ from server.core.article_parser import ArticleParser
 from base_client import BaseClient
 
 
-class NPClient(BaseClient):
+class HttpClient(BaseClient):
     def __init__(self):
         pass
 
