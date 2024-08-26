@@ -117,8 +117,7 @@ def create_incidents(batch):
             f"Retrieved {len(articles_batch)} articles out of {len(batch)} urls"
         )
 
-        predictor = IncidentPredictor()
-        incidents_created = predictor.predict_batch(articles_batch)
+        incidents_created = IncidentPredictor.predict_batch(articles_batch)
         incidents_count = len(incidents_created)
 
         logger.info(f"Predicted {incidents_count} incidents")
