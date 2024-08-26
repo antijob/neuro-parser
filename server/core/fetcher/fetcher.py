@@ -5,10 +5,10 @@ import logging
 from typing import Coroutine, Iterable
 from server.apps.core.models import Article, Source
 
-from .client import NPClient
-from .libs.exceptions import BadCodeException, ClientError
 
+from .libs.exceptions import BadCodeException, ClientError
 from .tasks import fetch_source_articles
+from .clients import ClientFactory
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -24,7 +24,7 @@ class Fetcher:
         article: Article, source: Optional[Source] = None
     ) -> Optional[Article]:
         try:
-            async with NPClient() as client:
+            async with ClientFactory.get_client(source, article) as client:
                 return await client.get_article(article, source)
         except ClientError as e:
             logger.error(
@@ -43,7 +43,7 @@ class Fetcher:
     @staticmethod
     async def download_source(source: Source) -> Optional[str]:
         try:
-            async with NPClient() as client:
+            async with ClientFactory.get_client(source) as client:
                 return await client.get_source(source)
         except ClientError as e:
             logger.error(

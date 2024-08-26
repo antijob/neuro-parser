@@ -10,8 +10,10 @@ from server.core.fetcher.libs.url_preparer import URLPreparer
 from server.apps.core.models import Article, Source
 from server.core.article_parser import ArticleParser
 
+from base_client import BaseClient
 
-class NPClient:
+
+class NPClient(BaseClient):
     def __init__(self):
         pass
 
