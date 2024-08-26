@@ -4,7 +4,7 @@ from typing import Optional
 import datetime
 
 from server.apps.core.models import IncidentType, Article, MediaIncident
-from server.settings.components.common import MODELS_DIR, REPLICATE_MODEL_NAME
+from libs.handler import HandlerRegistry
 
 from predictors.base_predictor import PredictorBase
 from predictors.bert import BertPredictor
@@ -23,21 +23,15 @@ logger = logging.getLogger(__name__)
 
 
 class IncidentPredictor:
-    @staticmethod
-    def make_predictor(incident_type: IncidentType) -> Optional[PredictorBase]:
+    registry = HandlerRegistry[PredictorBase]()
+    registry.register(BertPredictor)
+    registry.register(LlamaPredictor)
+
+    @classmethod
+    def make_predictor(cls, incident_type: IncidentType) -> Optional[PredictorBase]:
         try:
-            if incident_type.model_path:
-                model_directory = MODELS_DIR.joinpath(incident_type.model_path)
-
-                if not model_directory.exists() or not model_directory.is_dir():
-                    raise FileNotFoundError(
-                        f"Model directory {model_directory} does not exist or is not a directory."
-                    )
-                return BertPredictor(incident_type, model_directory)
-            elif incident_type.llm_prompt:
-                return LlamaPredictor(incident_type, REPLICATE_MODEL_NAME)
-
-            return None
+            predictor = cls.registry.choose(incident_type)
+            return predictor(incident_type)
         except Exception as e:
             logger.error(f"Error in setup_incident_type: {e}", exc_info=True)
 

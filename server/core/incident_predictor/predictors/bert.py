@@ -21,15 +21,27 @@ logger = logging.getLogger(__name__)
 from base_predictor import PredictorBase
 
 from transformers import AutoTokenizer, BertForSequenceClassification
+from server.settings.components.common import MODELS_DIR
 
 
 class BertPredictor(PredictorBase):
-    def __init__(self, incident_type: IncidentType, model_directory):
+    def __init__(self, incident_type: IncidentType):
+        model_directory = MODELS_DIR.joinpath(incident_type.model_path)
         self.tokenizer = AutoTokenizer.from_pretrained(model_directory, use_fast=False)
         self.model = BertForSequenceClassification.from_pretrained(model_directory)
         self.model.eval()
 
         self.incident_type = incident_type
+
+    def can_handle(incident_type: IncidentType):
+        if incident_type.model_path:
+            model_directory = MODELS_DIR.joinpath(incident_type.model_path)
+
+            if not model_directory.exists() or not model_directory.is_dir():
+                raise FileNotFoundError(
+                    f"Model directory {model_directory} does not exist or is not a directory."
+                )
+            return True
 
     def is_incident(self, article: Article) -> tuple[bool, Any]:
         normalized_text = normalize_text(article.text)

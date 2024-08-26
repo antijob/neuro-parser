@@ -7,6 +7,7 @@ import re
 from server.apps.core.models import IncidentType, Article
 
 from base_predictor import PredictorBase
+from server.settings.components.common import REPLICATE_MODEL_NAME
 
 
 # Configure logging
@@ -28,7 +29,7 @@ class LlamaPredictor(PredictorBase):
     def __init__(
         self,
         incident_type: IncidentType,
-        model: str,
+        model: str = REPLICATE_MODEL_NAME,
         max_new_tokens: int = 512,
         retries: int = 3,
     ):
@@ -36,6 +37,9 @@ class LlamaPredictor(PredictorBase):
         self.model = model
         self.max_new_tokens = max_new_tokens
         self.retries = retries
+
+    def can_handle(self, incident_type: IncidentType) -> bool:
+        return incident_type.llm_prompt is not None
 
     def is_incident(self, article: Article) -> tuple[bool, Any]:
         if not self.incident_type.llm_prompt or not article.text:
