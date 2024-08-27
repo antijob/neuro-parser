@@ -29,3 +29,9 @@ REST_FRAMEWORK = {
     },
     "EXCEPTION_HANDLER": "server.apps.api.exception_handler.custom_exception_handler",
 }
+
+SWAGGER_SETTINGS = {
+    "SECURITY_DEFINITIONS": {
+        "Bearer": {"type": "apiKey", "name": "Authorization", "in": "header"}
+    }
+}
