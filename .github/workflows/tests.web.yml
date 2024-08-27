@@ -47,10 +47,13 @@ jobs:
       - name: Execute tests in Docker
         env:
           TEST_REPORT_ROOT: /tmp/artifacts/tests
-          TEST_REPORT_OUTPUT: md_report.md
+          TEST_REPORT_OUTPUT: md_report.${{ github.run_id }}.md
+          TEST_COVERAGE_OUTPUT: ${{ github.run_id }}.coverage
         run: |
           echo "TEST_REPORT_ROOT=${TEST_REPORT_ROOT}" >> "$GITHUB_ENV";
           echo "TEST_REPORT_FILE=${TEST_REPORT_ROOT}/${TEST_REPORT_OUTPUT}" >> "$GITHUB_ENV";
+          echo "TEST_COVERAGE_FILE=${TEST_REPORT_ROOT}/${TEST_COVERAGE_OUTPUT}" >> "$GITHUB_ENV";
+          rm -rf ${TEST_REPORT_ROOT};
           mkdir -p ${TEST_REPORT_ROOT};
           docker run \
               --rm \
@@ -64,7 +67,7 @@ jobs:
               -p no:cacheprovider \
               -v \
               --cov \
-              --cov-report=lcov:/${TEST_REPORT_ROOT}/.coverage \
+              --cov-report=lcov:/${TEST_REPORT_ROOT}/${TEST_COVERAGE_OUTPUT} \
               --md-report \
               --md-report-flavor gfm \
               --md-report-output /${TEST_REPORT_ROOT}/${TEST_REPORT_OUTPUT}
@@ -77,7 +80,7 @@ jobs:
         with:
           title: "coverage-report"
           delete-old-comments: true
-          lcov-file: ${{ env.TEST_REPORT_ROOT }}/.coverage
+          lcov-file: ${{ env.TEST_COVERAGE_FILE }}
 
       # Reporting to PR details and Job summary
       # https://github.com/thombashi/pytest-md-report
