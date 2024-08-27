@@ -3,7 +3,7 @@
 # Use a base image with Python
 FROM python:3.9-slim
 
-# Setup environments
+# Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 ENV TRANSFORMERS_CACHE=/tmp
@@ -41,8 +41,11 @@ RUN pip install -U pip && \
 RUN python -m nltk.downloader punkt && \
     python -m nltk.downloader stopwords
 
+
 # Copy dependency management files first to leverage Docker cache
-COPY pyproject.toml pdm.lock /code/
+COPY pyproject.toml pdm.lock entrypoint.sh /code/
+
+RUN chmod +x entrypoint.sh
 
 # Which groups to install in to the container. If none, will not install additional groups.
 # Pass as docker-compose build --build-arg PDM_DEPENDENCY_GROUPS="groupA groupB" or 
@@ -57,3 +60,6 @@ RUN export PDM_GROUP_FLAGS=${PDM_DEPENDENCY_GROUPS:+$(echo "$PDM_DEPENDENCY_GROU
 # Install dependencies and caching
 RUN --mount=type=cache,target=/root/.cache \
   pip install -r requirements.txt
+
+# Add the rest of the code
+ADD . /code/
