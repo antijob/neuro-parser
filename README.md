@@ -108,3 +108,25 @@ For external api using [replicate.com](https://replicate.com/) as a cheap altern
 
 ## API для внешних моделей
 Для обращения используется сервис [replicate.com](https://replicate.com/) он сильно дешевле chatGPT.
+
+# API
+
+## Authorization
+
+The API uses token-based authentication. To access the endpoints, you need to include the token in the `Authorization` header of your requests. The token should be prefixed with the word `token`, followed by a space and the token itself:
+
+```Authorization: token <your_token_here>```
+
+
+## Swagger Documentation
+
+You can access the interactive API documentation through Swagger UI, available at:
+
+```/swagger-ui```
+
+Swagger provides an interface to explore the API endpoints, view request and response details, and test your API calls directly. Ensure you include your token in the `Authorization` header when using Swagger for testing.
+
+
+## Throttling
+
+To prevent abuse and ensure fair usage, throttling is applied to the API endpoints. This limits the number of requests that can be made to the API within a specific timeframe.
