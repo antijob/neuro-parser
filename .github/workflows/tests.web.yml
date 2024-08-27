@@ -55,9 +55,9 @@ jobs:
           docker run \
               --rm \
               --env-file .env.test \
-              -e COVERAGE_FILE=${TEST_REPORT_ROOT}/coverage.db
+              -e COVERAGE_FILE=${TEST_REPORT_ROOT}/coverage.db \
               -u $UID \
-              --network $(docker network ls --format '{{ .Name }}' | grep -m1 djangonetwork)
+              --network $(docker network ls --format '{{ .Name }}' | grep -m1 djangonetwork) \
               -v ${TEST_REPORT_ROOT}:/${TEST_REPORT_ROOT} \
               antijob/neuro-parser-test:${NEURO_PARSER_VERSION} \
               pytest . \
