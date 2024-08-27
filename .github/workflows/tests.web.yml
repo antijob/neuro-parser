@@ -26,6 +26,8 @@ jobs:
         id: build
         run: |
           docker compose -f docker-compose.prod.yaml build web
+        env:
+          MODELS_ROOT: ./models
 
       - name: Prepare .env.test
         run: |
