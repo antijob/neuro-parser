@@ -25,9 +25,9 @@ jobs:
       - name: Build python
         id: build
         run: |
-          docker compose -f docker-compose.prod.yaml build web
+          docker -f ${DOCKER_FILE} -t antijob/neuro-parser-test:${NEURO_PARSER_VERSION} .
         env:
-          MODELS_ROOT: ./models
+          DOCKER_FILE: docker/web/Dockerfile
 
       - name: Prepare .env.test
         run: |
@@ -53,7 +53,7 @@ jobs:
               --env-file .env.test \
               -u $UID \
               -v ${TEST_REPORT_ROOT}:/${TEST_REPORT_ROOT} \
-              antijob/neuro-parser:${NEURO_PARSER_VERSION} \
+              antijob/neuro-parser-test:${NEURO_PARSER_VERSION} \
               pytest . \
               -v \
               --cov \
