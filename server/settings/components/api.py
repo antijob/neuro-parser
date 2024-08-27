@@ -9,7 +9,6 @@ from decouple import config as c
 
 c.path = "../../../.env"
 
-API_TOKEN = c("API_TOKEN", default=None)
 API_RPS = c("API_RPS", default="100/minute")
 
 REST_FRAMEWORK = {
