@@ -8,7 +8,8 @@ import re
 
 from server.apps.core.models import Article, Source
 
-from base_client import BaseClient
+from base_client import ClientBase
+from .base_client import ClientBase
 from server.settings.components.telethon import (
     TELEGRAM_API_HASH,
     TELEGRAM_API_ID,
@@ -16,7 +17,7 @@ from server.settings.components.telethon import (
 )
 
 
-class TelethonClient(BaseClient):
+class TelethonClient(ClientBase):
     def __init__(self):
         # Fetch environment variables for the Telegram API
         # self.phone_number = TELEGRAM_PHONE_NUMBER
