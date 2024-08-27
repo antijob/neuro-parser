@@ -55,8 +55,9 @@ jobs:
           docker run \
               --rm \
               --env-file .env.test \
+              -e COVERAGE_FILE=${TEST_REPORT_ROOT}/coverage.db
               -u $UID \
-              --network djangonetwork
+              --network $(docker network ls --format '{{ .Name }}' | grep -m1 djangonetwork)
               -v ${TEST_REPORT_ROOT}:/${TEST_REPORT_ROOT} \
               antijob/neuro-parser-test:${NEURO_PARSER_VERSION} \
               pytest . \
@@ -67,9 +68,6 @@ jobs:
               --md-report \
               --md-report-flavor gfm \
               --md-report-output /${TEST_REPORT_ROOT}/${TEST_REPORT_OUTPUT}
-          
-          # Because python-coverage-comment-action cannot handle any other paths. Amazing.
-          cp ${TEST_REPORT_ROOT}/.coverage .coverage
 
       # Reporting coverage
       # https://github.com/romeovs/lcov-reporter-action
