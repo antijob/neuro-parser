@@ -10,13 +10,13 @@ from server.core.fetcher.libs.url_preparer import URLPreparer
 from server.apps.core.models import Article, Source
 from server.core.article_parser import ArticleParser
 
+from .base_client import ClientBase
 
 <<<<<<<< HEAD:server/core/fetcher/client.py
 class NPClient:
 ========
 
-class HttpClient(BaseClient):
->>>>>>>> 8d68f2c (Add Telethon client; Rename NPClient to HttpClient):server/core/fetcher/http_client.py
+class HttpClient(ClientBase):
     def __init__(self):
         pass
 
