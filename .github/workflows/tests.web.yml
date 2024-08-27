@@ -25,7 +25,7 @@ jobs:
       - name: Build python
         id: build
         run: |
-          docker -f ${DOCKER_FILE} -t antijob/neuro-parser-test:${NEURO_PARSER_VERSION} .
+          docker build -f ${DOCKER_FILE} -t antijob/neuro-parser-test:${NEURO_PARSER_VERSION} .
         env:
           DOCKER_FILE: docker/web/Dockerfile
 
