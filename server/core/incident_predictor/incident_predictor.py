@@ -1,10 +1,8 @@
 import logging
 import datetime
-import asyncio
 
 from server.libs import llama, bert
 from server.apps.core.models import IncidentType, Article, MediaIncident
-from server.apps.bot.services.inc_post import mediaincident_post
 
 from transformers import AutoTokenizer, BertForSequenceClassification
 
