@@ -70,6 +70,7 @@ jobs:
             -e s,^FLOWER_HOST=.*,FLOWER_HOST=$FLOWER_HOST, \
             -e s,^HOST=.*,HOST=$HOST, \
             -e s,^ACME_EMAIL=.*,ACME_EMAIL=$ACME_EMAIL, \
+            -e s,^MODELS_ROOT=.*,MODELS_ROOT=$MODELS_ROOT, \
             .env
         env:
           POSTGRES_USER: "${{ secrets.POSTGRES_USER }}"
@@ -87,6 +88,7 @@ jobs:
           FLOWER_HOST: "${{ vars.FLOWER_HOST }}"
           HOST: "${{ vars.HOST }}"
           ACME_EMAIL: "${{ secrets.ACME_EMAIL }}"
+          MODELS_ROOT: /root/models
 
       - name: Build python
         id: build
@@ -153,6 +155,7 @@ jobs:
             -e s,^FLOWER_HOST=.*,FLOWER_HOST=$FLOWER_HOST, \
             -e s,^HOST=.*,HOST=$HOST, \
             -e s,^ACME_EMAIL=.*,ACME_EMAIL=$ACME_EMAIL, \
+            -e s,^MODELS_ROOT=.*,MODELS_ROOT=$MODELS_ROOT, \
             .env
           branch=$(echo "${GITHUB_REF#refs/heads/}" | tr '/' '-')
           echo "Branch name with / substituted for - : $branch"
@@ -173,6 +176,7 @@ jobs:
           FLOWER_HOST: "${{ vars.FLOWER_HOST }}"
           HOST: "${{ vars.HOST_STAGE }}"
           ACME_EMAIL: "${{ secrets.ACME_EMAIL }}"
+          MODELS_ROOT: /root/models
 
       - name: Start the app
         run: |
@@ -217,6 +221,7 @@ jobs:
             -e s,^FLOWER_HOST=.*,FLOWER_HOST=$FLOWER_HOST, \
             -e s,^HOST=.*,HOST=$HOST, \
             -e s,^ACME_EMAIL=.*,ACME_EMAIL=$ACME_EMAIL, \
+            -e s,^MODELS_ROOT=.*,MODELS_ROOT=$MODELS_ROOT, \
             .env
           branch=$(echo "${GITHUB_REF#refs/heads/}" | tr '/' '-')
           echo "Branch name with / substituted for - : $branch"
@@ -237,6 +242,7 @@ jobs:
           FLOWER_HOST: "${{ vars.FLOWER_HOST }}"
           HOST: "${{ vars.HOST }}"
           ACME_EMAIL: "${{ secrets.ACME_EMAIL }}"
+          MODELS_ROOT: /root/models
 
       - name: Start the app
         run: |
