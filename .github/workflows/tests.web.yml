@@ -18,15 +18,14 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v3
       
+      - name: Prepare branch name
+        run: |
+          echo "NEURO_PARSER_VERSION=$(echo ${GITHUB_REF#refs/heads/} | tr '/' '-')" >> "$GITHUB_ENV";
+
       - name: Build python
         id: build
         run: |
-          branch=$(echo "${GITHUB_REF#refs/heads/}" | tr '/' '-')
-          echo "Branch name with / substituted for - : $branch"
-          # use dummy .env.template so build is happy
-          cp .env.template .env
-          NEURO_PARSER_VERSION=${branch} \
-            docker compose -f docker-compose.yaml build web
+          docker compose -f docker-compose.prod.yaml build web
 
       - name: Prepare .env.test
         run: |
@@ -41,17 +40,20 @@ jobs:
 
       - name: Execute tests in Docker
         env:
-          TEST_REPORT_ROOT: artifacts/tests
+          TEST_REPORT_ROOT: /tmp/artifacts/tests
           TEST_REPORT_OUTPUT: md_report.md
         run: |
           echo "TEST_REPORT_ROOT=${TEST_REPORT_ROOT}" >> "$GITHUB_ENV";
           echo "TEST_REPORT_FILE=${TEST_REPORT_ROOT}/${TEST_REPORT_OUTPUT}" >> "$GITHUB_ENV";
           mkdir -p ${TEST_REPORT_ROOT};
-          docker compose --env-file .env.test \
-            run \
-            -u $UID \
-            -v $(pwd)/${TEST_REPORT_ROOT}:/${TEST_REPORT_ROOT} \
-            web pytest . -v \
+          docker run \
+              --rm \
+              --env-file .env.test \
+              -u $UID \
+              -v ${TEST_REPORT_ROOT}:/${TEST_REPORT_ROOT} \
+              antijob/neuro-parser:${NEURO_PARSER_VERSION} \
+              pytest . \
+              -v \
               --cov \
               --cov-report=lcov:/${TEST_REPORT_ROOT}/.coverage \
               --md-report \
