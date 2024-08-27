@@ -43,9 +43,7 @@ RUN python -m nltk.downloader punkt && \
 
 
 # Copy dependency management files first to leverage Docker cache
-COPY pyproject.toml pdm.lock entrypoint.sh /code/
-
-RUN chmod +x entrypoint.sh
+COPY pyproject.toml pdm.lock /code/
 
 # Which groups to install in to the container. If none, will not install additional groups.
 # Pass as docker-compose build --build-arg PDM_DEPENDENCY_GROUPS="groupA groupB" or 
