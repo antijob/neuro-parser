@@ -37,7 +37,6 @@ services:
       context: .
       dockerfile: ./docker/web/Dockerfile
     volumes:
-      - ${MODELS_ROOT}:/code/models
       - .:/code
     expose:
       - 8000
@@ -66,7 +65,6 @@ services:
       dockerfile: ./docker/web/Dockerfile
     command: /bin/bash -c "./docker/celery/entrypoint.sh"
     volumes:
-      - ${MODELS_ROOT}:/code/models
       - .:/code
     environment:
       REPLICATE_API_TOKEN: ${REPLICATE_API_TOKEN}

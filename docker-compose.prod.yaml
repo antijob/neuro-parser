@@ -62,7 +62,7 @@ services:
       file: docker-compose.yaml
       service: celery
     volumes:
-      - ${MODELS_ROOT}:/code/models
+      - /root/models:/code/models
 
   bot:
     extends:
