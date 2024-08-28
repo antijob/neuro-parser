@@ -3,7 +3,6 @@
 name: Web tests
 
 on:
-  pull_request:
   workflow_call:
 
 concurrency:
@@ -22,25 +21,14 @@ jobs:
         run: |
           echo "NEURO_PARSER_VERSION=$(echo ${GITHUB_REF#refs/heads/} | tr '/' '-')" >> "$GITHUB_ENV";
 
-      - name: Build python
-        id: build
+      - name: Prepare .env
         run: |
-          docker build -f ${DOCKER_FILE} -t antijob/neuro-parser-test:${NEURO_PARSER_VERSION} .
-        env:
-          DOCKER_FILE: docker/web/Dockerfile
-
-      - name: Prepare .env.test
-        run: |
-          cp .env.template .env.test
+          cp .env.template .env
           sed -i \
-            -e s,^POSTGRES_USER=.*,POSTGRES_USER=$POSTGRES_USER, \
-            -e s,^POSTGRES_PASSWORD=.*,POSTGRES_PASSWORD=$POSTGRES_PASSWORD, \
             -e s,^TELEGRAM_BOT_TOKEN=.*,TELEGRAM_BOT_TOKEN=$TELEGRAM_BOT_TOKEN, \
             -e s,^API_RPS=.*,API_RPS=$API_RPS, \
             .env.test
         env:
-          POSTGRES_USER: "${{ secrets.POSTGRES_USER }}"
-          POSTGRES_PASSWORD: "${{ secrets.POSTGRES_PASSWORD }}"
           TELEGRAM_BOT_TOKEN: "non-existing-token"
           API_RPS: "100/minute"
 
@@ -55,14 +43,12 @@ jobs:
           echo "TEST_COVERAGE_FILE=${TEST_REPORT_ROOT}/${TEST_COVERAGE_OUTPUT}" >> "$GITHUB_ENV";
           rm -rf ${TEST_REPORT_ROOT};
           mkdir -p ${TEST_REPORT_ROOT};
-          docker run \
+          docker compose run \
               --rm \
-              --env-file .env.test \
               -e COVERAGE_FILE=${TEST_REPORT_ROOT}/coverage.db \
               -u $UID \
-              --network $(docker network ls --format '{{ .Name }}' | grep -m1 djangonetwork) \
               -v ${TEST_REPORT_ROOT}:/${TEST_REPORT_ROOT} \
-              antijob/neuro-parser-test:${NEURO_PARSER_VERSION} \
+              web \
               pytest . \
               -p no:cacheprovider \
               -v \
