@@ -3,7 +3,6 @@
 name: Deploy environment
 
 on:
-  pull_request:
   workflow_call:
     inputs:
       # Environment set to utilize environments and secrets from Github Actions
