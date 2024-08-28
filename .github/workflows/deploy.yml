@@ -38,7 +38,7 @@ jobs:
   deploy:
     name: "Deploy environment"
     runs-on: ["self-hosted", "neuroparser", "${{ inputs.runner }}" ]
-    # environment: ${{ inputs.environment }}
+    environment: ${{ inputs.environment }}
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4 
@@ -98,7 +98,7 @@ jobs:
       - name: Start the app
         run: |
           cd /opt/services/neuro-parser
-          docker compose -f docker-compose.prod.yaml pull || true
+          docker compose -f docker-compose.prod.yaml pull
           docker compose -f docker-compose.prod.yaml up -d
 
       - name: logout from docker registry

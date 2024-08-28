@@ -48,8 +48,7 @@ jobs:
       - test
       - build
     uses: "./.github/workflows/deploy.yml"
-    if: success()
-    # if: success() && github.ref == 'refs/heads/stage'
+    if: success() && github.ref == 'refs/heads/stage'
     secrets: inherit
     with:
       runner: staging
