@@ -13,7 +13,12 @@ concurrency:
 
 jobs:
   build:
-    runs-on: ["self-hosted", "neuroparser", "${{ github.ref == 'refs/heads/main' && 'production' || 'staging' }}"]
+    runs-on:
+      [
+        "self-hosted",
+        "neuroparser",
+        "${{ github.ref == 'refs/heads/main' && 'production' || 'staging' }}",
+      ]
     environment: ${{ github.ref == 'refs/heads/main' && 'Prod' || github.ref == 'refs/heads/stage' && 'Staging' || 'Unknown' }}
     outputs:
       branch_name: ${{ steps.build.outputs.branch_name }}
@@ -41,19 +46,19 @@ jobs:
         run: |
           branch=$(echo "${GITHUB_REF#refs/heads/}" | tr '/' '-')
           echo "Branch name with / substituted for - : $branch"
-          
+
           # "Preparing" the environment by just copying over stub .env file
           cp .env.template .env
 
           NEURO_PARSER_VERSION=${branch} \
             docker compose -f docker-compose.prod.yaml build web
-      
+
       - name: login to docker registry
-        if: ${{ steps.filter.outputs.web == 'true' || inputs.runType == 'Force build' }}
+        if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/stage' }} && ${{ steps.filter.outputs.web == 'true' || inputs.runType == 'Force build' }}
         run: echo "${{ secrets.docker_password }}" | docker login -u ${{ secrets.docker_username }} --password-stdin
 
       - name: push to registry
-        if: ${{ steps.filter.outputs.web == 'true' || inputs.runType == 'Force build' }}
+        if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/stage' }} && ${{ steps.filter.outputs.web == 'true' || inputs.runType == 'Force build' }}
         run: |
           branch=$(echo "${GITHUB_REF#refs/heads/}" | tr '/' '-')
           echo "Branch name with / substituted for - : $branch"
