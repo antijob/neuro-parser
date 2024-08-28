@@ -18,48 +18,59 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v3
       
+      - name: Prepare branch name
+        run: |
+          echo "NEURO_PARSER_VERSION=$(echo ${GITHUB_REF#refs/heads/} | tr '/' '-')" >> "$GITHUB_ENV";
+
       - name: Build python
         id: build
         run: |
-          branch=$(echo "${GITHUB_REF#refs/heads/}" | tr '/' '-')
-          echo "Branch name with / substituted for - : $branch"
-          # use dummy .env.template so build is happy
-          cp .env.template .env
-          NEURO_PARSER_VERSION=${branch} \
-            docker compose -f docker-compose.yaml build web
+          docker build -f ${DOCKER_FILE} -t antijob/neuro-parser-test:${NEURO_PARSER_VERSION} .
+        env:
+          DOCKER_FILE: docker/web/Dockerfile
 
       - name: Prepare .env.test
         run: |
           cp .env.template .env.test
           sed -i \
+            -e s,^POSTGRES_USER=.*,POSTGRES_USER=$POSTGRES_USER, \
+            -e s,^POSTGRES_PASSWORD=.*,POSTGRES_PASSWORD=$POSTGRES_PASSWORD, \
             -e s,^TELEGRAM_BOT_TOKEN=.*,TELEGRAM_BOT_TOKEN=$TELEGRAM_BOT_TOKEN, \
             -e s,^API_RPS=.*,API_RPS=$API_RPS, \
             .env.test
         env:
+          POSTGRES_USER: "${{ secrets.POSTGRES_USER }}"
+          POSTGRES_PASSWORD: "${{ secrets.POSTGRES_PASSWORD }}"
           TELEGRAM_BOT_TOKEN: "non-existing-token"
           API_RPS: "100/minute"
 
       - name: Execute tests in Docker
         env:
-          TEST_REPORT_ROOT: artifacts/tests
-          TEST_REPORT_OUTPUT: md_report.md
+          TEST_REPORT_ROOT: /tmp/artifacts/tests
+          TEST_REPORT_OUTPUT: md_report.${{ github.run_id }}.md
+          TEST_COVERAGE_OUTPUT: ${{ github.run_id }}.coverage
         run: |
           echo "TEST_REPORT_ROOT=${TEST_REPORT_ROOT}" >> "$GITHUB_ENV";
           echo "TEST_REPORT_FILE=${TEST_REPORT_ROOT}/${TEST_REPORT_OUTPUT}" >> "$GITHUB_ENV";
+          echo "TEST_COVERAGE_FILE=${TEST_REPORT_ROOT}/${TEST_COVERAGE_OUTPUT}" >> "$GITHUB_ENV";
+          rm -rf ${TEST_REPORT_ROOT};
           mkdir -p ${TEST_REPORT_ROOT};
-          docker compose --env-file .env.test \
-            run \
-            -u $UID \
-            -v $(pwd)/${TEST_REPORT_ROOT}:/${TEST_REPORT_ROOT} \
-            web pytest . -v \
+          docker run \
+              --rm \
+              --env-file .env.test \
+              -e COVERAGE_FILE=${TEST_REPORT_ROOT}/coverage.db \
+              -u $UID \
+              --network $(docker network ls --format '{{ .Name }}' | grep -m1 djangonetwork) \
+              -v ${TEST_REPORT_ROOT}:/${TEST_REPORT_ROOT} \
+              antijob/neuro-parser-test:${NEURO_PARSER_VERSION} \
+              pytest . \
+              -p no:cacheprovider \
+              -v \
               --cov \
-              --cov-report=lcov:/${TEST_REPORT_ROOT}/.coverage \
+              --cov-report=lcov:/${TEST_REPORT_ROOT}/${TEST_COVERAGE_OUTPUT} \
               --md-report \
               --md-report-flavor gfm \
               --md-report-output /${TEST_REPORT_ROOT}/${TEST_REPORT_OUTPUT}
-          
-          # Because python-coverage-comment-action cannot handle any other paths. Amazing.
-          cp ${TEST_REPORT_ROOT}/.coverage .coverage
 
       # Reporting coverage
       # https://github.com/romeovs/lcov-reporter-action
@@ -69,7 +80,7 @@ jobs:
         with:
           title: "coverage-report"
           delete-old-comments: true
-          lcov-file: ${{ env.TEST_REPORT_ROOT }}/.coverage
+          lcov-file: ${{ env.TEST_COVERAGE_FILE }}
 
       # Reporting to PR details and Job summary
       # https://github.com/thombashi/pytest-md-report
