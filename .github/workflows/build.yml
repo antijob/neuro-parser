@@ -28,7 +28,7 @@ jobs:
 
       # Build these images only when related files are changed
       - name: Filter out app changes
-        uses: dorny/paths-filter@v2
+        uses: dorny/paths-filter@v3
         id: filter
         with:
           base: ${{ github.ref }}
