@@ -9,27 +9,6 @@ on:
       environment:
         required: true
         type: string
-      # Runner tag to be used when deploying
-      runner:
-        required: true
-        type: string
-      
-      # Parametrized $TELEGRAM_BOT_NAME env var
-      env_telegram_bot_name:
-        required: true
-        type: string
-      # Parametrized $TELEGRAM_BOT_URL env var
-      env_telegram_bot_url:
-        required: true
-        type: string
-      # Parametrized $FLOWER_HOST env var
-      env_flower_host:
-        required: true
-        type: string
-      # Parametrized $HOST env var
-      env_host:
-        required: true
-        type: string
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -37,7 +16,7 @@ concurrency:
 jobs:
   deploy:
     name: "Deploy environment"
-    runs-on: ["self-hosted", "neuroparser", "${{ inputs.runner }}" ]
+    runs-on: ["self-hosted", "neuroparser", "${{ inputs.environment }}" ]
     environment: ${{ inputs.environment }}
     steps:
       - name: Check out repository code
@@ -48,6 +27,30 @@ jobs:
 
       - name: Prepare .env
         run: |
+          # Add an environment variable here if it needs to be non-empty.
+          REQUIRED_ENVS=(
+            "POSTGRES_USER"
+            "POSTGRES_PASSWORD"
+            "TELEGRAM_BOT_TOKEN"
+            "TELEGRAM_BOT_NAME"
+            "TELEGRAM_BOT_URL"
+            "FLOWER_USER"
+            "FLOWER_PASSWORD"
+            "FLOWER_HOST"
+            "HOST"
+            "ACME_EMAIL"
+          )
+          for name in "${REQUIRED_ENVS[@]}"; do
+            if [[ -z "${!name}" ]]; then
+              echo "Environment variable is not set: $name!";
+              env_check_failed=1;
+            fi
+          done
+          if [ $env_check_failed == 1 ]; then 
+            echo "Please check if you're deploying to correct environment and all variables are set";
+            exit 10;
+          fi;
+
           cp .env.template .env
           sed -i \
             -e s,^POSTGRES_USER=.*,POSTGRES_USER=$POSTGRES_USER, \
@@ -74,16 +77,16 @@ jobs:
           POSTGRES_PASSWORD: "${{ secrets.POSTGRES_PASSWORD }}"
           SENTRY_DSN: "${{ secrets.SENTRY_DSN }}"
           TELEGRAM_BOT_TOKEN: "${{ secrets.TELEGRAM_BOT_TOKEN }}"
-          TELEGRAM_BOT_NAME: "${{ inputs.env_telegram_bot_name }}"
-          TELEGRAM_BOT_URL: "${{ inputs.env_telegram_bot_url }}"
+          TELEGRAM_BOT_NAME: "${{ vars.TELEGRAM_BOT_NAME }}"
+          TELEGRAM_BOT_URL: "${{ vars.TELEGRAM_BOT_URL }}"
           DJANGO_KEY: "${{ secrets.DJANGO_KEY}}"
           CF_DNS_API_TOKEN: "${{ secrets.CF_DNS_API_TOKEN }}"
           API_TOKEN: "${{ secrets.API_TOKEN }}"
           REPLICATE_API_TOKEN: "${{ secrets.REPLICATE_API_TOKEN }}"
           FLOWER_USER: "${{ secrets.FLOWER_USER }}"
           FLOWER_PASSWORD: "${{ secrets.FLOWER_PASSWORD }}"
-          FLOWER_HOST: "${{ inputs.env_flower_host }}"
-          HOST: "${{ inputs.env_host }}"
+          FLOWER_HOST: "${{ vars.FLOWER_HOST }}"
+          HOST: "${{ vars.HOST }}"
           ACME_EMAIL: "${{ secrets.ACME_EMAIL }}"
       
       - name: "Copy the app"
