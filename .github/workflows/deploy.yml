@@ -14,6 +14,23 @@ on:
       runner:
         required: true
         type: string
+      
+      # Parametrized $TELEGRAM_BOT_NAME env var
+      env_telegram_bot_name:
+        required: true
+        type: string
+      # Parametrized $TELEGRAM_BOT_URL env var
+      env_telegram_bot_url:
+        required: true
+        type: string
+      # Parametrized $FLOWER_HOST env var
+      env_flower_host:
+        required: true
+        type: string
+      # Parametrized $HOST env var
+      env_host:
+        required: true
+        type: string
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -58,8 +75,8 @@ jobs:
           POSTGRES_PASSWORD: "${{ secrets.POSTGRES_PASSWORD }}"
           SENTRY_DSN: "${{ secrets.SENTRY_DSN }}"
           TELEGRAM_BOT_TOKEN: "${{ secrets.TELEGRAM_BOT_TOKEN }}"
-          TELEGRAM_BOT_NAME: "${{ inputs.telegram_bot_name }}"
-          TELEGRAM_BOT_URL: "${{ inputs.telegram_bot_url }}"
+          TELEGRAM_BOT_NAME: "${{ inputs.env_telegram_bot_name }}"
+          TELEGRAM_BOT_URL: "${{ inputs.env_telegram_bot_url }}"
           DJANGO_KEY: "${{ secrets.DJANGO_KEY}}"
           CF_DNS_API_TOKEN: "${{ secrets.CF_DNS_API_TOKEN }}"
           API_TOKEN: "${{ secrets.API_TOKEN }}"

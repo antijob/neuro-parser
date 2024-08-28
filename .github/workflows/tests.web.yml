@@ -43,7 +43,9 @@ jobs:
           echo "TEST_COVERAGE_FILE=${TEST_REPORT_ROOT}/${TEST_COVERAGE_OUTPUT}" >> "$GITHUB_ENV";
           rm -rf ${TEST_REPORT_ROOT};
           mkdir -p ${TEST_REPORT_ROOT};
-          docker compose run \
+
+          # NOTICE: running dev version of docker-compose.yaml on purpose, to not mistakingly do anything production-like.
+          docker compose -f docker-compose.yaml run \
               --rm \
               -e COVERAGE_FILE=${TEST_REPORT_ROOT}/coverage.db \
               -u $UID \
