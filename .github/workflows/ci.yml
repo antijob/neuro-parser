@@ -51,13 +51,7 @@ jobs:
     if: success() && github.ref == 'refs/heads/stage'
     secrets: inherit
     with:
-      runner: staging
-      environment: Staging
-
-      env_telegram_bot_name: "${{ vars.TELEGRAM_BOT_NAME_STAGE }}"
-      env_telegram_bot_url: "${{ vars.TELEGRAM_BOT_URL_STAGE}}"
-      env_flower_host: "${{ vars.FLOWER_HOST }}"
-      env_host: "${{ vars.HOST_STAGE }}"
+      environment: staging
 
   start_prod:
     name: Start prod
@@ -68,10 +62,4 @@ jobs:
     if: success() && github.ref == 'refs/heads/main'
     secrets: inherit
     with:
-      runner: production
-      environment: Production
-    
-      env_telegram_bot_name: "${{ vars.TELEGRAM_BOT_NAME }}"
-      env_telegram_bot_url: "${{ vars.TELEGRAM_BOT_URL }}"
-      env_flower_host: "${{ vars.FLOWER_HOST }}"
-      env_host: "${{ vars.HOST }}"
+      environment: production
