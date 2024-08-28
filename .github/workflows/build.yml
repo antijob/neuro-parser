@@ -24,7 +24,7 @@ jobs:
       branch_name: ${{ steps.build.outputs.branch_name }}
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       # Build these images only when related files are changed
       - name: Filter out app changes

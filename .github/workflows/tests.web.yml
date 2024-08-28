@@ -15,7 +15,7 @@ jobs:
     runs-on: ["self-hosted", "neuroparser", "staging"]
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       
       - name: Prepare branch name
         run: |
@@ -63,7 +63,7 @@ jobs:
       # Reporting coverage
       # https://github.com/romeovs/lcov-reporter-action
       - name: Coverage comment
-        uses: romeovs/lcov-reporter-action@v0.3.1
+        uses: romeovs/lcov-reporter-action@v0.4.0
         if: always() && github.event_name == 'pull_request'
         with:
           title: "coverage-report"

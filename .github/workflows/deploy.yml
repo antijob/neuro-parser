@@ -41,7 +41,7 @@ jobs:
     environment: ${{ inputs.environment }}
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4 
 
       - name: login to docker registry
         run: echo "${{ secrets.docker_password }}" | docker login -u ${{ secrets.docker_username }} --password-stdin
