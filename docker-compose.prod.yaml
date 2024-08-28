@@ -41,6 +41,7 @@ services:
       - postgres_data_prod:/var/lib/postgresql/data
 
   web:
+    image: antijob/neuro-parser:${NEURO_PARSER_VERSION}
     extends:
       file: docker-compose.yaml
       service: web
@@ -58,6 +59,7 @@ services:
       traefik.http.routers.django.tls.certresolver: "letsencrypt"
     
   celery:
+    image: antijob/neuro-parser:${NEURO_PARSER_VERSION}
     extends:
       file: docker-compose.yaml
       service: celery
@@ -65,6 +67,7 @@ services:
       - /root/models:/code/models
 
   bot:
+    image: antijob/neuro-parser:${NEURO_PARSER_VERSION}
     extends:
       file: docker-compose.yaml
       service: bot

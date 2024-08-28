@@ -31,7 +31,6 @@ services:
       - djangonetwork
 
   web:
-    image: antijob/neuro-parser:${NEURO_PARSER_VERSION}
     command: /bin/bash -c ./docker/web/entrypoint-dev.sh
     build:
       context: .
@@ -59,7 +58,6 @@ services:
       traefik.http.routers.django.rule: Host(`${HOST}`)"
 
   celery:
-    image: antijob/neuro-parser:${NEURO_PARSER_VERSION}
     build:
       context: .
       dockerfile: ./docker/web/Dockerfile
@@ -75,7 +73,6 @@ services:
       - djangonetwork
 
   bot:
-    image: antijob/neuro-parser:${NEURO_PARSER_VERSION}
     build:
       context: .
       dockerfile: ./docker/web/Dockerfile
