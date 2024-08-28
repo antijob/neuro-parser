@@ -1,6 +1,5 @@
 import logging
 import sys
-from typing import List
 
 from asgiref.sync import sync_to_async
 
@@ -14,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 @sync_to_async
-def get_all_channels() -> List[Channel]:
+def get_all_channels() -> list[Channel]:
     return list(Channel.objects.all())
 
 
