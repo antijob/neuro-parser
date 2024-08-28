@@ -68,12 +68,18 @@ def plan_incidents(status):
 
 
 @app.task(queue="parser")
-def send_incident_notification(media_incident: MediaIncident):
+def send_incident_notification(media_incident_id: int):
+    try:
+        media_incident = MediaIncident.objects.get(id=media_incident_id)
+    except Exception as e:
+        logger.error(f"Could not get media_incident: {e}")
+        return f"MediaIncident getting failed due to an error: {e}"
+    logger.info(f"MediaIncident: {media_incident}")
     try:
         asyncio.run(mediaincident_post(media_incident))
         return f"Notification sent for incident: {media_incident}"
     except Exception as e:
-        logger.error(f"Error in send_incident_notification: {e}")
+        logger.error(f"Error in send_incident_notification: {e}", exc_info=True)
         return f"Notification failed due to an error: {e}"
 
 
@@ -91,7 +97,7 @@ def create_incidents(batch):
             art.save()
 
         for incindent in incidents_created:
-            send_incident_notification.delay(incindent)
+            send_incident_notification.delay(incindent.id)
 
         return f"Batch finished. Incidents created: {incidents_count}"
     except Exception as e:

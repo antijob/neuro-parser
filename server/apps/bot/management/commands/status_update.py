@@ -18,7 +18,7 @@ class Command(BaseCommand):
             for channel in all_channels:
                 result = self.process_channel(channel)
             logger.info(
-                f"Processed channel {channel.id}: Created {result[0]} ChannelIncidentType(s) and {result[1]} ChannelCountry(ies)."
+                f"Processed all channels.  Created {result[0]} ChannelIncidentType(s) and {result[1]} ChannelCountry(ies)."
             )
 
         logger.info("All statuses created or updated successfully")
