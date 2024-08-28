@@ -55,7 +55,7 @@ services:
       - djangonetwork
     labels:
       traefik.enable: "true"
-      traefik.http.routers.django.rule: Host(`${HOST}`)"
+      traefik.http.routers.django.rule: "Host(`${HOST}`)"
 
   celery:
     build:
