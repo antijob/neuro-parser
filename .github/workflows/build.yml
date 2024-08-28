@@ -31,6 +31,7 @@ jobs:
             web:
               - 'server/**'
               - 'docker/**'
+              - '.github/**'
               - '*.py'
               - 'pyproject.toml'
 

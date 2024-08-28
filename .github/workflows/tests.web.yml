@@ -27,7 +27,7 @@ jobs:
           sed -i \
             -e s,^TELEGRAM_BOT_TOKEN=.*,TELEGRAM_BOT_TOKEN=$TELEGRAM_BOT_TOKEN, \
             -e s,^API_RPS=.*,API_RPS=$API_RPS, \
-            .env.test
+            .env
         env:
           TELEGRAM_BOT_TOKEN: "non-existing-token"
           API_RPS: "100/minute"
