@@ -3,6 +3,7 @@ from .parsers.base_parser import ParserBase
 
 import re
 
+
 from .parsers.vk_parser import VkParser
 from .parsers.ok_parser import OkParser
 from .parsers.tg_parser import TgParser
@@ -12,6 +13,7 @@ from .parsers.tg_hidden_parser import TgHiddenParser
 
 from server.apps.core.models import Article, Source
 from server.core.fetcher import Fetcher
+from server.libs.handler import HandlerRegistry
 
 from asgiref.sync import sync_to_async
 
@@ -35,6 +37,7 @@ async def add_articles(
             continue
 
         url_without_method = match.group("url_without_method")
+
         # unefficient:
         if not await sync_to_async(
             Article.objects.filter(url__iendswith=url_without_method).exists
@@ -45,14 +48,12 @@ async def add_articles(
 
 
 class SourceParser:
-    parsers: list[ParserBase] = [
-        TgHiddenParser,
-        VkParser,
-        OkParser,
-        TgParser,
-        RssParser,
-        CommonParser,
-    ]
+    registry = HandlerRegistry[ParserBase]()
+    registry.register(VkParser)
+    registry.register(OkParser)
+    registry.register(TgParser)
+    registry.register(RssParser)
+    registry.register(CommonParser)
 
     @classmethod
     async def extract_all_news_urls(
@@ -63,18 +64,16 @@ class SourceParser:
         if html is None:
             return None
 
-        for parser in cls.parsers:
-            if parser.can_handle(source):
-                return parser.extract_urls(url, html)
-        raise ValueError("No suitable parser found")
+        parser = cls.registry.choose(source)
+        return parser.extract_urls(url, html)
 
     @classmethod
     async def create_new_articles(cls, source: Source) -> int:
         urls = await cls.extract_all_news_urls(source)
         if not urls:
             return 0
+
         added = await add_articles(source, urls)
-        print("Articles from source parser:", added)
         for article in added:
             await sync_to_async(article.save)()
         return len(added)

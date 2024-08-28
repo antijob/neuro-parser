@@ -1,0 +1,109 @@
+# Made in a reusable way
+# Ref: https://docs.github.com/en/actions/sharing-automations/reusing-workflows
+name: Deploy environment
+
+on:
+  workflow_call:
+    inputs:
+      # Environment set to utilize environments and secrets from Github Actions
+      environment:
+        required: true
+        type: string
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+
+jobs:
+  deploy:
+    name: "Deploy environment"
+    runs-on: ["self-hosted", "neuroparser", "${{ inputs.environment }}" ]
+    environment: ${{ inputs.environment }}
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4 
+
+      - name: login to docker registry
+        run: echo "${{ secrets.docker_password }}" | docker login -u ${{ secrets.docker_username }} --password-stdin
+
+      - name: Prepare .env
+        run: |
+          # Add an environment variable here if it needs to be non-empty.
+          REQUIRED_ENVS=(
+            "POSTGRES_USER"
+            "POSTGRES_PASSWORD"
+            "TELEGRAM_BOT_TOKEN"
+            "TELEGRAM_BOT_NAME"
+            "TELEGRAM_BOT_URL"
+            "FLOWER_USER"
+            "FLOWER_PASSWORD"
+            "FLOWER_HOST"
+            "HOST"
+            "ACME_EMAIL"
+          )
+          for name in "${REQUIRED_ENVS[@]}"; do
+            if [[ -z "${!name}" ]]; then
+              echo "Environment variable is not set: $name!";
+              env_check_failed=1;
+            fi
+          done
+          if [ $env_check_failed == 1 ]; then 
+            echo "Please check if you're deploying to correct environment and all variables are set";
+            exit 10;
+          fi;
+
+          cp .env.template .env
+          sed -i \
+            -e s,^POSTGRES_USER=.*,POSTGRES_USER=$POSTGRES_USER, \
+            -e s,^POSTGRES_PASSWORD=.*,POSTGRES_PASSWORD=$POSTGRES_PASSWORD, \
+            -e s,^SENTRY_DSN=.*,SENTRY_DSN=$SENTRY_DSN, \
+            -e s,^TELEGRAM_BOT_TOKEN=.*,TELEGRAM_BOT_TOKEN=$TELEGRAM_BOT_TOKEN, \
+            -e s,^TELEGRAM_BOT_NAME=.*,TELEGRAM_BOT_NAME=$TELEGRAM_BOT_NAME, \
+            -e s,^TELEGRAM_BOT_URL=.*,TELEGRAM_BOT_URL=$TELEGRAM_BOT_URL, \
+            -e s,^DJANGO_KEY=.*,DJANGO_KEY=$DJANGO_KEY, \
+            -e s,^CF_DNS_API_TOKEN=.*,CF_DNS_API_TOKEN=$CF_DNS_API_TOKEN, \
+            -e s,^API_TOKEN=.*,API_TOKEN=$API_TOKEN, \
+            -e s,^REPLICATE_API_TOKEN=.*,REPLICATE_API_TOKEN=$REPLICATE_API_TOKEN, \
+            -e s,^FLOWER_USER=.*,FLOWER_USER=$FLOWER_USER, \
+            -e s,^FLOWER_PASSWORD=.*,FLOWER_PASSWORD=$FLOWER_PASSWORD, \
+            -e s,^FLOWER_HOST=.*,FLOWER_HOST=$FLOWER_HOST, \
+            -e s,^HOST=.*,HOST=$HOST, \
+            -e s,^ACME_EMAIL=.*,ACME_EMAIL=$ACME_EMAIL, \
+            .env
+          branch=$(echo "${GITHUB_REF#refs/heads/}" | tr '/' '-')
+          echo "Branch name with / substituted for - : $branch"
+          echo NEURO_PARSER_VERSION=${branch} >> .env
+        env:
+          POSTGRES_USER: "${{ secrets.POSTGRES_USER }}"
+          POSTGRES_PASSWORD: "${{ secrets.POSTGRES_PASSWORD }}"
+          SENTRY_DSN: "${{ secrets.SENTRY_DSN }}"
+          TELEGRAM_BOT_TOKEN: "${{ secrets.TELEGRAM_BOT_TOKEN }}"
+          TELEGRAM_BOT_NAME: "${{ vars.TELEGRAM_BOT_NAME }}"
+          TELEGRAM_BOT_URL: "${{ vars.TELEGRAM_BOT_URL }}"
+          DJANGO_KEY: "${{ secrets.DJANGO_KEY}}"
+          CF_DNS_API_TOKEN: "${{ secrets.CF_DNS_API_TOKEN }}"
+          API_TOKEN: "${{ secrets.API_TOKEN }}"
+          REPLICATE_API_TOKEN: "${{ secrets.REPLICATE_API_TOKEN }}"
+          FLOWER_USER: "${{ secrets.FLOWER_USER }}"
+          FLOWER_PASSWORD: "${{ secrets.FLOWER_PASSWORD }}"
+          FLOWER_HOST: "${{ vars.FLOWER_HOST }}"
+          HOST: "${{ vars.HOST }}"
+          ACME_EMAIL: "${{ secrets.ACME_EMAIL }}"
+      
+      - name: "Copy the app"
+        run: |
+          docker run \
+            --rm \
+            -v .:/code \
+            -v /opt/services/neuro-parser:/service \
+            alpine:latest \
+            sh -c "find /service -mindepth 1 -delete && cp -a /code/. /service"
+
+      - name: Start the app
+        run: |
+          cd /opt/services/neuro-parser
+          docker compose -f docker-compose.prod.yaml pull
+          docker compose -f docker-compose.prod.yaml up -d
+
+      - name: logout from docker registry
+        if: ${{ always() }}
+        run: docker logout

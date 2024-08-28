@@ -46,18 +46,18 @@ class ChannelAdmin(admin.ModelAdmin):
 
                 async def send_messages():
                     success_count = 0
-                    for channel in channels:
-                        try:
-                            async with get_bot() as bot:
+                    async with get_bot() as bot:
+                        for channel in channels:
+                            try:
                                 await bot.send_message(
                                     text=message, chat_id=str(channel)
                                 )
-                            success_count += 1
-                        except Exception as e:
-                            logger.error(
-                                f"Failed to send message to channel {channel}: {e}"
-                            )
-                            continue
+                                success_count += 1
+                            except Exception as e:
+                                logger.error(
+                                    f"Failed to send message to channel {channel}: {e}"
+                                )
+                                continue
 
                     return success_count
 

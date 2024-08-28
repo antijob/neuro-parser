@@ -203,8 +203,6 @@ REPLICATE_MODEL_NAME = c("REPLICATE_MODEL_NAME")
 CONTACT_FORM_EMAILS = ["agorarights@gmail.com"]
 
 MAX_UPLOAD_SIZE = 20971520
-ACCOUNT_ADAPTER = "server.apps.core.logic.account_adapter.CustomAccountAdapter"
-ACCOUNT_ALLOW_SIGNUPS = False
 
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 

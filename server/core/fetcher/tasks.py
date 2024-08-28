@@ -3,7 +3,7 @@ import logging
 
 from server.apps.core.models import Article, Source
 
-from .client import NPClient
+from .clients import ClientFactory
 from .libs.statistics import CoroutineStatistics
 from .libs.exceptions import BadCodeException
 
