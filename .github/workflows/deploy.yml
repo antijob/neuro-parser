@@ -38,7 +38,7 @@ jobs:
   deploy:
     name: "Deploy environment"
     runs-on: ["self-hosted", "neuroparser", "${{ inputs.runner }}" ]
-    environment: ${{ inputs.environment }}
+    # environment: ${{ inputs.environment }}
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4 
