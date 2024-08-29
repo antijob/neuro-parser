@@ -4,7 +4,7 @@ from datetime import date
 
 from django.core.management.base import BaseCommand
 
-from server.apps.bot.services.inc_post import mediaincident_post
+from server.apps.bot.services.inc_post import post_incident
 from server.apps.core.models import (
     Article,
     Country,
@@ -160,6 +160,6 @@ class Command(BaseCommand):
 
         # send a message to the channel
         try:
-            asyncio.run(mediaincident_post(media_incident))
+            asyncio.run(post_incident(media_incident))
         except Exception as e:
             logger.error(f"Failed to send a message to the channel: {e}")
