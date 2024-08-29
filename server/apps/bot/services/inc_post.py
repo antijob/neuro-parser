@@ -1,5 +1,7 @@
 import logging
 import sys
+import asyncio
+from typing import Optional
 
 from asgiref.sync import sync_to_async
 
@@ -18,7 +20,9 @@ def get_all_channels() -> list[Channel]:
 
 
 @sync_to_async
-def get_channel_data(chn: Channel, inc: MediaIncident):
+def get_channel_data(
+    chn: Channel, inc: MediaIncident
+) -> tuple[Optional[ChannelIncidentType], Optional[ChannelCountry]]:
     try:
         channel_incident = ChannelIncidentType.objects.get(
             channel=chn, incident_type=inc.incident_type
@@ -33,7 +37,7 @@ def get_channel_data(chn: Channel, inc: MediaIncident):
 
 
 @sync_to_async
-def prepare_message(inc: MediaIncident):
+def prepare_message(inc: MediaIncident) -> str:
     return NEW_INCIDENT_TEMPLATE.format(
         cat=inc.incident_type.description,
         title=inc.title,
@@ -44,36 +48,55 @@ def prepare_message(inc: MediaIncident):
     )
 
 
-async def mediaincident_post(inc: MediaIncident):
+async def process_channel(bot, chn, inc: MediaIncident, msg: str) -> bool:
+    try:
+        channel_incident, channel_country = await get_channel_data(chn, inc)
+        if not (channel_incident and channel_country):
+            logger.warning(f"No data for channel {chn.channel_id}")
+            return False
+
+        if not (channel_incident.status and channel_country.status):
+            logger.info(f"Skipping channel {chn.channel_id} due to status checks")
+            return False
+
+        if inc.region:
+            if inc.region.name not in channel_country.enabled_regions:
+                logger.info(f"Skipping channel {chn.channel_id} due to region mismatch")
+                return False
+
+        await bot.send_message(text=msg, chat_id=chn.channel_id)
+        logger.info(f"Sent message to channel {chn.channel_id}")
+        return True
+    except Exception as e:
+        logger.error(f"Error processing channel {chn.channel_id}: {e}", exc_info=True)
+        return False
+
+
+async def post_incident(inc: MediaIncident):
     """
-    using of function in sync context
-    asyncio.run(mediaincident_post(incident))
+    Asynchronously post media incident to all relevant channels.
+
+    Usage in sync context:
+    asyncio.run(post_incident(incident))
     """
+    logger.info(f"Starting post_incident for incident: {inc.id}")
     try:
         all_channels = await get_all_channels()
+        logger.info(f"Retrieved {len(all_channels)} channels")
 
         msg = await prepare_message(inc)
+        logger.info("Message prepared successfully")
 
         async with get_bot() as bot:
-            for chn in all_channels:
-                try:
-                    channel_incident, channel_country = await get_channel_data(chn, inc)
-                    if channel_incident and channel_country:
-                        if (
-                            channel_incident.status
-                            and channel_country.status
-                            and inc.region.name in channel_country.enabled_regions
-                        ):
-                            await bot.send_message(text=msg, chat_id=chn.channel_id)
-                            logger.info(f"Sent message to channel {chn.channel_id}")
-                        else:
-                            logger.info(
-                                f"Skipping channel {chn.channel_id} due to status checks"
-                            )
-                    else:
-                        logger.warning(f"No data for channel {chn.channel_id}")
-                except Exception as e:
-                    logger.error(f"Error processing channel {chn.channel_id}: {e}")
+            tasks = [process_channel(bot, chn, inc, msg) for chn in all_channels]
+            results = await asyncio.gather(*tasks, return_exceptions=True)
 
+            success_count = sum(1 for r in results if r is True)
+            error_count = sum(1 for r in results if not r)
+
+            logger.info(
+                f"Processed all channels. Successes: {success_count}, Errors: {error_count}"
+            )
     except Exception as e:
-        logger.error(f"Error in mediaincident_post: {e}", exc_info=True)
+        logger.error(f"Error in post_incident: {e}", exc_info=True)
+        raise
