@@ -43,7 +43,11 @@ def prepare_message(inc: MediaIncident) -> str:
         title=inc.title,
         country=inc.country,
         region=inc.region,
-        desc=inc.description,
+        desc=(
+            inc.description
+            if len(inc.description) < 3000
+            else inc.description[:3000] + "..."
+        ),
         url=" ".join(inc.urls),
     )
 
@@ -92,7 +96,7 @@ async def post_incident(inc: MediaIncident):
             results = await asyncio.gather(*tasks, return_exceptions=True)
 
             success_count = sum(1 for r in results if r is True)
-            error_count = sum(1 for r in results if not r)
+            error_count = sum(1 for r in results if r is False)
 
             logger.info(
                 f"Processed all channels. Successes: {success_count}, Errors: {error_count}"
