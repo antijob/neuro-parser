@@ -1,58 +1,91 @@
-import os
+import logging
 from typing import Optional
 from telethon import TelegramClient
-
-# from telethon.errors import SessionPasswordNeededError
 from asgiref.sync import sync_to_async
 import re
+import asyncio
 
 from server.apps.core.models import Article, Source
 
-from base_client import ClientBase
 from .base_client import ClientBase
 from server.settings.components.telethon import (
     TELEGRAM_API_HASH,
     TELEGRAM_API_ID,
-    TELEGRAM_PHONE_NUMBER,
 )
+
+from telethon.tl.types import PeerUser, PeerChat, PeerChannel
+
+
+logging.basicConfig(level=logging.WARNING)
+logger = logging.getLogger(__name__)
 
 
 class TelethonClient(ClientBase):
-    def __init__(self):
-        # Fetch environment variables for the Telegram API
-        # self.phone_number = TELEGRAM_PHONE_NUMBER
-        self.client = TelegramClient("session_name", TELEGRAM_API_ID, TELEGRAM_API_HASH)
+    session_name = "telethon_session"
+    _lock = asyncio.Lock()
+
+    def __init__(
+        self, telegram_api_id=TELEGRAM_API_ID, telegram_api_hash=TELEGRAM_API_HASH
+    ):
+        self.client = TelegramClient(
+            self.session_name, telegram_api_id, telegram_api_hash
+        )
+        logging.getLogger("telethon").setLevel(level=logging.CRITICAL)
 
     async def __aenter__(self):
+        await self._lock.acquire()
         await self.client.connect()
-        # if not await self.client.is_user_authorized():
-        #     await self.client.send_code_request(self.phone_number)
-        #     try:
-        #         code = os.getenv("TELEGRAM_LOGIN_CODE")
-        #         await self.client.sign_in(self.phone_number, code)
-        #     except SessionPasswordNeededError:
-        #         password = os.getenv("TELEGRAM_PASSWORD")
-        #         await self.client.sign_in(password=password)
+        if not await self.client.is_user_authorized():
+            self._lock.release()
+            raise Exception("User is not authorized")
         return self
 
     async def __aexit__(self, exc_type, exc_value, traceback):
         await self.client.disconnect()
+        self._lock.release()
+
+    @staticmethod
+    def get_ids(url: str) -> list:
+        pattern_message = (
+            r"(?P<baseurl>https:\/\/[^\/]+\/(?:c\/)?)(?P<channel>\d+)\/(?P<message>\d+)"
+        )
+        pattern_channel = r"(?P<baseurl>https:\/\/[^\/]+\/(c\/)?)(?P<channel>[^\/]+)"
+
+        match = re.match(pattern_message, url)
+        if match:
+            base_url = match.group("baseurl")
+            channel = match.group("channel")
+            message = match.group("message")
+
+            if channel.isdigit():
+                channel = int(channel)
+            if message.isdigit():
+                message = int(message)
+
+            return [base_url, channel, message]
+
+        match = re.match(pattern_channel, url)
+        if match:
+            base_url = match.group("baseurl")
+            # is_hidden = match.group("is_hidden")
+            channel = match.group("channel")
+
+            if channel.isdigit():
+                channel = int(channel)
+
+            return [base_url, channel]
+
+        return []
 
     async def get_article(self, article: Article, source: Source) -> Article:
-        """
-        Fetches an article from Telegram by parsing its URL and populates
-        the article's title, text, and publication date.
-        """
-        channel_regex = r"(?:https:\/\/t\.me\/)(?P<channel>\w+)\/(?P<message_id>\d+)"
+        ids = self.get_ids(article.url)
 
-        match = re.search(channel_regex, article.url)
-        if match:
-            channel = match.group("channel")
-            message_id = match.group("message_id")
-            message = await self.client.get_messages(channel, ids=int(message_id))
+        if ids and len(ids) == 3:
+            entity = await self.client.get_entity(PeerChannel(ids[1]))
+            message = await self.client.get_messages(entity, ids=ids[2])
 
             if message:
-                article.title = f"Message from {channel}"
+                article.title = f"Message from {source.url}"
                 article.text = message.message
                 article.publication_date = message.date
 
@@ -61,32 +94,39 @@ class TelethonClient(ClientBase):
         return article
 
     async def get_source(self, source: Source) -> Optional[str]:
-        """
-        Fetches source details from Telegram based on the source's URL, which may refer
-        to a channel or a user. Returns a description of the source (e.g., bio, channel description).
-        """
-        url = source.url
-        channel_regex = r"(?:https:\/\/t\.me\/)(?P<channel>\w+)"
-        user_regex = r"(?:https:\/\/t\.me\/)(?P<username>\w+)"
+        ids = self.get_ids(source.url)
 
-        if re.match(channel_regex, url):
-            match = re.search(channel_regex, url)
-            if match:
-                channel = match.group("channel")
-                # Fetch channel details
-                entity = await self.client.get_entity(channel)
-                messages = await self.client.get_messages(entity, limit=100)
-                return str(messages)
+        res = []
 
-        elif re.match(user_regex, url):
-            match = re.search(user_regex, url)
-            if match:
-                username = match.group("username")
-                # Fetch user details
-                entity = await self.client.get_entity(username)
-                if hasattr(entity, "about"):
-                    return entity.about  # User bio
-                else:
-                    return None
+        if ids and len(ids) >= 1:
+            if isinstance(ids[1], int):
+                entity = await self.client.get_entity(PeerChannel(ids[1]))
+            else:
+                entity = ids[1]
 
-        return None
+            async for message in self.client.iter_messages(entity, limit=10):
+                url = f"{ids[0]}{ids[1]}/{message.id}"
+                res.append(url)
+            return res
+
+        # elif re.match(user_regex, url):
+        #     match = re.search(user_regex, url)
+        #     if match:
+        #         username = match.group("username")
+        #         # Fetch user details
+        #         entity = await self.client.get_entity(username)
+        #         if hasattr(entity, "about"):
+        #             return entity.about  # User bio
+        #         else:
+        #             return None
+
+        # return None
+
+    async def init_session_async(self):
+        await self.client.start()
+        me = await self.client.get_me()
+        print(f"Вы вошли как {me.username} ({me.id})")
+
+    def init_session(self):
+        with self.client as client:
+            client.loop.run_until_complete(self.init_session_async())
