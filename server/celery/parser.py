@@ -1,9 +1,9 @@
 import asyncio
-import logging
 from datetime import datetime, timedelta
 from itertools import islice
 
 from celery import group
+from celery.utils.log import get_task_logger
 
 from server.apps.bot.services.inc_post import post_incident
 from server.apps.core.models import Article, MediaIncident
@@ -13,9 +13,7 @@ from server.settings.components.celery import INCIDENT_BATCH_SIZE
 
 from .celery_app import app
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+logger = get_task_logger(__name__)
 
 
 def split_every(n, iterable):
@@ -67,7 +65,7 @@ def plan_incidents(status):
     return "Group of create_incidents tasks submitted"
 
 
-@app.task(queue="parser")
+@app.task(queue="parser", rate_limit="0.5/s")
 def send_incident_notification(media_incident_id: int):
     logger.info(f"Starting send_incident_notification for id: {media_incident_id}")
     try:
