@@ -2,6 +2,7 @@ import asyncio
 from datetime import datetime, timedelta
 from itertools import islice
 
+from aiogram.exceptions import TelegramRetryAfter
 from celery import group
 from celery.utils.log import get_task_logger
 
@@ -65,7 +66,17 @@ def plan_incidents(status):
     return "Group of create_incidents tasks submitted"
 
 
-@app.task(queue="parser", rate_limit="0.5/s")
+class SendMessageTask(app.Task):
+    queue = "parser"
+    rate_limit = "0.2/s"
+    autoretry_for = (TelegramRetryAfter,)
+    max_retries = 5
+    retry_backoff = 30
+    retry_backoff_max = 600
+    retry_jitter = False
+
+
+@app.task(base=SendMessageTask)
 def send_incident_notification(media_incident_id: int):
     logger.info(f"Starting send_incident_notification for id: {media_incident_id}")
     try:
