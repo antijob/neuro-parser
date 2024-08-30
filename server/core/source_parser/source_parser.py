@@ -1,118 +1,80 @@
-from typing import Iterable, Optional
+from typing import Iterable, Union
 from .parsers.base_parser import ParserBase
 
 import re
-from lxml.html.clean import Cleaner
-from selectolax.parser import HTMLParser
-
 
 from .parsers.vk_parser import VkParser
 from .parsers.ok_parser import OkParser
 from .parsers.tg_parser import TgParser
 from .parsers.common_parser import CommonParser
 from .parsers.rss_parser import RssParser
+from .parsers.tg_hidden_parser import TgHiddenParser
 
 from server.apps.core.models import Article, Source
 from server.core.fetcher import Fetcher
 
-from asgiref.sync import async_to_sync
+from asgiref.sync import sync_to_async
 
 
-CLEANER = Cleaner(
-    scripts=True,
-    javascript=True,
-    comments=True,
-    style=True,
-    links=True,
-    meta=True,
-    add_nofollow=False,
-    page_structure=True,
-    processing_instructions=True,
-    embedded=True,
-    frames=True,
-    forms=True,
-    annoying_tags=True,
-    kill_tags=["img", "noscript", "button"],
-    remove_unknown_tags=True,
-    safe_attrs_only=False,
-)
-
-
-async def get_source_data(source: Source) -> Optional[str]:
-    """Get document by given url"""
-    html = await Fetcher.download_source(source)
-    if html:
-        html = html.replace("\xa0", " ")
-    return html
-
-
-def build_document(html, clean=False):
-    """
-    Return etree document
-    cleans it if clean = True
-    """
-    if not html:
-        return None
-    if clean:
-        html = CLEANER.clean_html(html)
-    try:
-        document = HTMLParser(html)
-    except ValueError:
-        pass
-
-    return document
-
-
-def add_articles(source: Source, urls: list[str]) -> list[Article]:
+async def add_articles(
+    source: Source, articles: list[Union[str, Article]]
+) -> list[Article]:
     pattern = re.compile(r"https?://(?P<url_without_method>.+)")
     added = []
 
-    for url in urls:
+    for article in articles:
+        if isinstance(article, Article):
+            url = article.url
+            article = article
+        else:
+            url = article
+            article = Article(url=url, source=source)
+
         match = pattern.match(url)
         if not match:
             continue
 
         url_without_method = match.group("url_without_method")
-
-        if not Article.objects.filter(url__iendswith=url_without_method).exists():
-            try:
-                added.append(Article.objects.create(url=url, source=source))
-            except Exception as e:
-                raise type(e)(
-                    f"When adding articles with {url} exception occurred: {e}"
-                )
+        # unefficient:
+        if not await sync_to_async(
+            Article.objects.filter(url__iendswith=url_without_method).exists
+        )():
+            added.append(article)
 
     return added
 
 
 class SourceParser:
-    parsers: list[ParserBase] = [VkParser, OkParser, TgParser]
-    document_parsers: list[ParserBase] = [RssParser, CommonParser]
+    parsers: list[ParserBase] = [
+        TgHiddenParser,
+        VkParser,
+        OkParser,
+        TgParser,
+        RssParser,
+        CommonParser,
+    ]
 
     @classmethod
-    async def extract_all_news_urls(cls, source: Source) -> Iterable[str]:
+    async def extract_all_news_urls(
+        cls, source: Source
+    ) -> Iterable[Union[str, Article]]:
         url = source.url
-        html = await get_source_data(source)
+        html = await Fetcher.download_source(source)
         if html is None:
             return None
 
-        document = build_document(html)
-
         for parser in cls.parsers:
-            if parser.can_handle(url):
-                return parser.extract_urls(url, document)
-
-        document = build_document(html, clean=True)
-
-        for parser in cls.document_parsers:
-            if parser.can_handle(url):
-                return parser.extract_urls(url, document)
+            if parser.can_handle(source):
+                return parser.extract_urls(url, html)
         raise ValueError("No suitable parser found")
 
     @classmethod
-    def create_new_articles(cls, source: Source) -> int:
-        urls = async_to_sync(cls.extract_all_news_urls)(source)
+    async def create_new_articles(cls, source: Source) -> int:
+        urls = await cls.extract_all_news_urls(source)
         if not urls:
             return 0
-        added = add_articles(source, urls)
+        added = await add_articles(source, urls)
+        print("Articles from source parser:", added)
+        for article in added:
+            await sync_to_async(article.save)()
         return len(added)

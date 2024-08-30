@@ -1,5 +1,5 @@
 import logging
-from typing import Optional
+from typing import Optional, Any
 from telethon import TelegramClient
 from asgiref.sync import sync_to_async
 import re
@@ -96,7 +96,7 @@ class TelethonClient(ClientBase):
     async def get_source(self, source: Source) -> Optional[str]:
         ids = self.get_ids(source.url)
 
-        res = []
+        res: dict[str, Any] = {}
 
         if ids and len(ids) >= 1:
             if isinstance(ids[1], int):
@@ -104,9 +104,11 @@ class TelethonClient(ClientBase):
             else:
                 entity = ids[1]
 
-            async for message in self.client.iter_messages(entity, limit=10):
+            messages = await self.client.get_messages(entity, limit=10)
+            for message in messages:
                 url = f"{ids[0]}{ids[1]}/{message.id}"
-                res.append(url)
+                res[url] = message
+
             return res
 
         # elif re.match(user_regex, url):

@@ -68,7 +68,12 @@ class Fetcher:
         return results
 
     def await_tasks(self) -> int:
-        results = asyncio.run(self._await())
+        loop = asyncio.get_event_loop()
+        if loop.is_closed():
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+        results = loop.run_until_complete(self._await())
+
         fetched_total = 0
         for res in results:
             if isinstance(res, BaseException):
