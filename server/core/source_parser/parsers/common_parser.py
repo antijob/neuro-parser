@@ -2,11 +2,12 @@ from typing import Iterable
 
 from urllib.parse import urlparse
 
-from .base_parser import ParserBase
+from .base_parser import ParserBase, Source
 from ..utils import (
     is_correct_article_link,
     get_absolute_url,
     is_rss_link,
+    build_document,
 )
 
 # fmt: off
@@ -95,24 +96,31 @@ def is_valid_link_text(link_text):
 
 
 def recursive_delete(node):
-    if node.id and node.id in IGNORED_IDS \
-        or 'class' in  node.attrs and node.attrs['class'] in IGNORED_CLASSES:
+    if (
+        node.id
+        and node.id in IGNORED_IDS
+        or "class" in node.attrs
+        and node.attrs["class"] in IGNORED_CLASSES
+    ):
         node.decompose()
         return
 
     for child in node.iter():
         recursive_delete(child)
 
+
 class CommonParser(ParserBase):
     @classmethod
-    def can_handle(cls, url: str) -> bool:
+    def can_handle(cls, source: Source) -> bool:
         return True  # Default parser
 
     @classmethod
     def extract_urls(cls, source_url: str, document) -> Iterable[str]:
         if document is None:
             return []
-        
+
+        document = build_document(document, clean=True)
+
         document.strip_tags(TAGS_WITHOUT_CONTENT)
         document.strip_tags(SERVICE_TAGS)
         for link in document.css("a"):
@@ -124,12 +132,12 @@ class CommonParser(ParserBase):
 
             if not is_valid_link_text(link_text):
                 continue
-            href = link.attrs['href'] if 'href' in link.attrs else None
+            href = link.attrs["href"] if "href" in link.attrs else None
             url = get_absolute_url(source_url, href)
             if not is_correct_article_link(url):
                 continue
             if is_path_ignored(url):
                 continue
-            if  is_rss_link(url):
+            if is_rss_link(url):
                 continue
             yield url
