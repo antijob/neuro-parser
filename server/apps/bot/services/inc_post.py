@@ -1,8 +1,9 @@
+import asyncio
 import logging
 import sys
-import asyncio
 from typing import Optional
 
+from aiogram.exceptions import TelegramBadRequest
 from asgiref.sync import sync_to_async
 
 from server.apps.bot.bot_instance import get_bot
@@ -68,7 +69,10 @@ async def process_channel(bot, chn, inc: MediaIncident, msg: str) -> bool:
                 logger.info(f"Skipping channel {chn.channel_id} due to region mismatch")
                 return False
 
-        await bot.send_message(text=msg, chat_id=chn.channel_id)
+        try:
+            await bot.send_message(text=msg, chat_id=chn.channel_id)
+        except TelegramBadRequest as e:
+            logger.warning(f"Can't send message to channel {chn.channel_id}: {e}")
         logger.info(f"Sent message to channel {chn.channel_id}")
         return True
     except Exception as e:
