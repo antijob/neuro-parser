@@ -32,6 +32,9 @@ def mark_duplicates(query: QuerySet) -> None:
 
         if article.url not in neighbours:
             for n_article in Article.objects.filter(url__in=neighbours):
+                if not n_article.text:
+                    continue
+
                 if calc_ratio(n_article.text, article.text) >= RATIO_THRESHOLD:
                     duplicate_urls.append(article.url)
                     article.is_duplicate = True
