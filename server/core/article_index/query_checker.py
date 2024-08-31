@@ -24,7 +24,7 @@ def mark_duplicates(query: QuerySet) -> None:
     duplicate_urls = []
 
     for article in query:
-        if not article.text and not article.title:
+        if not article.text:
             duplicate_urls.append(article.url)
             continue
 
