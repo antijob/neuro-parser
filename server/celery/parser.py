@@ -1,11 +1,12 @@
 import asyncio
-import logging
 from datetime import datetime, timedelta
 from itertools import islice
 
+from aiogram.exceptions import TelegramRetryAfter
 from celery import group
+from celery.utils.log import get_task_logger
 
-from server.apps.bot.services.inc_post import mediaincident_post
+from server.apps.bot.services.inc_post import post_incident
 from server.apps.core.models import Article, MediaIncident
 from server.core.article_index.query_checker import mark_duplicates
 from server.core.incident_predictor import IncidentPredictor
@@ -13,9 +14,7 @@ from server.settings.components.celery import INCIDENT_BATCH_SIZE
 
 from .celery_app import app
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+logger = get_task_logger(__name__)
 
 
 def split_every(n, iterable):
@@ -67,41 +66,76 @@ def plan_incidents(status):
     return "Group of create_incidents tasks submitted"
 
 
-@app.task(queue="parser")
+class SendMessageTask(app.Task):
+    queue = "parser"
+    rate_limit = "0.2/s"
+    autoretry_for = (TelegramRetryAfter,)
+    max_retries = 5
+    retry_backoff = 30
+    retry_backoff_max = 600
+    retry_jitter = False
+
+
+@app.task(base=SendMessageTask)
 def send_incident_notification(media_incident_id: int):
+    logger.info(f"Starting send_incident_notification for id: {media_incident_id}")
     try:
         media_incident = MediaIncident.objects.get(id=media_incident_id)
     except Exception as e:
-        logger.error(f"Could not get media_incident: {e}")
+        logger.error(f"Could not get media_incident with id {media_incident_id}: {e}")
         return f"MediaIncident getting failed due to an error: {e}"
-    logger.info(f"MediaIncident: {media_incident}")
+
+    logger.info(f"Retrieved MediaIncident: {media_incident}")
+
     try:
-        asyncio.run(mediaincident_post(media_incident))
+        logger.info(f"Attempting to send notification for incident: {media_incident}")
+        asyncio.run(post_incident(media_incident), debug=True)
+        logger.info(f"Notification sent successfully for incident: {media_incident}")
         return f"Notification sent for incident: {media_incident}"
     except Exception as e:
-        logger.error(f"Error in send_incident_notification: {e}", exc_info=True)
+        logger.error(
+            f"Error in send_incident_notification for incident {media_incident}: {e}",
+            exc_info=True,
+        )
         return f"Notification failed due to an error: {e}"
 
 
 @app.task(queue="parser")
 def create_incidents(batch):
+    logger.info(f"Starting create_incidents for batch size: {len(batch)}")
     try:
-        articles_batch = [Article.objects.get(url=url) for url in batch]
+        articles_batch = []
+        for url in batch:
+            try:
+                article = Article.objects.get(url=url)
+                articles_batch.append(article)
+                logger.info(f"Retrieved article: {article}")
+            except Exception as e:
+                logger.error(f"Error retrieving article with url {url}: {e}")
+
+        logger.info(
+            f"Retrieved {len(articles_batch)} articles out of {len(batch)} urls"
+        )
 
         predictor = IncidentPredictor()
         incidents_created = predictor.predict_batch(articles_batch)
         incidents_count = len(incidents_created)
 
+        logger.info(f"Predicted {incidents_count} incidents")
+
         for art in articles_batch:
             art.is_parsed = True
             art.save()
+            logger.info(f"Marked article as parsed: {art}")
 
-        for incindent in incidents_created:
-            send_incident_notification.delay(incindent.id)
+        for incident in incidents_created:
+            logger.info(f"Queueing notification for incident: {incident}")
+            send_incident_notification.delay(incident.id)
 
+        logger.info(f"Batch finished. Incidents created: {incidents_count}")
         return f"Batch finished. Incidents created: {incidents_count}"
     except Exception as e:
-        logger.error(f"Error in create_incidents: {e}")
+        logger.error(f"Error in create_incidents: {e}", exc_info=True)
         return f"Batch failed due to an error: {e}"
 
 
