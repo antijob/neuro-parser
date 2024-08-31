@@ -1,0 +1,93 @@
+# Made in a reusable way
+# Ref: https://docs.github.com/en/actions/sharing-automations/reusing-workflows
+name: Web tests
+
+on:
+  workflow_call:
+
+concurrency:
+  group: ${{ github.workflow }}
+
+jobs:
+  test:
+    name: Run tests
+    runs-on: ["self-hosted", "neuroparser", "staging"]
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+      
+      - name: Prepare branch name
+        run: |
+          echo "NEURO_PARSER_VERSION=$(echo ${GITHUB_REF#refs/heads/} | tr '/' '-')" >> "$GITHUB_ENV";
+
+      - name: Prepare .env
+        run: |
+          cp .env.template .env
+          sed -i \
+            -e s,^TELEGRAM_BOT_TOKEN=.*,TELEGRAM_BOT_TOKEN=$TELEGRAM_BOT_TOKEN, \
+            -e s,^API_RPS=.*,API_RPS=$API_RPS, \
+            .env
+        env:
+          TELEGRAM_BOT_TOKEN: "non-existing-token"
+          API_RPS: "100/minute"
+
+      - name: Execute tests in Docker
+        env:
+          TEST_REPORT_ROOT: /tmp/artifacts/tests
+          TEST_REPORT_OUTPUT: md_report.${{ github.run_id }}.md
+          TEST_COVERAGE_OUTPUT: ${{ github.run_id }}.coverage
+          COMPOSE_PROJECT_NAME: "neuro-parser-test"
+        run: |
+          echo "TEST_REPORT_ROOT=${TEST_REPORT_ROOT}" >> "$GITHUB_ENV";
+          echo "TEST_REPORT_FILE=${TEST_REPORT_ROOT}/${TEST_REPORT_OUTPUT}" >> "$GITHUB_ENV";
+          echo "TEST_COVERAGE_FILE=${TEST_REPORT_ROOT}/${TEST_COVERAGE_OUTPUT}" >> "$GITHUB_ENV";
+          rm -rf ${TEST_REPORT_ROOT};
+          mkdir -p ${TEST_REPORT_ROOT};
+
+          # NOTICE: running dev version of docker-compose.yaml on purpose, to not mistakingly do anything production-like.
+          docker compose -f docker-compose.yaml run \
+              --rm \
+              -e COVERAGE_FILE=${TEST_REPORT_ROOT}/coverage.db \
+              -u $UID \
+              -v ${TEST_REPORT_ROOT}:/${TEST_REPORT_ROOT} \
+              web \
+              pytest . \
+              -p no:cacheprovider \
+              -v \
+              --cov \
+              --cov-report=lcov:/${TEST_REPORT_ROOT}/${TEST_COVERAGE_OUTPUT} \
+              --md-report \
+              --md-report-flavor gfm \
+              --md-report-output /${TEST_REPORT_ROOT}/${TEST_REPORT_OUTPUT}
+
+      # Reporting coverage
+      # https://github.com/romeovs/lcov-reporter-action
+      - name: Coverage comment
+        uses: romeovs/lcov-reporter-action@v0.4.0
+        if: always() && github.event_name == 'pull_request'
+        with:
+          title: "coverage-report"
+          delete-old-comments: true
+          lcov-file: ${{ env.TEST_COVERAGE_FILE }}
+
+      # Reporting to PR details and Job summary
+      # https://github.com/thombashi/pytest-md-report
+      - name: Render the report to the PR
+        uses: marocchino/sticky-pull-request-comment@v2
+        if: always()
+        with:
+          header: test-report
+          recreate: true
+          path: ${{ env.TEST_REPORT_FILE }}
+
+      - name: Output reports to the job summary
+        if: always()
+        shell: bash
+        run: |
+          if [ -f "$TEST_REPORT_FILE" ]; then
+            echo "<details><summary>Test Report</summary>" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            cat "$TEST_REPORT_FILE" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "</details>" >> $GITHUB_STEP_SUMMARY
+          fi
