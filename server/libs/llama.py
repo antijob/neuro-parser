@@ -39,7 +39,7 @@ def predict_is_incident_llama(incident_type: IncidentType, article: Article,  mo
                 "max_new_tokens": max_new_tokens,
                 "top_p": 0.95,
                 "max_tokens": 512,
-                "temperature": 0.7,
+                "temperature": 0,
                 "length_penalty": 1,
                 "stop_sequences": "<|end_of_text|>,<|eot_id|>",
                 "prompt_template": "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\n{system_prompt}<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n{prompt}<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n",
