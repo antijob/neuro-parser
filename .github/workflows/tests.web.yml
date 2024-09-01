@@ -8,6 +8,9 @@ on:
 concurrency:
   group: ${{ github.workflow }}
 
+env:
+  COMPOSE_PROJECT_NAME: "neuro-parser-test"
+
 jobs:
   test:
     name: Run tests
@@ -36,7 +39,6 @@ jobs:
           TEST_REPORT_ROOT: /tmp/artifacts/tests
           TEST_REPORT_OUTPUT: md_report.${{ github.run_id }}.md
           TEST_COVERAGE_OUTPUT: ${{ github.run_id }}.coverage
-          COMPOSE_PROJECT_NAME: "neuro-parser-test"
         run: |
           echo "TEST_REPORT_ROOT=${TEST_REPORT_ROOT}" >> "$GITHUB_ENV";
           echo "TEST_REPORT_FILE=${TEST_REPORT_ROOT}/${TEST_REPORT_OUTPUT}" >> "$GITHUB_ENV";
@@ -60,6 +62,11 @@ jobs:
               --md-report-flavor gfm \
               --md-report-output /${TEST_REPORT_ROOT}/${TEST_REPORT_OUTPUT}
 
+      - name: Ensure tests aren't running anymore
+        if: always()
+        run: |
+          docker-compose -f docker-compose.yaml down --timeout=0
+        
       # Reporting coverage
       # https://github.com/romeovs/lcov-reporter-action
       - name: Coverage comment
