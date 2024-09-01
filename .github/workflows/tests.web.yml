@@ -65,7 +65,7 @@ jobs:
       - name: Ensure tests aren't running anymore
         if: always()
         run: |
-          docker-compose -f docker-compose.yaml down --timeout=0
+          docker compose -f docker-compose.yaml down --timeout=0
         
       # Reporting coverage
       # https://github.com/romeovs/lcov-reporter-action
