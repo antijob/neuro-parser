@@ -39,8 +39,8 @@ class BertPredictor(PredictorBase):
 
             if not model_directory.exists() or not model_directory.is_dir():
                 raise FileNotFoundError(
-                    f"Model directory {
-                        model_directory} does not exist or is not a directory."
+                    f"Model directory {model_directory} does not exist"
+                    "or is not a directory."
                 )
             return True
 
