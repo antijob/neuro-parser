@@ -33,7 +33,7 @@ class BertPredictor(PredictorBase):
 
         self.incident_type = incident_type
 
-    def can_handle(self, incident_type: IncidentType):
+    def can_handle(self, incident_type: IncidentType) -> bool:
         if incident_type.model_path:
             model_directory = MODELS_DIR.joinpath(incident_type.model_path)
 
@@ -80,7 +80,6 @@ class BertPredictor(PredictorBase):
 
             return is_incident, rate
 
-            return
         except Exception as e:
             logger.error(f"Error in predict_is_incident_bert: {e}")
             return False, None
