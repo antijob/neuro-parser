@@ -33,7 +33,8 @@ class BertPredictor(PredictorBase):
 
         self.incident_type = incident_type
 
-    def can_handle(self, incident_type: IncidentType) -> bool:
+    @classmethod
+    def can_handle(cls, incident_type: IncidentType) -> bool:
         if incident_type.model_path:
             model_directory = MODELS_DIR.joinpath(incident_type.model_path)
 

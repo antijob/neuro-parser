@@ -10,6 +10,10 @@ class PredictorBase(Handler):
         self.incident_type = incident_type
 
     @abstractmethod
+    def can_handle(self, incident_type: IncidentType) -> bool:
+        pass
+
+    @abstractmethod
     def is_incident(self, article: Article) -> tuple[bool, Any]:
         """
         Abstract method that must be implemented by subclasses

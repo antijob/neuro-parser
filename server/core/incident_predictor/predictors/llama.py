@@ -38,7 +38,8 @@ class LlamaPredictor(PredictorBase):
         self.max_new_tokens = max_new_tokens
         self.retries = retries
 
-    def can_handle(self, incident_type: IncidentType) -> bool:
+    @classmethod
+    def can_handle(cls, incident_type: IncidentType) -> bool:
         return incident_type.llm_prompt is not None
 
     def is_incident(self, article: Article) -> tuple[bool, Any]:
