@@ -61,5 +61,4 @@ class HttpClient(ClientBase):
     async def get_source(self, source: Source) -> Optional[str]:
         url = URLPreparer.source(source.url)
         content, _ = await self.get(url)
-        content.replace("\xa0", " ")
         return content

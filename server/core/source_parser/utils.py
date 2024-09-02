@@ -82,6 +82,9 @@ def build_document(html, clean=False):
     """
     if not html:
         return None
+
+    html.replace("\xa0", " ")
+
     if clean:
         html = CLEANER.clean_html(html)
     try:
