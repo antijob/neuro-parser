@@ -1,3 +1,6 @@
+from server.settings.components.common import MODELS_DIR
+from transformers import AutoTokenizer, BertForSequenceClassification
+from .base_predictor import PredictorBase
 import logging
 
 from typing import Any
@@ -18,28 +21,26 @@ logger = logging.getLogger(__name__)
 
 # TODO: convert to async
 
-from .base_predictor import PredictorBase
-
-from transformers import AutoTokenizer, BertForSequenceClassification
-from server.settings.components.common import MODELS_DIR
-
 
 class BertPredictor(PredictorBase):
     def __init__(self, incident_type: IncidentType):
         model_directory = MODELS_DIR.joinpath(incident_type.model_path)
-        self.tokenizer = AutoTokenizer.from_pretrained(model_directory, use_fast=False)
-        self.model = BertForSequenceClassification.from_pretrained(model_directory)
+        self.tokenizer = AutoTokenizer.from_pretrained(
+            model_directory, use_fast=False)
+        self.model = BertForSequenceClassification.from_pretrained(
+            model_directory)
         self.model.eval()
 
         self.incident_type = incident_type
 
-    def can_handle(incident_type: IncidentType):
+    def can_handle(self, incident_type: IncidentType):
         if incident_type.model_path:
             model_directory = MODELS_DIR.joinpath(incident_type.model_path)
 
             if not model_directory.exists() or not model_directory.is_dir():
                 raise FileNotFoundError(
-                    f"Model directory {model_directory} does not exist or is not a directory."
+                    f"Model directory {
+                        model_directory} does not exist or is not a directory."
                 )
             return True
 
@@ -72,7 +73,8 @@ class BertPredictor(PredictorBase):
             probabilities = torch.nn.functional.softmax(logits, dim=0).tolist()
 
             is_incident = (
-                probabilities[0] - probabilities[1] > self.incident_type.treshold
+                probabilities[0] -
+                probabilities[1] > self.incident_type.treshold
             )
             rate = probabilities
 
