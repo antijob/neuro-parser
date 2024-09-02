@@ -16,10 +16,7 @@ class Command(BaseCommand):
             all_channels = Channel.objects.all()
             logger.info(f"Starting processing {len(all_channels)} channels.")
             for channel in all_channels:
-                result = self.process_channel(channel)
-            logger.info(
-                f"Processed all channels.  Created {result[0]} ChannelIncidentType(s) and {result[1]} ChannelCountry(ies)."
-            )
+                self.process_channel(channel)
 
         logger.info("All statuses created or updated successfully")
 
