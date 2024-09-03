@@ -222,8 +222,7 @@ class ArticleViewSet(viewsets.ModelViewSet):
                     {"error": "Article not fetched"}, status=status.HTTP_400_BAD_REQUEST
                 )
 
-            predictor = IncidentPredictor()
-            incidents = predictor.predict(article)
+            incidents = IncidentPredictor.predict(article)
 
             incidents_serializer = MediaIncidentSerializer(incidents, many=True)
             return Response({"incidents": incidents_serializer.data})

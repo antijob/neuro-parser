@@ -1,28 +1,33 @@
 import logging
 from typing import Any
+import datetime
+
 from .parsers.base_parser import ArticleData, ParserBase
 from .parsers.tg_parser import TgParser
 from .parsers.vk_parser import VkParser
 from .parsers.ok_parser import OkParser
 from .parsers.common_parser import CommonParser
 from server.apps.core.models import Article
-import datetime
-# from asgiref.sync import sync_to_async
+from server.libs.handler import HandlerRegistry
+
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+
 class ArticleParser:
-    parsers: list[ParserBase] = [VkParser, OkParser, TgParser, CommonParser]
+    registry = HandlerRegistry[ParserBase]()
+    registry.register(VkParser)
+    registry.register(OkParser)
+    registry.register(TgParser)
+    registry.register(CommonParser)
 
     @classmethod
     def parse_article_raw_data(cls, url: str, data) -> ArticleData:
         try:
-            for parser in cls.parsers:
-                if parser.can_handle(url):
-                    return parser.parse_raw_data(data)
-            raise ValueError("No suitable parser found")
+            parser = cls.registry.choose(url)
+            return parser.parse_raw_data(data)
         except Exception as e:
             logger.error(f"Error parsing article raw data from URL {url}: {e}")
             raise
