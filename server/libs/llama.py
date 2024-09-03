@@ -35,7 +35,7 @@ def predict_is_incident_llama(incident_type: IncidentType, article: Article,  mo
         try:
             model_input = {
                 "prompt": cut_text,
-                "system_prompt":  SYSTEM_LLM_PROMPT_EXTRA + incident_type.llm_prompt,
+                "system_prompt":  incident_type.llm_prompt + SYSTEM_LLM_PROMPT_EXTRA,
                 "max_new_tokens": max_new_tokens,
                 "top_p": 0.95,
                 "max_tokens": 512,
