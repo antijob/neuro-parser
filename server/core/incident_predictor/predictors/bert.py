@@ -25,10 +25,8 @@ logger = logging.getLogger(__name__)
 class BertPredictor(PredictorBase):
     def __init__(self, incident_type: IncidentType):
         model_directory = MODELS_DIR.joinpath(incident_type.model_path)
-        self.tokenizer = AutoTokenizer.from_pretrained(
-            model_directory, use_fast=False)
-        self.model = BertForSequenceClassification.from_pretrained(
-            model_directory)
+        self.tokenizer = AutoTokenizer.from_pretrained(model_directory, use_fast=False)
+        self.model = BertForSequenceClassification.from_pretrained(model_directory)
         self.model.eval()
 
         self.incident_type = incident_type
@@ -44,6 +42,7 @@ class BertPredictor(PredictorBase):
                     "or is not a directory."
                 )
             return True
+        return False
 
     def is_incident(self, article: Article) -> tuple[bool, Any]:
         normalized_text = normalize_text(article.text)
@@ -74,8 +73,7 @@ class BertPredictor(PredictorBase):
             probabilities = torch.nn.functional.softmax(logits, dim=0).tolist()
 
             is_incident = (
-                probabilities[0] -
-                probabilities[1] > self.incident_type.treshold
+                probabilities[0] - probabilities[1] > self.incident_type.treshold
             )
             rate = probabilities
 

@@ -10,6 +10,7 @@ class Handler(ABC):
     in subclasses.
     """
 
+    @classmethod
     @abstractmethod
     def can_handle(self, *args, **kwargs) -> bool:
         """
