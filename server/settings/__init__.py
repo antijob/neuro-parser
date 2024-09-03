@@ -26,6 +26,7 @@ base_settings = [
     "components/celery.py",
     "components/sentry.py",
     "components/telegram.py",
+    "components/telethon.py",
     "components/api.py",
     # You can even use glob:
     # 'components/*.py'
