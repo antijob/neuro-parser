@@ -69,3 +69,8 @@ doc = ["mkdocs"]
 [build-system]
 requires = ["pdm-backend"]
 build-backend = "pdm.backend"
+
+[tool.black]
+line-length = 88
+target-version = ['py39']
+skip-string-normalization = false
