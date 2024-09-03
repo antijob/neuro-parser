@@ -15,10 +15,12 @@ class Command(BaseCommand):
         with transaction.atomic():
             all_channels = Channel.objects.all()
             logger.info(f"Starting processing {len(all_channels)} channels.")
+            result_sum = (0, 0)
             for channel in all_channels:
                 result = self.process_channel(channel)
+                result_sum = (result_sum[0] + result[0], result_sum[1] + result[1])
             logger.info(
-                f"Processed all channels.  Created {result[0]} ChannelIncidentType(s) and {result[1]} ChannelCountry(ies)."
+                f"Processed all channels.  Created {result_sum[0]} ChannelIncidentType(s) and {result_sum[1]} ChannelCountry(ies)."
             )
 
         logger.info("All statuses created or updated successfully")
@@ -40,9 +42,6 @@ class Command(BaseCommand):
 
             # Process Countries for each ChannelIncidentType
             for country in Country.objects.all():
-                logger.debug(
-                    f"Processing country {country.id} for ChannelIncidentType {channel_incident_type.id}."
-                )
                 channel_country, created = ChannelCountry.objects.get_or_create(
                     channel_incident_type=channel_incident_type,
                     country=country,
