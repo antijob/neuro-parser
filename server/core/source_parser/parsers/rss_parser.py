@@ -1,8 +1,10 @@
 from typing import Iterable
 import re
-from .base_parser import ParserBase
+from .base_parser import ParserBase, Source
 from ..utils import is_correct_article_link, get_absolute_url, is_rss_link
 import feedparser
+
+from ..utils import build_document
 
 
 def find_rss_urls(source_url: str, document) -> Iterable[str]:
@@ -22,13 +24,15 @@ def find_rss_urls(source_url: str, document) -> Iterable[str]:
 
 class RssParser(ParserBase):
     @classmethod
-    def can_handle(cls, url: str) -> bool:
-        return re.match(r"https?://.*\.(rss|xml|feed)$", url) is not None
+    def can_handle(cls, source: Source) -> bool:
+        return re.match(r"https?://.*\.(rss|xml|feed)$", source.url) is not None
 
     @classmethod
     def extract_urls(cls, source_url: str, document=None) -> Iterable[str]:
         if document is None:
             return []
+
+        document = build_document(document, clean=True)
 
         rss_urls = find_rss_urls(source_url, document)
         for rss_url in rss_urls:
