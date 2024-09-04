@@ -9,6 +9,13 @@ from .parsers.tg_parser import TgParser
 from .parsers.common_parser import CommonParser
 from .parsers.rss_parser import RssParser
 
+
+from .parsers.vk_parser import VkParser
+from .parsers.ok_parser import OkParser
+from .parsers.tg_parser import TgParser
+from .parsers.common_parser import CommonParser
+from .parsers.rss_parser import RssParser
+
 from server.apps.core.models import Article, Source
 from server.libs.handler import HandlerRegistry
 
