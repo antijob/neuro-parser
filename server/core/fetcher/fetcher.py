@@ -63,12 +63,15 @@ class Fetcher:
         coro = fetch_source_articles(source, list(articles))
         self.coroutines.append(coro)
 
-    async def _await(self) -> list[int]:
-        results = await asyncio.gather(*self.coroutines, return_exceptions=False)
-        return results
-
     def await_tasks(self) -> int:
-        results = asyncio.run(self._await())
+        loop = asyncio.get_event_loop()
+        if loop.is_closed():
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+        results = loop.run_until_complete(
+            asyncio.gather(*self.coroutines, return_exceptions=False)
+        )
+
         fetched_total = 0
         for res in results:
             if isinstance(res, BaseException):
