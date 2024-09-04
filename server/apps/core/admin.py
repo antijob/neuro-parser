@@ -33,8 +33,7 @@ class IncidentTypeAdmin(admin.ModelAdmin):
         for obj in queryset:
             obj.is_active = False
             obj.save()
-        self.message_user(
-            request, f"{queryset.count()} models will be switched.")
+        self.message_user(request, f"{queryset.count()} models will be switched.")
 
     disable_models.short_description = "Disable models"
 
@@ -42,8 +41,7 @@ class IncidentTypeAdmin(admin.ModelAdmin):
         for obj in queryset:
             obj.is_active = True
             obj.save()
-        self.message_user(
-            request, f"{queryset.count()} models will be switched.")
+        self.message_user(request, f"{queryset.count()} models will be switched.")
 
     enable_models.short_description = "Enable models"
 
@@ -66,6 +64,7 @@ class ArticleAdmin(admin.ModelAdmin):
     list_display = (
         "url",
         "publication_date",
+        "create_date",
         "title",
         "is_downloaded",
         "is_parsed",
@@ -73,7 +72,7 @@ class ArticleAdmin(admin.ModelAdmin):
         "is_redirect",
         "rate",
     )
-    ordering = ("-publication_date",)
+    ordering = ("-create_date",)
     actions = ["force_parse"]
     search_fields = ["url", "title"]
 
@@ -81,8 +80,7 @@ class ArticleAdmin(admin.ModelAdmin):
         for obj in queryset:
             obj.is_parsed = False
             obj.save()
-        self.message_user(
-            request, f"{queryset.count()} articles will be parsed.")
+        self.message_user(request, f"{queryset.count()} articles will be parsed.")
 
     force_parse.short_description = "Force parse"
 
@@ -123,8 +121,7 @@ class SourceAdmin(admin.ModelAdmin):
         for obj in queryset:
             obj.is_active = False
             obj.save()
-        self.message_user(
-            request, f"{queryset.count()} sources were deactivate.")
+        self.message_user(request, f"{queryset.count()} sources were deactivate.")
 
     activate.short_description = "Activate sources"
     deactivate.short_description = "Deactivate sources"
