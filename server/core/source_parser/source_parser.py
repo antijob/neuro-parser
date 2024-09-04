@@ -16,7 +16,6 @@ from server.apps.core.models import Article, Source
 from server.core.fetcher import Fetcher
 from server.libs.handler import HandlerRegistry
 
-from asgiref.sync import async_to_sync
 
 
 CLEANER = Cleaner(
@@ -64,7 +63,12 @@ def build_document(html, clean=False):
     return document
 
 
-def add_articles(source: Source, urls: list[str]) -> list[Article]:
+from asgiref.sync import sync_to_async
+
+
+async def add_articles(
+    source: Source, articles: list[Union[str, Article]]
+) -> list[Article]:
     pattern = re.compile(r"https?://(?P<url_without_method>.+)")
     added = []
 
@@ -75,13 +79,11 @@ def add_articles(source: Source, urls: list[str]) -> list[Article]:
 
         url_without_method = match.group("url_without_method")
 
-        if not Article.objects.filter(url__iendswith=url_without_method).exists():
-            try:
-                added.append(Article.objects.create(url=url, source=source))
-            except Exception as e:
-                raise type(e)(
-                    f"When adding articles with {url} exception occurred: {e}"
-                )
+        # unefficient:
+        if not await sync_to_async(
+            Article.objects.filter(url__iendswith=url_without_method).exists
+        )():
+            added.append(article)
 
     return added
 
@@ -106,9 +108,12 @@ class SourceParser:
         return parser.extract_urls(url, document)
 
     @classmethod
-    def create_new_articles(cls, source: Source) -> int:
-        urls = async_to_sync(cls.extract_all_news_urls)(source)
+    async def create_new_articles(cls, source: Source) -> int:
+        urls = await cls.extract_all_news_urls(source)
         if not urls:
             return 0
-        added = add_articles(source, urls)
+
+        added = await add_articles(source, urls)
+        for article in added:
+            await sync_to_async(article.save)()
         return len(added)
