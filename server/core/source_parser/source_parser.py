@@ -1,11 +1,5 @@
-from typing import Iterable, Optional
-
+from typing import Iterable, Union
 from .parsers.base_parser import ParserBase
-
-import re
-from lxml.html.clean import Cleaner
-from selectolax.parser import HTMLParser
-
 
 from .parsers.vk_parser import VkParser
 from .parsers.ok_parser import OkParser
@@ -17,52 +11,6 @@ from server.apps.core.models import Article, Source
 from server.core.fetcher import Fetcher
 from server.libs.handler import HandlerRegistry
 
-
-CLEANER = Cleaner(
-    scripts=True,
-    javascript=True,
-    comments=True,
-    style=True,
-    links=True,
-    meta=True,
-    add_nofollow=False,
-    page_structure=True,
-    processing_instructions=True,
-    embedded=True,
-    frames=True,
-    forms=True,
-    annoying_tags=True,
-    kill_tags=["img", "noscript", "button"],
-    remove_unknown_tags=True,
-    safe_attrs_only=False,
-)
-
-
-async def get_source_data(source: Source) -> Optional[str]:
-    """Get document by given url"""
-    html = await Fetcher.download_source(source)
-    if html:
-        html = html.replace("\xa0", " ")
-    return html
-
-
-def build_document(html, clean=False):
-    """
-    Return etree document
-    cleans it if clean = True
-    """
-    if not html:
-        return None
-    if clean:
-        html = CLEANER.clean_html(html)
-    try:
-        document = HTMLParser(html)
-    except ValueError:
-        pass
-
-    return document
-
-
 from asgiref.sync import sync_to_async
 
 
@@ -71,7 +19,14 @@ async def add_articles(
 ) -> list[Article]:
     added = []
 
-    for url in urls:
+    for article in articles:
+        if isinstance(article, Article):
+            url = article.url
+            article = article
+        else:
+            url = article
+            article = Article(url=url, source=source)
+
         try:
             article, created = await sync_to_async(Article.objects.get_or_create)(
                 url=url, source=source
@@ -95,13 +50,12 @@ class SourceParser:
     @classmethod
     async def _extract_all_news_urls(cls, source: Source) -> Iterable[str]:
         url = source.url
-        html = await get_source_data(source)
+        html = await Fetcher.download_source(source)
         if html is None:
             return None
 
-        document = build_document(html, clean=True)
-        parser = cls.registry.choose(url)
-        return parser.extract_urls(url, document)
+        parser = cls.registry.choose(source)
+        return parser.extract_urls(url, html)
 
     @classmethod
     async def create_new_articles(cls, source: Source) -> int:
