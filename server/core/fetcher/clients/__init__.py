@@ -1,2 +1,2 @@
-from client import NPClient
-from client_factory import ClientFactory
+from server.core.fetcher.clients.http_client import HttpClient
+from .client_factory import ClientFactory
