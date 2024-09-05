@@ -15,17 +15,11 @@ from .base_client import ClientBase
 
 
 class HttpClient(ClientBase):
-========
-from base_client import BaseClient
-
-
-class NPClient(BaseClient):
->>>>>>>> f5caca9 (Refactor Fetcher clients; Add clients fabric):server/core/fetcher/clients/client.py
-    def __init__(self):
-        pass
+    def __init__(self, proxy: Optional[str] = None):
+        self.proxy = proxy
 
     @staticmethod
-    def session():
+    def session() -> aiohttp.ClientSession:
         return aiohttp.ClientSession(
             trust_env=True,
             connector=aiohttp.TCPConnector(ssl=False),
@@ -40,7 +34,9 @@ class NPClient(BaseClient):
         await self._session.__aexit__(exc_type, exc_value, traceback)
 
     async def get(self, url: str) -> tuple[str, str]:
-        async with self._session.get(url, allow_redirects=True) as response:
+        async with self._session.get(
+            url, allow_redirects=True, proxy=self.proxy
+        ) as response:
             if response.ok:
                 return [await response.text(), str(response.url)]
             else:
