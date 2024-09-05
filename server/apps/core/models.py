@@ -38,8 +38,7 @@ DEFAULT_COUNTRY_ID: int = 11  # RUssia
 
 
 class Country(models.Model):
-    name = models.CharField("Страна", choices=COUNTRIES,
-                            default="RUS", max_length=100)
+    name = models.CharField("Страна", choices=COUNTRIES, default="RUS", max_length=100)
 
     def __str__(self) -> str:
         return self.get_full_country_name()
@@ -53,8 +52,7 @@ class Country(models.Model):
 
 
 class Region(models.Model):
-    name = models.CharField("Регион", choices=REGIONS,
-                            default="ALL", max_length=100)
+    name = models.CharField("Регион", choices=REGIONS, default="ALL", max_length=100)
     country = models.ForeignKey(Country, on_delete=models.CASCADE)
 
     def __str__(self) -> str:
@@ -128,8 +126,7 @@ class BaseIncident(models.Model):
     public_title = models.CharField(
         "Публичное название", max_length=512, null=True, blank=True
     )
-    public_description = models.TextField(
-        "Публичное описание", null=True, blank=True)
+    public_description = models.TextField("Публичное описание", null=True, blank=True)
 
     class Meta:
         abstract = True
@@ -168,8 +165,7 @@ class MediaIncident(BaseIncident):
 
 
 class Source(models.Model):
-    url = models.TextField(
-        verbose_name="URL списка новостей", null=False, unique=True)
+    url = models.TextField(verbose_name="URL списка новостей", null=False, unique=True)
     is_active = models.BooleanField(verbose_name="Активен", default=True)
     country = models.ForeignKey(
         Country,
@@ -179,6 +175,7 @@ class Source(models.Model):
     region = models.ForeignKey(
         Region, on_delete=models.SET_NULL, default=None, null=True, blank=True
     )
+    needs_proxy = models.BooleanField(verbose_name=_("Требуется прокси"), default=False)
 
     class Meta:
         verbose_name = "Источник"
@@ -197,24 +194,20 @@ class Article(models.Model):
         null=True,
         blank=True,
     )
-    url = models.URLField(
-        primary_key=True, verbose_name="URL", default="", blank=True)
+    url = models.URLField(primary_key=True, verbose_name="URL", default="", blank=True)
     title = models.TextField(
         verbose_name="Заголовок", default="", blank=True, null=True
     )
-    text = models.TextField(verbose_name="Текст",
-                            default="", blank=True, null=True)
+    text = models.TextField(verbose_name="Текст", default="", blank=True, null=True)
     is_downloaded = models.BooleanField(verbose_name="Скачана", default=False)
     is_parsed = models.BooleanField(verbose_name="Обработана", default=False)
     is_incident_created = models.BooleanField(
         verbose_name="Инцидент создан", default=False
     )
     is_duplicate = models.BooleanField(verbose_name="Дубликат", default=False)
-    duplicate_url = models.URLField(
-        verbose_name="Дубликат чего", null=True, blank=True)
+    duplicate_url = models.URLField(verbose_name="Дубликат чего", null=True, blank=True)
     is_redirect = models.BooleanField(verbose_name="Редирект", default=False)
-    redirect_url = models.URLField(
-        verbose_name="Редирект куда", null=True, blank=True)
+    redirect_url = models.URLField(verbose_name="Редирект куда", null=True, blank=True)
 
     rate = models.JSONField(verbose_name="Оценка релевантности", default=dict)
     incident = models.OneToOneField(
@@ -226,8 +219,7 @@ class Article(models.Model):
         on_delete=models.SET_NULL,
     )
     create_date = models.DateField("Дата создания", auto_now_add=True)
-    publication_date = models.DateField(
-        "Дата публикации", null=True, blank=True)
+    publication_date = models.DateField("Дата публикации", null=True, blank=True)
 
     def save(self, *args, **kwargs):
         self.title = self.any_title()
