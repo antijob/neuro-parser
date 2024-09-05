@@ -5,7 +5,7 @@ from random import choice
 class ProxyManager:
     @staticmethod
     def get_proxy() -> str:
-        return choice(ProxyF._get_proxies())
+        return choice(ProxyManager._get_proxies())
 
     @staticmethod
     def _get_proxies() -> list[str]:
