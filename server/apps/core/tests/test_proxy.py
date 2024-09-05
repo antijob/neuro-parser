@@ -21,7 +21,7 @@ class ProxyManagerTestCase(TestCase):
         self.assertIn("10.0.0.1:3128", proxies)
 
     def test_get_proxy(self):
-        proxy = ProxyF.get_proxy()
+        proxy = ProxyManager.get_proxy()
         self.assertIn(proxy, ["192.168.1.1:8080", "10.0.0.1:3128"])
 
     def test_get_proxy_with_no_proxies(self):
