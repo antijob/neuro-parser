@@ -188,6 +188,7 @@ class Source(models.Model):
     region = models.ForeignKey(
         Region, on_delete=models.SET_NULL, default=None, null=True, blank=True
     )
+    needs_proxy = models.BooleanField(verbose_name=_("Требуется прокси"), default=False)
 
     class Meta:
         verbose_name = "Источник"
