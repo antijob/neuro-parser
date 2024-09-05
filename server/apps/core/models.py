@@ -188,9 +188,7 @@ class Article(models.Model):
         null=True,
         blank=True,
     )
-    url = models.URLField(
-        verbose_name="URL", default="", blank=True, max_length=1024, primary_key=True
-    )
+    url = models.URLField(verbose_name="URL", max_length=1024, primary_key=True)
     title = models.TextField(
         verbose_name="Заголовок", default="", blank=True, null=True
     )
