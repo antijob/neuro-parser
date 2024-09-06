@@ -6,10 +6,10 @@ from typing import Optional
 from aiogram.exceptions import TelegramBadRequest
 from asgiref.sync import sync_to_async
 
-from server.apps.bot.bot_instance import get_bot
 from server.apps.bot.models import Channel, ChannelCountry, ChannelIncidentType
 from server.apps.core.data.messages import NEW_INCIDENT_TEMPLATE
 from server.apps.core.models import MediaIncident
+from server.celery.bot import send_message_to_channels
 
 logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 logger = logging.getLogger(__name__)
@@ -53,7 +53,7 @@ def prepare_message(inc: MediaIncident) -> str:
     )
 
 
-async def process_channel(bot, chn, inc: MediaIncident, msg: str) -> bool:
+async def process_channel(chn, inc: MediaIncident, msg: str) -> bool:
     try:
         channel_incident, channel_country = await get_channel_data(chn, inc)
         if not (channel_incident and channel_country):
@@ -70,7 +70,7 @@ async def process_channel(bot, chn, inc: MediaIncident, msg: str) -> bool:
                 return False
 
         try:
-            await bot.send_message(text=msg, chat_id=chn.channel_id)
+            send_message_to_channels.delay(msg, chn.channel_id)
         except TelegramBadRequest as e:
             logger.warning(f"Can't send message to channel {chn.channel_id}: {e}")
         logger.info(f"Sent message to channel {chn.channel_id}")
@@ -95,16 +95,15 @@ async def post_incident(inc: MediaIncident):
         msg = await prepare_message(inc)
         logger.info("Message prepared successfully")
 
-        async with get_bot() as bot:
-            tasks = [process_channel(bot, chn, inc, msg) for chn in all_channels]
-            results = await asyncio.gather(*tasks, return_exceptions=True)
+        tasks = [process_channel(chn, inc, msg) for chn in all_channels]
+        results = await asyncio.gather(*tasks, return_exceptions=True)
 
-            success_count = sum(1 for r in results if r is True)
-            error_count = sum(1 for r in results if r is False)
+        success_count = sum(1 for r in results if r is True)
+        error_count = sum(1 for r in results if r is False)
 
-            logger.info(
-                f"Processed all channels. Successes: {success_count}, Errors: {error_count}"
-            )
+        logger.info(
+            f"Processed all channels. Successes: {success_count}, Errors: {error_count}"
+        )
     except Exception as e:
         logger.error(f"Error in post_incident: {e}", exc_info=True)
         raise

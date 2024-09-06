@@ -1,11 +1,12 @@
+import asyncio
 from datetime import datetime, timedelta
 from itertools import islice
 
 from celery import group
 from celery.utils.log import get_task_logger
 
+from server.apps.bot.services.inc_post import post_incident
 from server.apps.core.models import Article
-from server.celery.bot import send_incident_notification
 from server.core.article_index.query_checker import mark_duplicates
 from server.core.incident_predictor import IncidentPredictor
 from server.settings.components.celery import INCIDENT_BATCH_SIZE
@@ -93,7 +94,7 @@ def create_incidents(batch):
 
         for incident in incidents_created:
             logger.info(f"Queueing notification for incident: {incident}")
-            send_incident_notification.delay(incident.id)
+            asyncio.run(post_incident(incident))
 
         logger.info(f"Batch finished. Incidents created: {incidents_count}")
         return f"Batch finished. Incidents created: {incidents_count}"
