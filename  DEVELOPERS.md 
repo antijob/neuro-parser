@@ -1,0 +1,211 @@
+# Руководство по разработке
+
+Этот документ содержит инструкции для разработчиков, в том числе управление Python-пакетами, запуск проекта локально и в продакшене, настройку Telegram-бота, рассылку сообщений и использование API.
+
+## Оглавление
+1. [Управление Python-пакетами](#управление-python-пакетами)
+2. [Локальный запуск](#локальный-запуск)
+3. [Запуск в продакшене](#запуск-в-продакшене)
+4. [Настройка Telegram-бота](#настройка-telegram-бота)
+6. [API моделей](#api-моделей)
+7. [Внесение вклада](#внесение-вклада)
+8. [Контакты](#контакты)
+
+---
+
+## Управление Python-пакетами
+
+Для управления Python-пакетами мы используем [PDM](https://pdm-project.org/):
+
+```bash
+# установка всех зафиксированных пакетов из файла блокировки
+pdm install
+
+# разрешение всех зависимостей и фиксация пакетов в lock-файл
+pdm lock
+
+# обновление всех пакетов
+pdm update
+
+# добавление нового пакета в pyproject.toml без создания venv
+pdm add --no-sync <package_name>
+```
+
+Файлы `pyproject.toml` и `pdm.lock` должны быть включены в git.
+
+---
+
+## Локальный запуск
+
+1. Создайте файл `.env` на основе `.env.template` и инициализируйте базу данных.
+2. Выполните следующую команду в корневом каталоге для запуска локального контейнера:
+
+```bash
+docker-compose up -d
+```
+
+3. Добавьте следующие строки в файл `/etc/hosts` для разрешения локальных доменов Traefik:
+
+```bash
+127.0.0.1 report.local
+127.0.0.1 flower-report.local
+```
+
+4. Доступ к административной панели: `http://report.local/s/ecret/admin` или используйте API: `http://report.local/api`.
+
+---
+
+## Запуск в продакшене
+
+1. Измените файл `config/.env` и создайте базу данных.
+2. Выполните следующую команду в корневом каталоге для запуска контейнера в продакшене:
+
+```bash
+docker-compose -f docker-compose.prod.yaml up -d
+```
+
+---
+
+## Настройка Telegram-бота
+
+Вы можете использовать Telegram-бота для получения уведомлений о новых инцидентах.
+
+### Настройка
+
+1. Зарегистрируйте нового бота через [BotFather](https://t.me/BotFather).
+2. Добавьте следующие настройки в файл `.env`:
+
+```bash
+TELEGRAM_BOT_TOKEN=
+```
+
+- `TELEGRAM_BOT_TOKEN` - Токен, выданный BotFather.
+
+3. Создайте новый чат в Telegram, добавьте бота, и он будет запоминать группу для уведомлений.
+4. Чтобы получать уведомления только по определённым категориям, используйте команду `/categ` в чате.
+5. Вы также можете управлять каналами через админ-панель Django в разделе Bot.
+
+---
+
+## API моделей
+
+Для вызова внешних моделей используется [Replicate.com](https://replicate.com/), что является более дешёвой альтернативой ChatGPT.
+
+---
+
+## Внесение вклада
+
+Мы приветствуем участие сообщества. Пожалуйста, следуйте инструкциям в файле [CONTRIBUTING.md](CONTRIBUTING.md).
+
+---
+
+## Контакты
+
+Если у вас есть вопросы или требуется помощь, свяжитесь с нами по адресу info@antijob.net.
+
+---
+
+# Development Guide
+
+This document provides guidelines for developers contributing to the project, covering Python package management, running the project locally or in production, setting up a Telegram bot, broadcasting messages, and API usage.
+
+## Table of Contents
+1. [Managing Python Packages](#managing-python-packages)
+2. [Running Locally](#running-locally)
+3. [Running in Production](#running-in-production)
+4. [Telegram Bot Setup](#telegram-bot-setup)
+6. [Model API](#model-api)
+7. [Contributing](#contributing)
+8. [Contact](#contact)
+
+---
+
+## Managing Python Packages
+
+For managing Python packages, we use [PDM](https://pdm-project.org/):
+
+```bash
+# install all locked packages from lock file
+pdm install
+
+# resolve all dependencies and lock packages to lock file
+pdm lock
+
+# update all packages 
+pdm update
+
+# add new package to pyproject.toml without creating venv
+pdm add --no-sync <package_name>
+```
+
+Both `pyproject.toml` and `pdm.lock` files should be included in git.
+
+---
+
+## Running Locally
+
+1. Create an `.env` file from `.env.template` and initialize the database.
+2. Run the following command inside the root directory to start the local container:
+
+```bash
+docker-compose up -d
+```
+
+3. Add the following lines to your `/etc/hosts` file to resolve local domains for Traefik:
+
+```bash
+127.0.0.1 report.local
+127.0.0.1 flower-report.local
+```
+
+4. Access the admin panel at `http://report.local/s/ecret/admin` or use the API at `http://report.local/api`.
+
+---
+
+## Running in Production
+
+1. Modify the `config/.env` file and create the database.
+2. Run the following command inside the root directory to start the production container:
+
+```bash
+docker-compose -f docker-compose.prod.yaml up -d
+```
+
+---
+
+## Telegram Bot Setup
+
+You can use the Telegram bot to receive notifications about new incidents.
+
+### Setup
+
+1. Register a new bot with [BotFather](https://t.me/BotFather).
+2. Add the following settings to the `.env` file:
+
+```bash
+TELEGRAM_BOT_TOKEN=
+```
+
+- `TELEGRAM_BOT_TOKEN` - The token provided by BotFather.
+
+3. Create a new Telegram chat, add the bot, and it will remember the group for notifications.
+4. To receive notifications for specific categories, use the `/categ` command in the chat.
+5. You can also manage channels via the Django admin panel under the Bot section.
+
+---
+
+## Model API
+
+For external model API calls, we use [Replicate.com](https://replicate.com/) as a cost-effective alternative to ChatGPT.
+
+---
+
+## Contributing
+
+We welcome contributions from the community. Please follow the guidelines in the [CONTRIBUTING.md](CONTRIBUTING.md) file.
+
+---
+
+## Contact
+
+If you have any questions or need further assistance, feel free to contact us at info@antijob.net.
