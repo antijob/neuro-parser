@@ -8,8 +8,9 @@
 3. [Запуск в продакшене](#запуск-в-продакшене)
 4. [Настройка Telegram-бота](#настройка-telegram-бота)
 6. [API моделей](#api-моделей)
-7. [Внесение вклада](#внесение-вклада)
-8. [Контакты](#контакты)
+7. [REST API интерфейс](#rest-api)
+8. [Внесение вклада](#внесение-вклада)
+9. [Контакты](#контакты)
 
 ---
 
@@ -95,6 +96,12 @@ TELEGRAM_BOT_TOKEN=
 
 ---
 
+## REST API интерфейс
+
+Сделан на базе `django-rest-api-framework` документация автоматически генерируется swagger и доступна по пути `/swagger-ui`
+
+---
+
 ## Внесение вклада
 
 Мы приветствуем участие сообщества. Пожалуйста, следуйте инструкциям в файле [CONTRIBUTING.md](CONTRIBUTING.md).
@@ -107,6 +114,7 @@ TELEGRAM_BOT_TOKEN=
 
 ---
 
+
 # Development Guide
 
 This document provides guidelines for developers contributing to the project, covering Python package management, running the project locally or in production, setting up a Telegram bot, broadcasting messages, and API usage.
@@ -116,7 +124,8 @@ This document provides guidelines for developers contributing to the project, co
 2. [Running Locally](#running-locally)
 3. [Running in Production](#running-in-production)
 4. [Telegram Bot Setup](#telegram-bot-setup)
-6. [Model API](#model-api)
+5. [Model API](#model-api)
+6. [REST API Interface](#rest-api-interface)
 7. [Contributing](#contributing)
 8. [Contact](#contact)
 
@@ -162,6 +171,8 @@ docker-compose up -d
 
 4. Access the admin panel at `http://report.local/s/ecret/admin` or use the API at `http://report.local/api`.
 
+5. For the system to work fully, add links to sources and incident types for tracking.
+
 ---
 
 ## Running in Production
@@ -199,6 +210,12 @@ TELEGRAM_BOT_TOKEN=
 ## Model API
 
 For external model API calls, we use [Replicate.com](https://replicate.com/) as a cost-effective alternative to ChatGPT.
+
+---
+
+## REST API Interface
+
+The REST API is built using the `django-rest-framework`. Documentation is automatically generated using Swagger and is available at `/swagger-ui`.
 
 ---
 
