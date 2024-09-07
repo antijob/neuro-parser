@@ -1,23 +1,21 @@
 from typing import Iterable, Optional
-from .parsers.base_parser import ParserBase
+from urllib.parse import urlparse
 
-import re
+from asgiref.sync import async_to_sync
+from django.db import transaction
 from lxml.html.clean import Cleaner
 from selectolax.parser import HTMLParser
-
-
-from .parsers.vk_parser import VkParser
-from .parsers.ok_parser import OkParser
-from .parsers.tg_parser import TgParser
-from .parsers.common_parser import CommonParser
-from .parsers.rss_parser import RssParser
 
 from server.apps.core.models import Article, Source
 from server.core.fetcher import Fetcher
 from server.libs.handler import HandlerRegistry
 
-from asgiref.sync import async_to_sync
-
+from .parsers.base_parser import ParserBase
+from .parsers.common_parser import CommonParser
+from .parsers.ok_parser import OkParser
+from .parsers.rss_parser import RssParser
+from .parsers.tg_parser import TgParser
+from .parsers.vk_parser import VkParser
 
 CLEANER = Cleaner(
     scripts=True,
@@ -65,23 +63,21 @@ def build_document(html, clean=False):
 
 
 def add_articles(source: Source, urls: list[str]) -> list[Article]:
-    pattern = re.compile(r"https?://(?P<url_without_method>.+)")
     added = []
 
     for url in urls:
-        match = pattern.match(url)
-        if not match:
-            continue
-
-        url_without_method = match.group("url_without_method")
-
-        if not Article.objects.filter(url__iendswith=url_without_method).exists():
-            try:
-                added.append(Article.objects.create(url=url, source=source))
-            except Exception as e:
-                raise type(e)(
-                    f"When adding articles with {url} exception occurred: {e}"
-                )
+        with transaction.atomic():
+            if not Article.objects.filter(url__iendswith=url.split("://")[1]).exists():
+                try:
+                    article, created = Article.objects.get_or_create(
+                        url=url, source=source
+                    )
+                    if created:
+                        added.append(article)
+                except Exception as e:
+                    raise type(e)(
+                        f"When adding articles with {url} exception occurred: {e}"
+                    )
 
     return added
 
