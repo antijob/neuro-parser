@@ -3,8 +3,11 @@
     "model": "core.incidenttype",
     "pk": 1,
     "fields": {
+      "model_path": "",
+      "treshold": 1.0,
       "description": "Пупа",
-      "is_active": true,
+      "llm_prompt": "",
+      "is_active": false,
       "should_sent_to_bot": true
     }
   },
@@ -12,7 +15,22 @@
     "model": "core.incidenttype",
     "pk": 2,
     "fields": {
+      "model_path": "",
+      "treshold": 1.0,
       "description": "Лупа",
+      "llm_prompt": "",
+      "is_active": false,
+      "should_sent_to_bot": true
+    }
+  },
+  {
+    "model": "core.incidenttype",
+    "pk": 3,
+    "fields": {
+      "model_path": "",
+      "treshold": 1.0,
+      "description": "LLAMa",
+      "llm_prompt": "Является ли этот текст новостью?",
       "is_active": true,
       "should_sent_to_bot": true
     }
