@@ -1,12 +1,15 @@
 import logging
+
+from typing import Optional
 import datetime
 
-from server.libs import llama, bert
 from server.apps.core.models import IncidentType, Article, MediaIncident
+from server.libs.handler import HandlerRegistry
 
-from transformers import AutoTokenizer, BertForSequenceClassification
+from .predictors.base_predictor import PredictorBase
+from .predictors.bert import BertPredictor
+from .predictors.llama import LlamaPredictor
 
-from server.settings.components.common import MODELS_DIR, REPLICATE_MODEL_NAME
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -20,53 +23,22 @@ logger = logging.getLogger(__name__)
 
 
 class IncidentPredictor:
-    tokenizer: any
-    model: any
-    is_llm_setup: bool
+    registry = HandlerRegistry[PredictorBase]()
+    registry.register(BertPredictor)
+    registry.register(LlamaPredictor)
 
-    def setup_incident_type(self, incident_type: IncidentType):
+    @classmethod
+    def make_predictor(cls, incident_type: IncidentType) -> Optional[PredictorBase]:
         try:
-            self.is_llm_setup = False
-            if incident_type.model_path:
-                model_directory = MODELS_DIR.joinpath(incident_type.model_path)
-
-                if not model_directory.exists() or not model_directory.is_dir():
-                    raise FileNotFoundError(
-                        f"Model directory {model_directory} does not exist or is not a directory."
-                    )
-
-                self.tokenizer = AutoTokenizer.from_pretrained(
-                    model_directory, use_fast=False
-                )
-                self.model = BertForSequenceClassification.from_pretrained(
-                    model_directory
-                )
-                self.model.eval()
-            elif incident_type.llm_prompt:
-                self.is_llm_setup = True
+            predictor = cls.registry.choose(incident_type)
+            return predictor(incident_type)
         except Exception as e:
             logger.error(f"Error in setup_incident_type: {e}", exc_info=True)
 
-    # Как-то надо в этом месте отмечать, что article -- mutable
-
-    def _is_incident(self, article: Article, incident_type: IncidentType) -> bool:
-        try:
-            logger.debug(incident_type)
-            if self.is_llm_setup:
-                return llama.predict_is_incident_llama(
-                    incident_type, article, REPLICATE_MODEL_NAME
-                )
-            else:
-                return bert.predict_is_incident_bert(
-                    incident_type, article, self.model, self.tokenizer
-                )
-        except Exception as e:
-            logger.error("Error in _is_incident: %s: %s", e.__class__.__name__, e.args)
-            return False
-
-    def _create_incident(
-        self, article: Article, incident_type: IncidentType
-    ) -> MediaIncident:
+    @staticmethod
+    def create_incident(
+        article: Article, incident_type: IncidentType
+    ) -> Optional[MediaIncident]:
         try:
             media_incident = MediaIncident.objects.create(
                 urls=[article.url],
@@ -83,28 +55,32 @@ class IncidentPredictor:
             )
             return media_incident
         except Exception as e:
-            logger.error(f"Error in _create_incident: {e}")
-            return None  # Default value if an error occurs
+            logger.error(f"Error in create_incident: {e}")
+            return None
 
-    def predict_batch(self, batch: list[Article]) -> list[MediaIncident]:
+    @classmethod
+    def predict_batch(cls, batch: list[Article]) -> list[MediaIncident]:
         try:
-            incidents_count: int = 0
             result_incidents: list[MediaIncident] = []
             for incident_type in IncidentType.objects.all():
                 if not incident_type.is_active:
                     continue
 
-                self.setup_incident_type(incident_type)
+                predictor = cls.make_predictor(incident_type)
                 for article in batch:
-                    if self._is_incident(article, incident_type):
-                        result_incidents.append(
-                            self._create_incident(article, incident_type)
-                        )
-                        incidents_count += 1
+                    is_incident, rate = predictor.is_incident(article)
+                    if is_incident:
+                        incident = cls.create_incident(article, incident_type)
+                        if incident is not None:
+                            result_incidents.append(incident)
+                    if rate:
+                        article.rate[incident_type.description] = rate
+                        article.save()
             return result_incidents
         except Exception as e:
             logger.error(f"Error in predict_batch: {e}")
             raise
 
-    def predict(self, article: Article) -> list[MediaIncident]:
-        return self.predict_batch([article])
+    @classmethod
+    def predict(cls, article: Article) -> list[MediaIncident]:
+        return cls.predict_batch([article])

@@ -14,6 +14,7 @@ from .parsers.rss_parser import RssParser
 
 from server.apps.core.models import Article, Source
 from server.core.fetcher import Fetcher
+from server.libs.handler import HandlerRegistry
 
 from asgiref.sync import async_to_sync
 
@@ -86,8 +87,12 @@ def add_articles(source: Source, urls: list[str]) -> list[Article]:
 
 
 class SourceParser:
-    parsers: list[ParserBase] = [VkParser, OkParser, TgParser]
-    document_parsers: list[ParserBase] = [RssParser, CommonParser]
+    registry = HandlerRegistry[ParserBase]()
+    registry.register(VkParser)
+    registry.register(OkParser)
+    registry.register(TgParser)
+    registry.register(RssParser)
+    registry.register(CommonParser)
 
     @classmethod
     async def extract_all_news_urls(cls, source: Source) -> Iterable[str]:
@@ -96,18 +101,9 @@ class SourceParser:
         if html is None:
             return None
 
-        document = build_document(html)
-
-        for parser in cls.parsers:
-            if parser.can_handle(url):
-                return parser.extract_urls(url, document)
-
         document = build_document(html, clean=True)
-
-        for parser in cls.document_parsers:
-            if parser.can_handle(url):
-                return parser.extract_urls(url, document)
-        raise ValueError("No suitable parser found")
+        parser = cls.registry.choose(url)
+        return parser.extract_urls(url, document)
 
     @classmethod
     def create_new_articles(cls, source: Source) -> int:
