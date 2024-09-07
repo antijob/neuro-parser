@@ -72,7 +72,7 @@ class LlamaPredictor(PredictorBase):
 
                 for event in replicate.stream(self.model, input=model_input):
                     is_incident = bool(re.search(r"\+", event.data))
-                    rate = "LLM_RESP: " + event.data
+                    rate = "LLM_RESP: " + event.id
                     return is_incident, rate
 
             except replicate.exceptions.ReplicateError as e:
