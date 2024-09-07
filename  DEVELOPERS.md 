@@ -53,6 +53,8 @@ docker-compose up -d
 
 4. Доступ к административной панели: `http://report.local/s/ecret/admin` или используйте API: `http://report.local/api`.
 
+5. Для начала полноценной работы системы нужно добавить ссылки на источники и типы инцидентов для отслеживания
+
 ---
 
 ## Запуск в продакшене
@@ -81,7 +83,7 @@ TELEGRAM_BOT_TOKEN=
 
 - `TELEGRAM_BOT_TOKEN` - Токен, выданный BotFather.
 
-3. Создайте новый чат в Telegram, добавьте бота, и он будет запоминать группу для уведомлений.
+3. Создайте новый чат в Telegram, добавьте бота, он его запомнит и будет присылать туда оповщенеия о новых инцидентах.
 4. Чтобы получать уведомления только по определённым категориям, используйте команду `/categ` в чате.
 5. Вы также можете управлять каналами через админ-панель Django в разделе Bot.
 
@@ -131,7 +133,7 @@ pdm install
 # resolve all dependencies and lock packages to lock file
 pdm lock
 
-# update all packages 
+# update all packages
 pdm update
 
 # add new package to pyproject.toml without creating venv
