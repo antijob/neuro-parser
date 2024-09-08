@@ -1,30 +1,31 @@
-from django.test import TestCase
+import pytest
 from server.apps.core.models import Proxy, Country
-from server.core.fetcher.libs.proxy import (
-    ProxyManager,
-)
+from server.core.fetcher.libs.proxy import ProxyManager
 
 
-class ProxyManagerTestCase(TestCase):
-    def setUp(self):
-        # Создаем тестовые данные
-        default_country = Country.objects.get(name="RUS")
-        Proxy.objects.create(ip="192.168.1.1", port=8080, country=default_country)
-        Proxy.objects.create(ip="10.0.0.1", port=3128, country=default_country)
+@pytest.fixture
+def setup_proxies():
+    country = Country.objects.create(name="RUS")
+    Proxy.objects.create(ip="192.168.1.1", port=8080, country=country)
+    Proxy.objects.create(ip="10.0.0.1", port=3128, country=country)
+    return ["192.168.1.1:8080", "10.0.0.1:3128"]
 
-    def test_get_proxies(self):
-        proxy_f = ProxyManager()
-        proxies = proxy_f._get_proxies()
-        print(proxies, type(proxies))
-        self.assertEqual(len(proxies), 2)
-        self.assertIn("192.168.1.1:8080", proxies)
-        self.assertIn("10.0.0.1:3128", proxies)
 
-    def test_get_proxy(self):
-        proxy = ProxyManager.get_proxy()
-        self.assertIn(proxy, ["192.168.1.1:8080", "10.0.0.1:3128"])
+@pytest.mark.django_db
+def test_get_proxies(setup_proxies):
+    proxy_manager = ProxyManager()
+    proxies = proxy_manager._get_proxies()
+    assert set(proxies) == set(setup_proxies)
 
-    def test_get_proxy_with_no_proxies(self):
-        Proxy.objects.all().delete()
-        with self.assertRaises(IndexError):
-            ProxyManager.get_proxy()
+
+@pytest.mark.django_db
+def test_get_proxy(setup_proxies):
+    proxy = ProxyManager.get_proxy()
+    assert proxy in setup_proxies
+
+
+@pytest.mark.django_db
+def test_get_proxy_with_no_proxies():
+    Proxy.objects.all().delete()
+    with pytest.raises(IndexError):
+        ProxyManager.get_proxy()
