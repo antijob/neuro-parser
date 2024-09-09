@@ -64,5 +64,10 @@ class SourceParser:
 
         added = await add_articles(source, urls)
         for article in added:
-            await sync_to_async(article.save)()
+            try:
+                await sync_to_async(article.save)()
+            except Exception as e:
+                raise type(e)(
+                    f"When adding articles with {article.url} exception occurred: {e}"
+                )
         return len(added)
