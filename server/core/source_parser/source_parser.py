@@ -17,7 +17,8 @@ from asgiref.sync import sync_to_async
 async def add_articles(
     source: Source, articles: list[Union[str, Article]]
 ) -> list[Article]:
-    added = []
+    added_articles: list[Article] = []
+    added_urls: set[str] = set()
 
     for article in articles:
         if isinstance(article, Article):
@@ -27,16 +28,14 @@ async def add_articles(
             url = article
             article = Article(url=url, source=source)
 
-        try:
-            article, created = await sync_to_async(Article.objects.get_or_create)(
-                url=url, source=source
-            )
-            if created:
-                added.append(article)
-        except Exception as e:
-            raise type(e)(f"When adding articles with {url} exception occurred: {e}")
+        if url in added_urls:
+            continue
 
-    return added
+        if not await sync_to_async(Article.objects.filter(url=url).exists)():
+            added_articles.append(article)
+            added_urls.add(url)
+
+    return added_articles
 
 
 class SourceParser:
