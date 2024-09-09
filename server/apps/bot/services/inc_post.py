@@ -8,7 +8,7 @@ from asgiref.sync import sync_to_async
 
 from server.apps.bot.bot_instance import get_bot
 from server.apps.bot.models import Channel, ChannelCountry, ChannelIncidentType
-from server.apps.core.data.messages import NEW_INCIDENT_TEMPLATE
+from server.apps.bot.data.messages import NEW_INCIDENT_TEMPLATE
 from server.apps.core.models import MediaIncident
 
 logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
