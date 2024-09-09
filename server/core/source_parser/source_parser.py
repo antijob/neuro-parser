@@ -21,7 +21,8 @@ async def add_articles(
     source: Source, articles: list[Union[str, Article]]
 ) -> list[Article]:
     pattern = re.compile(r"https?://(?P<url_without_method>.+)")
-    added = []
+    added_articles: list[Article] = []
+    added_urls: set[str] = set()
 
     for article in articles:
         if isinstance(article, Article):
@@ -30,6 +31,9 @@ async def add_articles(
         else:
             url = article
             article = Article(url=url, source=source)
+
+        if url in added_urls:
+            continue
 
         match = pattern.match(url)
         if not match:
@@ -41,9 +45,10 @@ async def add_articles(
         if not await sync_to_async(
             Article.objects.filter(url__iendswith=url_without_method).exists
         )():
-            added.append(article)
+            added_articles.append(article)
+            added_urls.add(url)
 
-    return added
+    return added_articles
 
 
 class SourceParser:
