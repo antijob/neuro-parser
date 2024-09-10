@@ -1,3 +1,12 @@
+NEW_INCIDENT_TEMPLATE = """
+<b>Title:</b> {title}
+<b>Category:</b> #{cat}
+<b>Country:</b> {country}
+<b>Region:</b> {region}
+<b>URL:</b> {url}
+<b>Description:</b> {desc}
+"""
+
 HELP_MESSAGE = """
 Бот анализирует русскоязычные новости, и может присылать вам оповещения и появлении в них выбранных вами тем.
 Для работы бота добавьте его в вашу группу с возможностью писать сообщения.
