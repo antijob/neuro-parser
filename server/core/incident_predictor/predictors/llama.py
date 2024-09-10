@@ -53,7 +53,7 @@ class LlamaPredictor(PredictorBase):
         cut_text = full_text[:500] + full_text[-500:]
 
         attempt = 0
-        system_prompt = SYSTEM_LLM_PROMPT_EXTRA + self.incident_type.llm_prompt
+        system_prompt = self.incident_type.llm_prompt + SYSTEM_LLM_PROMPT_EXTRA
         while attempt < self.retries:
             try:
                 model_input = {
@@ -70,9 +70,15 @@ class LlamaPredictor(PredictorBase):
                     "log_performance_metrics": False,
                 }
 
-                for event in replicate.stream(self.model, input=model_input):
+                prediction = replicate.predictions.create(
+                    model=self.model,
+                    input=model_input,
+                    stream=True,
+                )
+
+                for event in prediction.stream():
                     is_incident = bool(re.search(r"\+", event.data))
-                    rate = "LLM_RESP: " + event.id
+                    rate = "LLM_RESP: " + prediction.id
                     return is_incident, rate
 
             except replicate.exceptions.ReplicateError as e:
