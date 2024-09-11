@@ -3,6 +3,7 @@ import logging
 from asgiref.sync import async_to_sync
 from django.contrib import admin, messages
 from django.shortcuts import render
+from django.utils.translation import gettext_lazy as _
 
 from server.apps.bot.bot_instance import get_bot
 from server.apps.bot.models import (
@@ -87,8 +88,23 @@ class ChannelAdmin(admin.ModelAdmin):
 
 @admin.register(ChannelIncidentType)
 class ChannelIncidentTypeAdmin(admin.ModelAdmin):
-    list_display = ["channel", "incident_type", "status"]
+    list_display = ["channel", "incident_type", "status", "show"]
+    list_filter = ["channel", "incident_type", "status", "show"]
+    search_fields = ["channel__name", "incident_type__name"]
     inlines = [ChannelSubscriptionInline]
+
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        field = super().formfield_for_dbfield(db_field, request, **kwargs)
+        if db_field.name == "show":
+            field.help_text = _(
+                "При отключении этого поля, поле <b>status</b> также будет отключено"
+            )
+        return field
+
+    def save_model(self, request, obj, form, change):
+        if not obj.show:
+            obj.status = False
+        super().save_model(request, obj, form, change)
 
 
 @admin.register(ChannelCountry)
