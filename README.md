@@ -22,6 +22,12 @@
 
 ---
 
+## Документация и инструкции по использованию
+
+Доступны в [readthedocs](https://neuro-parser.readthedocs.io/ru/latest/)
+
+---
+
 ## Разработчикам
 
 Инструкции для разработчиков и установка проекта для локальной и продакшн среды находятся в файле [DEVELOPERS.md](DEVELOPERS.md).
@@ -58,6 +64,13 @@ The parser searches for links to news and posts from these sources, then downloa
 - The user interface is implemented as a Telegram bot. Importantly, the project only stores the chat IDs where the bot is added, but not user data, for security purposes.
 - Neuroparser can be deployed for private use, allowing more flexible configuration of source lists and available models for distinguishing news.
 - REST API interface with [documentation](https://report.antijob.net/swagger-ui/)
+
+---
+
+## Documentation and Usage Instructions
+
+Available at [readthedocs](https://neuro-parser.readthedocs.io/en/latest/)
+
 
 ---
 
