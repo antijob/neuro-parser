@@ -44,7 +44,7 @@ def send_message_to_channels(msg: str, chat_id: int):
             await bot.send_message(text=msg, chat_id=chat_id)
         except Exception as e:
             logger.error(f"Error sending message to channel: {e}")
-            return f"Error sending message: {e}"
+            raise
         return "Message sent"
 
     try:
