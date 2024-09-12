@@ -26,7 +26,8 @@ class Channel(models.Model):
 class ChannelIncidentType(models.Model):
     """
     Model that connects channels + incident types
-    and status field
+    status: send new incidents or not
+    show: show in the chat or not
     """
 
     channel = models.ForeignKey(
@@ -34,6 +35,7 @@ class ChannelIncidentType(models.Model):
     )
     incident_type = models.ForeignKey(IncidentType, on_delete=models.CASCADE)
     status = models.BooleanField(default=True)
+    show = models.BooleanField(default=True)
 
     def __str__(self):
         return f"{self.channel} - {self.incident_type}"
