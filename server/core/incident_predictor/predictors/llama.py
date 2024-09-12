@@ -43,11 +43,11 @@ class LlamaPredictor(PredictorBase):
         return incident_type.llm_prompt is not None
 
     def is_incident(self, article: Article) -> tuple[bool, Any]:
-        if not self.incident_type.llm_prompt or not article.text:
+        if not self.incident_type.llm_prompt or not article.text or article.text.len() < 200:
             return False, None
 
         title = article.any_title()
-        full_text = title + article.text
+        full_text = remove_emoji(title + article.text)
 
         # Обрезаем текст, оставляя 500 символов до и 500 после
         cut_text = full_text[:500] + full_text[-500:]
@@ -98,3 +98,15 @@ class LlamaPredictor(PredictorBase):
             attempt += 1
             time.sleep(2)
         return False, None
+
+
+def remove_emoji(string):
+    emoji_pattern = re.compile("["
+                               u"\U0001F600-\U0001F64F"  # emoticons
+                               u"\U0001F300-\U0001F5FF"  # symbols & pictographs
+                               u"\U0001F680-\U0001F6FF"  # transport & map symbols
+                               u"\U0001F1E0-\U0001F1FF"  # flags (iOS)
+                               u"\U00002702-\U000027B0"
+                               u"\U000024C2-\U0001F251"
+                               "]+", flags=re.UNICODE)
+    return emoji_pattern.sub(r'', string)
