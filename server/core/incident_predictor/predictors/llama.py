@@ -43,7 +43,7 @@ class LlamaPredictor(PredictorBase):
         return incident_type.llm_prompt is not None
 
     def is_incident(self, article: Article) -> tuple[bool, Any]:
-        if not self.incident_type.llm_prompt or not article.text or article.text.len() < 200:
+        if not self.incident_type.llm_prompt or not article.text or len(article.text) < 200:
             return False, None
 
         title = article.any_title()
