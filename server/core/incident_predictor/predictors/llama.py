@@ -80,7 +80,7 @@ class LlamaPredictor(PredictorBase):
                 rate = None
 
                 for event in prediction.stream():
-                    is_incident = event.data
+                    is_incident = bool(re.search(r"\+", event.data))
                     rate = "LLM_RESP: " + prediction.id
                     break
 
