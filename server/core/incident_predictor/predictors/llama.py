@@ -59,7 +59,7 @@ class LlamaPredictor(PredictorBase):
                 model_input = {
                     "prompt": cut_text,
                     "system_prompt": system_prompt,
-                    "max_new_tokens": self.max_new_tokens,
+                    "max_new_tokens": 512,
                     "top_p": 0.95,
                     "max_tokens": 512,
                     "temperature": 0,
@@ -71,15 +71,21 @@ class LlamaPredictor(PredictorBase):
                 }
 
                 prediction = replicate.predictions.create(
-                    model=self.model,
+                    model="meta/meta-llama-3-8b-instruct",
                     input=model_input,
                     stream=True,
                 )
 
+                is_incident = False
+                rate = None
+
                 for event in prediction.stream():
-                    is_incident = bool(re.search(r"\+", event.data))
+                    print(event)
+                    is_incident = event
                     rate = "LLM_RESP: " + prediction.id
-                    return is_incident, rate
+                    break
+
+                return is_incident, rate
 
             except replicate.exceptions.ReplicateError as e:
                 logger.error(
