@@ -52,56 +52,54 @@ class LlamaPredictor(PredictorBase):
         # Обрезаем текст, оставляя 500 символов до и 500 после
         cut_text = full_text[:500] + full_text[-500:]
 
-        attempt = 0
         system_prompt = self.incident_type.llm_prompt + SYSTEM_LLM_PROMPT_EXTRA
-        while attempt < self.retries:
-            try:
-                model_input = {
-                    "prompt": cut_text,
-                    "system_prompt": system_prompt,
-                    "max_new_tokens": 512,
-                    "top_p": 0.95,
-                    "max_tokens": 512,
-                    "temperature": 0,
-                    "length_penalty": 1,
-                    "stop_sequences": "<|end_of_text|>,<|eot_id|>",
-                    "prompt_template": "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\n{system_prompt}<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n{prompt}<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n",
-                    "presence_penalty": 0,
-                    "log_performance_metrics": False,
-                }
+        try:
+            model_input = {
+                "prompt": cut_text,
+                "system_prompt": system_prompt,
+                "max_new_tokens": 512,
+                "top_p": 0.95,
+                "max_tokens": 512,
+                "temperature": 0,
+                "length_penalty": 1,
+                "stop_sequences": "<|end_of_text|>,<|eot_id|>",
+                "prompt_template": "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\n{system_prompt}<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n{prompt}<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n",
+                "presence_penalty": 0,
+                "log_performance_metrics": False,
+            }
 
-                prediction = replicate.predictions.create(
-                    model="meta/meta-llama-3-8b-instruct",
-                    input=model_input,
-                    stream=True,
-                )
+            prediction = replicate.predictions.create(
+                model="meta/meta-llama-3-8b-instruct",
+                input=model_input,
+                stream=True,
+            )
 
-                is_incident = False
-                rate = None
+            is_incident = False
+            rate = None
 
-                for event in prediction.stream():
-                    is_incident = bool(re.search(r"\+", event.data))
-                    rate = "LLM_RESP: " + prediction.id
-                    break
+            for event in prediction.stream():
+                output = event.data.strip()
+                if output == '+':
+                    is_incident = True
+                elif output == '-':
+                    is_incident = False
+                else:
+                    is_incident = False
+                    logger.warning(f"Unknown output {event.data}")
+                rate = "LLM_RESP: " + prediction.id
+                break
 
-                return is_incident, rate
+            return is_incident, rate
 
-            except replicate.exceptions.ReplicateError as e:
-                logger.error(
-                    "Replicate API error occurred on attempt %d/%d: %s",
-                    attempt + 1,
-                    self.retries,
-                    e,
-                )
-            except Exception as e:
-                logger.error(
-                    "Unexpected error occurred on attempt %d/%d: %s",
-                    attempt + 1,
-                    self.retries,
-                    e,
-                )
-            attempt += 1
-            time.sleep(2)
+        except replicate.exceptions.ReplicateError as e:
+            logger.error(
+                "Replicate API error occurred: %s", e,
+            )
+        except Exception as e:
+            logger.error(
+                "Unexpected error occurred: %s", e,
+            )
+
         return False, None
 
 
