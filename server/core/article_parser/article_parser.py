@@ -24,7 +24,7 @@ class ArticleParser:
     registry.register(CommonParser)
 
     @classmethod
-    def parse_article_raw_data(cls, url: str, data) -> ArticleData:
+    def _parse_article_raw_data(cls, url: str, data) -> ArticleData:
         try:
             parser = cls.registry.choose(url)
             return parser.parse_raw_data(data)
@@ -36,15 +36,13 @@ class ArticleParser:
     @classmethod
     def postprocess_article(cls, article: Article, data: Any) -> None:
         try:
-            article_data: ArticleData = cls.parse_article_raw_data(article.url, data)
+            article_data: ArticleData = cls._parse_article_raw_data(article.url, data)
             if article_data:
                 article.title, article.text, publication_date = article_data
                 if publication_date:
                     article.publication_date = publication_date
                 else:
                     article.publication_date = datetime.date.today()
-            article.is_downloaded = True
-            # await sync_to_async(article.save, thread_sensitive=True)()
         except ValueError as e:
             logger.warning(f"Value error during postprocessing of article {article.url}: {e}")
         except Exception as e:
