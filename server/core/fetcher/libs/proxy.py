@@ -1,12 +1,14 @@
+from asgiref.sync import sync_to_async
 from server.apps.core.models import Proxy
 from random import choice
 
 
 class ProxyManager:
     @staticmethod
-    def get_proxy() -> str:
+    async def get_proxy() -> str:
         return choice(ProxyManager._get_proxies())
 
     @staticmethod
-    def _get_proxies() -> list[str]:
-        return [f"{proxy.ip}:{proxy.port}" for proxy in Proxy.objects.all()]
+    async def _get_proxies() -> list[str]:
+        proxies = sync_to_async(list)(Proxy.objects.all())
+        return [f"{proxy.ip}:{proxy.port}" for proxy in proxies]
