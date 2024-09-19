@@ -67,6 +67,7 @@ class MediaIncidentAdmin(admin.ModelAdmin):
 class ArticleAdmin(admin.ModelAdmin):
     list_display = (
         "url",
+        "create_date",
         "publication_date",
         "create_date",
         "title",
