@@ -18,7 +18,7 @@ class IncidentType(models.Model):
     )
     llm_prompt = models.TextField(
         "LLM промпт", null=True, blank=True)
-    llm_system_promt = models.TextField(
+    llm_system_prompt = models.TextField(
         "LLM системный промпт", null=True, blank=True, default=SYSTEM_LLM_PROMPT_DEFAULT)
     llm_template = models.TextField(
         "LLM шаблон", null=True, blank=True, default=LLM_TEMPLATE_DEFAULT)

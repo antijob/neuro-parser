@@ -45,7 +45,7 @@ class LlamaPredictor(PredictorBase):
         cut_text = full_text[:500] + full_text[-500:]
 
         system_prompt = self.incident_type.llm_prompt + \
-            self.incident_type.llm_system_promt
+            self.incident_type.llm_system_prompt
         try:
             model_input = {
                 "prompt": cut_text,
@@ -56,7 +56,7 @@ class LlamaPredictor(PredictorBase):
                 "temperature": 0,
                 "length_penalty": 1,
                 "stop_sequences": "<|end_of_text|>,<|eot_id|>",
-                "prompt_template": self.incident_type.llm_prompt,
+                "prompt_template": self.incident_type.llm_template,
                 "presence_penalty": 0,
                 "log_performance_metrics": False,
             }
@@ -69,19 +69,13 @@ class LlamaPredictor(PredictorBase):
 
             is_incident = False
             rate = None
+            output = ""
 
             for event in prediction.stream():
-                output = event.data.strip()
-                if output == '+':
-                    is_incident = True
-                elif output == '-':
-                    is_incident = False
-                else:
-                    is_incident = False
-                    logger.warning(f"Unknown output {event.data}")
-                rate = "LLM_RESP: " + prediction.id
-                break
+                output += event.data
 
+            is_incident = bool(re.search(r"\+", output))
+            rate = "LLM_RESP: " + prediction.id
             return is_incident, rate
 
         except replicate.exceptions.ReplicateError as e:
