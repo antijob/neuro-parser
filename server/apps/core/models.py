@@ -161,6 +161,9 @@ class MediaIncident(BaseIncident):
         null=True,
         blank=True,
     )
+    downvote = models.PositiveSmallIntegerField(
+        "Downvoted", default=0, null=True, blank=True
+    )
 
     def get_absolute_url(self):
         return reverse("core:dashboard-mediaincident-update", args=[self.pk])

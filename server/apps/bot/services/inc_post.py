@@ -6,8 +6,8 @@ from typing import Optional
 from aiogram.exceptions import TelegramBadRequest
 from asgiref.sync import sync_to_async
 
-from server.apps.bot.models import Channel, ChannelCountry, ChannelIncidentType
 from server.apps.bot.data.messages import NEW_INCIDENT_TEMPLATE
+from server.apps.bot.models import Channel, ChannelCountry, ChannelIncidentType
 from server.apps.core.models import MediaIncident
 from server.celery.bot import send_message_to_channels
 
@@ -70,7 +70,7 @@ async def process_channel(chn, inc: MediaIncident, msg: str) -> bool:
                 return False
 
         try:
-            send_message_to_channels.delay(msg, chn.channel_id)
+            send_message_to_channels.delay(msg, chn.channel_id, inc_id=inc.id)
         except TelegramBadRequest as e:
             logger.warning(f"Can't send message to channel {chn.channel_id}: {e}")
         logger.info(f"Sent message to channel {chn.channel_id}")
