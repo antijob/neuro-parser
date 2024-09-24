@@ -1,8 +1,17 @@
+from typing import Coroutine
+import asyncio
+import logging
+
 from .celery_app import app
 
 from server.apps.core.models import Article, Source
 from server.core.fetcher import Fetcher
 from server.core.source_parser import SourceParser
+
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 @app.task(queue="crawler", name="crawl_chain")
@@ -12,13 +21,26 @@ def crawl_chain():
 
 @app.task(queue="crawler")
 def update_sources():
+    tasks: list[Coroutine] = []
+
     sources = Source.objects.filter(is_active=True)
-    urls_count = 0
     for source in sources:
-        try:
-            urls_count += SourceParser.create_new_articles(source)
-        except Exception as e:
-            print(f"An error occurred while updating source: {e}")
+        tasks.append(SourceParser.create_new_articles(source))
+
+    async def gather(tasks):
+        return await asyncio.gather(*tasks, return_exceptions=False)
+
+    results = asyncio.run(gather(tasks))
+
+    urls_count = 0
+    for res in results:
+        if isinstance(res, BaseException):
+            logger.error(
+                "Coroutine error occured during SourceParser.create_new_articles: ",
+                exc_info=res,
+            )
+        else:
+            urls_count += res
     return f"Urls extracted: {urls_count}"
 
 
