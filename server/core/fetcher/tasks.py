@@ -21,7 +21,7 @@ async def fetch_source_articles(source: Source, articles: list[Article]):
     logger.info(f"Start task. Source {source.url}: {articles_length} articles")
     statistics = CoroutineStatistics(source.url, articles_length)
 
-    async with ClientFactory.get_client(source) as client:
+    async with await ClientFactory.get_client(source) as client:
         delay = 1 / rps
 
         for article in articles:

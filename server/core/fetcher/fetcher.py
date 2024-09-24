@@ -22,7 +22,7 @@ class Fetcher:
         article: Article, source: Optional[Source] = None
     ) -> Optional[Article]:
         try:
-            async with ClientFactory.get_client(source, article) as client:
+            async with await ClientFactory.get_client(source, article) as client:
                 return await client.get_article(article, source)
         except ClientError as e:
             logger.error(
@@ -42,9 +42,8 @@ class Fetcher:
     @staticmethod
     async def download_source(source: Source) -> ClientSourceData:
         try:
-            client = await ClientFactory.get_client(source)
-            async with client as client_inst:
-                return await client_inst.get_source(source)
+            async with await ClientFactory.get_client(source) as client:
+                return await client.get_source(source)
         except ClientError as e:
             logger.error(
                 f"Network error occurred while fetching source URL {source.url}: {e}"
