@@ -5,16 +5,10 @@ from server.core.fetcher.libs.exceptions import BadCodeException
 from server.apps.core.models import Article, Source
 from server.core.article_parser import ArticleParser
 
-import logging
-
-# Configure logging
-logging.basicConfig(level=logging.DEBUG)
-
 
 @pytest.mark.django_db(transaction=True)
 @pytest.mark.asyncio
 async def test_get_article_success(load_test_data, mock_aiohttp, article, source):
-    logging.debug(load_test_data)
     content = load_test_data("article.html")
     content_article = Article()
     ArticleParser.postprocess_article(content_article, content)
@@ -23,14 +17,7 @@ async def test_get_article_success(load_test_data, mock_aiohttp, article, source
     mock_aiohttp.get(article.url, status=200, body=content)
 
     async with NPClient() as client:
-        try:
-            result = await client.get_article(article, source)
-        except Exception as e:
-            logging.error(f"Error during get_article call: {e}")
-            raise
-
-    logging.debug(f"Result: {result}")
-    logging.debug(f"Article after processing: {article}")
+        result = await client.get_article(article, source)
 
     assert result == article
     assert article.redirect_url is None
