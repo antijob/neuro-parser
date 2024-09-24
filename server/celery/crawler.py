@@ -23,16 +23,14 @@ def crawl_chain():
 def update_sources():
     tasks: list[Coroutine] = []
 
-    loop = asyncio.get_event_loop()
-    if loop.is_closed():
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-
     sources = Source.objects.filter(is_active=True)
     for source in sources:
         tasks.append(SourceParser.create_new_articles(source))
 
-    results = loop.run_until_complete(asyncio.gather(*tasks, return_exceptions=False))
+    async def gather(tasks):
+        return await asyncio.gather(*tasks, return_exceptions=False)
+
+    results = asyncio.run(gather(tasks))
 
     urls_count = 0
     for res in results:
