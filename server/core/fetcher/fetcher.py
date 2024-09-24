@@ -64,13 +64,10 @@ class Fetcher:
         self.coroutines.append(coro)
 
     def await_tasks(self) -> int:
-        loop = asyncio.get_event_loop()
-        if loop.is_closed():
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
-        results = loop.run_until_complete(
-            asyncio.gather(*self.coroutines, return_exceptions=False)
-        )
+        async def gather(tasks):
+            return await asyncio.gather(*tasks, return_exceptions=False)
+
+        results = asyncio.run(gather(self.coroutines))
 
         fetched_total = 0
         for res in results:
