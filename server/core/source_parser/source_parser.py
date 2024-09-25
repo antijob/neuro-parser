@@ -1,8 +1,6 @@
 from typing import Iterable, Optional
-from urllib.parse import urlparse
 
 from asgiref.sync import async_to_sync
-from django.db import transaction
 from lxml.html.clean import Cleaner
 from selectolax.parser import HTMLParser
 
@@ -66,18 +64,12 @@ def add_articles(source: Source, urls: list[str]) -> list[Article]:
     added = []
 
     for url in urls:
-        with transaction.atomic():
-            if not Article.objects.filter(url__iendswith=url.split("://")[1]).exists():
-                try:
-                    article, created = Article.objects.get_or_create(
-                        url=url, source=source
-                    )
-                    if created:
-                        added.append(article)
-                except Exception as e:
-                    raise type(e)(
-                        f"When adding articles with {url} exception occurred: {e}"
-                    )
+        try:
+            article, created = Article.objects.get_or_create(url=url, source=source)
+            if created:
+                added.append(article)
+        except Exception as e:
+            raise type(e)(f"When adding articles with {url} exception occurred: {e}")
 
     return added
 
