@@ -1,8 +1,6 @@
 from asgiref.sync import sync_to_async
-from server.apps.core.models import Proxy
-from random import choice
 
-from asgiref.sync import sync_to_async
+from server.apps.core.models import Proxy
 
 
 class ProxyManager:
