@@ -11,6 +11,14 @@ from server.core.article_parser.parsers.tg_parser import TgParser
 from server.core.article_parser.parsers.common_parser import CommonParser
 
 
+from server.libs.helpers import load_pytest_data
+
+
+@pytest.fixture
+def load_test_data():
+    return load_pytest_data(__file__)
+
+
 @pytest.mark.parametrize(
     "url,expected_parser",
     [
@@ -25,53 +33,16 @@ def test_registry_choose(url, expected_parser):
 
 
 @pytest.mark.parametrize(
-    "html_content,expected_title,expected_text,expected_date",
+    "html_file,expected_title,expected_text,expected_date",
     [
         (
-            """
-            <!DOCTYPE html>
-            <html lang="en">
-            <head>
-                <meta charset="UTF-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>Sample Title</title>
-            </head>
-            <body>
-                <div class="article">
-                    <h1>Sample Title</h1>
-                    <div class="content">
-                        <p>This is the main content of the article.</p>
-                    </div>
-                    <div class="date">
-                        <p>Publication Date: 2024-09-01</p>
-                    </div>
-                </div>
-            </body>
-            </html>
-            """,
+            "article1.html",
             "Sample Title",
             "This is the main content of the article.",
             "2024-09-01",
         ),
         (
-            """
-            <!DOCTYPE html>
-            <html lang="en">
-            <head>
-                <meta charset="UTF-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>Another Title</title>
-            </head>
-            <body>
-                <div class="article">
-                    <h1>Another Title</h1>
-                    <div class="content">
-                        <p>Another content of the article.</p>
-                    </div>
-                </div>
-            </body>
-            </html>
-            """,
+            "article2.html",
             "Another Title",
             "Another content of the article.",
             None,  # This will default to today's date if not provided
@@ -79,7 +50,7 @@ def test_registry_choose(url, expected_parser):
     ],
 )
 def test_postprocess_article_with_html(
-    html_content, expected_title, expected_text, expected_date
+    html_file, expected_title, expected_text, expected_date, load_test_data
 ):
     # Create an Article instance with a URL that would be handled by CommonParser
     article = Article(url="https://example.com/some_article")
@@ -87,7 +58,9 @@ def test_postprocess_article_with_html(
     if not expected_date:
         expected_date = datetime.date.today()
 
-    ArticleParser.postprocess_article(article, html_content)
+    html_data = load_test_data(html_file)
+
+    ArticleParser.postprocess_article(article, html_data)
 
     # Check if the article's fields have been updated correctly
     assert article.title == expected_title

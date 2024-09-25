@@ -1,19 +1,14 @@
 from itertools import count
 import pytest
 from server.apps.core.models import Article, Source, Country
-from pathlib import Path
 from aioresponses import aioresponses
 
+from server.libs.helpers import load_pytest_data
 
-# Фикстура для загрузки данных из файла
+
 @pytest.fixture
 def load_test_data():
-    def _load(filename):
-        filepath = Path(__file__).parent / "test_data" / filename
-        with open(filepath, "r", encoding="utf-8") as file:
-            return file.read()
-
-    return _load
+    return load_pytest_data(__file__)
 
 
 @pytest.fixture
