@@ -254,3 +254,7 @@ models
 
 # PDM
 .pdm-python
+
+
+#venv
+venv/**/*

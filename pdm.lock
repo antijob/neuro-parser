@@ -5,7 +5,7 @@
 groups = ["default", "doc", "lint", "test"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:89037c5ed97b917837e66bc58015211346a9dbaf4b8fdfa0202b6eb713fbb6d3"
+content_hash = "sha256:5e8d3bd2fa76d776302e3b273c8fa0e864f623c0963aa502c5851f2fea7e7c46"
 
 [[metadata.targets]]
 requires_python = "~=3.9"
@@ -143,6 +143,19 @@ files = [
     {file = "aiohttp-3.10.5-cp39-cp39-win32.whl", hash = "sha256:03f2645adbe17f274444953bdea69f8327e9d278d961d85657cb0d06864814c1"},
     {file = "aiohttp-3.10.5-cp39-cp39-win_amd64.whl", hash = "sha256:d17920f18e6ee090bdd3d0bfffd769d9f2cb4c8ffde3eb203777a3895c128862"},
     {file = "aiohttp-3.10.5.tar.gz", hash = "sha256:f071854b47d39591ce9a17981c46790acb30518e2f83dfca8db2dfa091178691"},
+]
+
+[[package]]
+name = "aioresponses"
+version = "0.7.6"
+summary = "Mock out requests made by ClientSession from aiohttp package"
+groups = ["default"]
+dependencies = [
+    "aiohttp<4.0.0,>=3.3.0",
+]
+files = [
+    {file = "aioresponses-0.7.6-py2.py3-none-any.whl", hash = "sha256:d2c26defbb9b440ea2685ec132e90700907fd10bcca3e85ec2f157219f0d26f7"},
+    {file = "aioresponses-0.7.6.tar.gz", hash = "sha256:f795d9dbda2d61774840e7e32f5366f45752d1adc1b74c9362afd017296c7ee1"},
 ]
 
 [[package]]
