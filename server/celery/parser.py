@@ -2,12 +2,11 @@ import asyncio
 from datetime import datetime, timedelta
 from itertools import islice
 
-from aiogram.exceptions import TelegramRetryAfter
 from celery import group
 from celery.utils.log import get_task_logger
 
 from server.apps.bot.services.inc_post import post_incident
-from server.apps.core.models import Article, MediaIncident
+from server.apps.core.models import Article
 from server.core.article_index.query_checker import mark_duplicates
 from server.core.incident_predictor import IncidentPredictor
 from server.settings.components.celery import INCIDENT_BATCH_SIZE
@@ -66,40 +65,6 @@ def plan_incidents(status):
     return "Group of create_incidents tasks submitted"
 
 
-class SendMessageTask(app.Task):
-    queue = "parser"
-    rate_limit = "0.2/s"
-    autoretry_for = (TelegramRetryAfter,)
-    max_retries = 5
-    retry_backoff = 30
-    retry_backoff_max = 600
-    retry_jitter = False
-
-
-@app.task(base=SendMessageTask)
-def send_incident_notification(media_incident_id: int):
-    logger.info(f"Starting send_incident_notification for id: {media_incident_id}")
-    try:
-        media_incident = MediaIncident.objects.get(id=media_incident_id)
-    except Exception as e:
-        logger.error(f"Could not get media_incident with id {media_incident_id}: {e}")
-        return f"MediaIncident getting failed due to an error: {e}"
-
-    logger.info(f"Retrieved MediaIncident: {media_incident}")
-
-    try:
-        logger.info(f"Attempting to send notification for incident: {media_incident}")
-        asyncio.run(post_incident(media_incident), debug=True)
-        logger.info(f"Notification sent successfully for incident: {media_incident}")
-        return f"Notification sent for incident: {media_incident}"
-    except Exception as e:
-        logger.error(
-            f"Error in send_incident_notification for incident {media_incident}: {e}",
-            exc_info=True,
-        )
-        return f"Notification failed due to an error: {e}"
-
-
 @app.task(queue="parser")
 def create_incidents(batch):
     logger.info(f"Starting create_incidents for batch size: {len(batch)}")
@@ -129,7 +94,7 @@ def create_incidents(batch):
 
         for incident in incidents_created:
             logger.info(f"Queueing notification for incident: {incident}")
-            send_incident_notification.delay(incident.id)
+            asyncio.run(post_incident(incident))
 
         logger.info(f"Batch finished. Incidents created: {incidents_count}")
         return f"Batch finished. Incidents created: {incidents_count}"
