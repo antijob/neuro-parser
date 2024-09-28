@@ -30,8 +30,8 @@ RUN apt-get update && \
       libwebp-dev \
       postgresql-server-dev-all && \
     apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
-
+    rm -rf /var/lib/apt/lists/* && \
+    apt-get update --fix-missing
 # Install PDM
 RUN pip install -U pip && \
     pip install pdm && \
@@ -46,7 +46,7 @@ RUN python -m nltk.downloader punkt && \
 COPY pyproject.toml pdm.lock /code/
 
 # Which groups to install in to the container. If none, will not install additional groups.
-# Pass as docker-compose build --build-arg PDM_DEPENDENCY_GROUPS="groupA groupB" or 
+# Pass as docker-compose build --build-arg PDM_DEPENDENCY_GROUPS="groupA groupB" or
 #   docker build ... --build-arg PDM_DEPENDENCY_GROUPS=""
 # By default will build with all groups, including `torch` group, which requires GPU
 ARG PDM_DEPENDENCY_GROUPS=:all
