@@ -4,13 +4,14 @@
 
 ## Оглавление
 1. [Управление Python-пакетами](#управление-python-пакетами)
-2. [Локальный запуск](#локальный-запуск)
-3. [Запуск в продакшене](#запуск-в-продакшене)
-4. [Настройка Telegram-бота](#настройка-telegram-бота)
-6. [API моделей](#api-моделей)
-7. [REST API интерфейс](#rest-api)
-8. [Внесение вклада](#внесение-вклада)
-9. [Контакты](#контакты)
+1. [Локальный запуск](#локальный-запуск)
+1. [Запуск в продакшене](#запуск-в-продакшене)
+1. [Настройка Telegram-бота](#настройка-telegram-бота)
+1. [API моделей](#api-моделей)
+1. [REST API интерфейс](#rest-api)
+1. [Инфраструктура](#инфраструктура)
+1. [Внесение вклада](#внесение-вклада)
+1. [Контакты](#контакты)
 
 ---
 
@@ -102,6 +103,62 @@ TELEGRAM_BOT_TOKEN=
 
 ---
 
+## Инфраструктура
+
+Для работы проекта были созданы две удалённые машины для окружений `stage` и `prod`. 
+Они настроены одинаково, сервер запускается так же, как и локально:
+
+```
+docker compose -f docker-compose.prod.yaml pull
+docker-compose -f docker-compose.prod.yaml -d
+```
+
+Более подробный процесс разворачивания можно увидеть в [deploy.yml](.github/workflows/deploy.yml).
+
+> [!NOTE] На заметку
+> Рабочая директория на серверах, где расположена запущенная версия сервера: `/opt/services/neuro-parser`. 
+> Актуальная информация о месте запуска сервера находится в `$DEPLOY_LOCATION` в файле [deploy.yml](.github/workflows/deploy.yml).
+
+> [!WARNING] Важно! 
+> Рабочая директория `github-actions` (`/home/github-actions/_work/neuro-parser`) используется только для клонирования репозитория.
+> В ней не запускается и не должен запускаться проект.
+
+### Типовые операции на серверах
+
+- **На окружении (`stage` или `prod`) какая-то ошибка, нужно почитать логи**
+  
+  ```bash
+  # почитать логи с конкретного контейнера
+  # web - сервер (админка), bot - TG-бот, celery - задачи в очередях
+  docker logs neuro-parser-web-1
+  # или
+  cd /opt/services/neuro-parser
+  docker-compose -f docker-compose.prod.yml logs -f
+  ```
+
+- **Нужно протестировать скрипт внутри контейнера**
+  
+  ```bash
+  # web - сервер (админка), bot - TG-бот, celery - задачи в очередях
+  docker exec -it neuro-parser-web-1 bash
+  # или
+  cd /opt/services/neuro-parser
+  docker-compose -f docker-compose.prod.yml exec -it web bash
+  ```
+
+- **Закончилось место. Сервер спамит ошибками `No space left on disk`.**
+
+  Скорее всего, место закончилось из-за постоянной сборки или скачивания образов. Они должны чиститься периодически, однако в редких случаях этого может быть недостаточно. Можно попробовать почистить место вручную:
+
+  ```bash
+  docker container prune -f
+  docker image prune -af
+  # проверить место на диске
+  df -h
+  ```
+
+---
+
 ## Внесение вклада
 
 Мы приветствуем участие сообщества. Пожалуйста, следуйте инструкциям в файле [CONTRIBUTING.md](CONTRIBUTING.md).
@@ -121,13 +178,14 @@ This document provides guidelines for developers contributing to the project, co
 
 ## Table of Contents
 1. [Managing Python Packages](#managing-python-packages)
-2. [Running Locally](#running-locally)
-3. [Running in Production](#running-in-production)
-4. [Telegram Bot Setup](#telegram-bot-setup)
-5. [Model API](#model-api)
-6. [REST API Interface](#rest-api-interface)
-7. [Contributing](#contributing)
-8. [Contact](#contact)
+1. [Running Locally](#running-locally)
+1. [Running in Production](#running-in-production)
+1. [Telegram Bot Setup](#telegram-bot-setup)
+1. [Model API](#model-api)
+1. [REST API Interface](#rest-api-interface)
+1. [Infrastructure](#infrastructure)
+1. [Contributing](#contributing)
+1. [Contact](#contact)
 
 ---
 
@@ -216,6 +274,62 @@ For external model API calls, we use [Replicate.com](https://replicate.com/) as 
 ## REST API Interface
 
 The REST API is built using the `django-rest-framework`. Documentation is automatically generated using Swagger and is available at `/swagger-ui`.
+
+---
+
+## Infrastructure
+
+For project to be online, we've setup two remote machines for environments `stage` и `prod`.
+They have identical configurations, and the project is started in the similar way as you would run it locally:
+
+```
+docker compose -f docker-compose.prod.yaml pull
+docker-compose -f docker-compose.prod.yaml -d
+```
+
+More deployment details in [deploy.yml](.github/workflows/deploy.yml).
+
+> [!NOTE]
+> Working directory for the project is `/opt/services/neuro-parser`. 
+> Should the value change, you can look it up in `$DEPLOY_LOCATION` at [deploy.yml](.github/workflows/deploy.yml).
+
+> [!WARNING] Beware!
+> Working directory of `github-actions` (`/home/github-actions/_work/neuro-parser`) is only used to clone project's source code.
+> It's not used for running the project and shouldn't be used by anyone to do so.
+
+### Типовые операции на серверах
+
+- **An error has occured in the environment, so we need to look at logs**
+  
+  ```bash
+  # a particular container
+  # web - server (admin section), bot - TG-bot, celery - tasks in queues
+  docker logs neuro-parser-web-1
+  # or
+  cd /opt/services/neuro-parser
+  docker-compose -f docker-compose.prod.yml logs -f
+  ```
+
+- **Need to test a script inside the container**
+  
+  ```bash
+  # web - server (admin section), bot - TG-bot, celery - tasks in queues
+  docker exec -it neuro-parser-web-1 bash
+  # or
+  cd /opt/services/neuro-parser
+  docker-compose -f docker-compose.prod.yml exec -it web bash
+  ```
+
+- **No space left. Server spams with `No space left on device` messages.**
+
+  Most likely the space finished due to frequent rebuilds or image pulls. We periodically clean up the space from unused images and containers, but it might not be sufficient sometimes. You can do that manually:
+
+  ```bash
+  docker container prune -f
+  docker image prune -af
+  # check disk usage
+  df -h
+  ```
 
 ---
 
