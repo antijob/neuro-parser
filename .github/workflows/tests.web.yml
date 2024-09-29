@@ -92,7 +92,7 @@ jobs:
         with:
           title: "coverage-report"
           delete-old-comments: true
-          lcov-file: ${{ env.TEST_COVERAGE_FILE }}
+          lcov-file: /${{ env.TEST_COVERAGE_FILE }}
 
       # Reporting to PR details and Job summary
       # https://github.com/thombashi/pytest-md-report
