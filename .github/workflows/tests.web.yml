@@ -25,12 +25,12 @@ jobs:
         run: |
           echo "NEURO_PARSER_VERSION=$(echo ${GITHUB_REF#refs/heads/} | tr '/' '-')" >> "$GITHUB_ENV";
           echo "COMPOSE_PROJECT_NAME=${COMPOSE_PROJECT_NAME_PREFIX}-${NEURO_PARSER_VERSION}" >> "$GITHUB_ENV";
-          echo "TEST_DIR=${TEST_DIR_ROOT}/${COMPOSE_PROJECT_NAME}";
+          echo "TEST_DIR=${TEST_DIR_ROOT}/${COMPOSE_PROJECT_NAME}" >> "$GITHUB_ENV";
       
       - name: Clone project to a separate work directory
         run: |
           find ${TEST_DIR} -mindepth 1 -delete;
-          cp -a ${GITHUB_WORKSPACE}/. ${TEST_DIR}/;
+          cp -a ./. ${TEST_DIR}/;
 
       - name: Prepare .env
         working-directory: ${{ env.TEST_DIR }} 
