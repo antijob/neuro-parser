@@ -23,12 +23,17 @@ jobs:
       
       - name: Prepare environment
         run: |
-          echo "NEURO_PARSER_VERSION=$(echo ${GITHUB_REF#refs/heads/} | tr '/' '-')" >> "$GITHUB_ENV";
-          echo "COMPOSE_PROJECT_NAME=${COMPOSE_PROJECT_NAME_PREFIX}-${NEURO_PARSER_VERSION}" >> "$GITHUB_ENV";
-          echo "TEST_DIR=${TEST_DIR_ROOT}/${COMPOSE_PROJECT_NAME}" >> "$GITHUB_ENV";
+          export NEURO_PARSER_VERSION=$(echo ${GITHUB_REF#refs/heads/} | tr '/' '-');
+          export COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME_PREFIX}-${NEURO_PARSER_VERSION}";
+          export TEST_DIR="${TEST_DIR_ROOT}/${COMPOSE_PROJECT_NAME}";
+
+          echo "NEURO_PARSER_VERSION=${NEURO_PARSER_VERSION}" >> "$GITHUB_ENV";
+          echo "COMPOSE_PROJECT_NAME=${COMPOSE_PROJECT_NAME}" >> "$GITHUB_ENV";
+          echo "TEST_DIR=${TEST_DIR}" >> "$GITHUB_ENV";
       
       - name: Clone project to a separate work directory
         run: |
+          mkdir -p ${TEST_DIR};
           find ${TEST_DIR} -mindepth 1 -delete;
           cp -a ./. ${TEST_DIR}/;
 
