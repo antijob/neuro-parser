@@ -20,23 +20,19 @@
 - Нейро-парсер можно развернуть для приватного использования, что позволин более гибко настроить списки источников и доступные модели для различения новостей.
 - REST API интерфейс с [документацией](https://report.antijob.net/swagger-ui/)
 
----
-
 ## Документация и инструкции по использованию
 
 Доступны в [readthedocs](https://neuro-parser.readthedocs.io/ru/latest/)
-
----
 
 ## Вклад в проект
 
 Мы приветствуем участие сообщества. Пожалуйста, следуйте рекомендациям, изложенным в файле [CONTRIBUTING.md](CONTRIBUTING.md).
 
----
-
 ## Контакты
 
 Если у вас есть вопросы или вам нужна дополнительная помощь, свяжитесь с нами по адресу info@antijob.net.
+
+---
 
 # Neuroparser
 
@@ -59,22 +55,14 @@ The parser searches for links to news and posts from these sources, then downloa
 - Neuroparser can be deployed for private use, allowing more flexible configuration of source lists and available models for distinguishing news.
 - REST API interface with [documentation](https://report.antijob.net/swagger-ui/)
 
----
-
 ## Documentation and Usage Instructions
 
 Available at [readthedocs](https://neuro-parser.readthedocs.io/en/latest/)
-
----
 
 ## Contributing
 
 We welcome community participation. Please follow the guidelines outlined in the [CONTRIBUTING.md](CONTRIBUTING.md) file.
 
----
-
 ## Contact
 
 If you have any questions or need additional assistance, contact us at info@antijob.net.
-
----
