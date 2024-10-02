@@ -2,6 +2,5 @@
 
 Choose your language:
 
-- [English](en/index.md)
 - [Русский](ru/index.md)
-- [Français](fr/index.md)
+- [English](en/index.md)

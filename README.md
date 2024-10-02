@@ -76,7 +76,7 @@ Available at [readthedocs](https://neuro-parser.readthedocs.io/en/latest/)
 
 ## For Developers
 
-Developer instructions and project setup for local and production environments can be found in the [DEVELOPERS.md](DEVELOPERS.md) file.
+Developer instructions and project setup for local and production environments can be found in the [developers guide](https://neuro-parser.readthedocs.io/ru/latest/ru/developers.html) file.
 
 ---
 
