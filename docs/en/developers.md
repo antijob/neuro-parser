@@ -4,14 +4,14 @@ This document provides guidelines for developers contributing to the project, co
 
 ## Table of Contents
 1. [Managing Python Packages](#managing-python-packages)
-1. [Running Locally](#running-locally)
-1. [Running in Production](#running-in-production)
-1. [Telegram Bot Setup](#telegram-bot-setup)
-1. [Model API](#model-api)
-1. [REST API Interface](#rest-api-interface)
-1. [Infrastructure](#infrastructure)
-1. [Contributing](#contributing)
-1. [Contact](#contact)
+2. [Running Locally](#running-locally)
+3. [Running in Production](#running-in-production)
+4. [Telegram Bot Setup](#telegram-bot-setup)
+5. [Model API](#model-api)
+6. [REST API Interface](#rest-api-interface)
+7. [Infrastructure](#infrastructure)
+8. [Contributing](#contributing)
+9. [Contact](#contact)
 
 ---
 
@@ -161,7 +161,7 @@ More deployment details in [deploy.yml](.github/workflows/deploy.yml).
 
 ## Contributing
 
-We welcome contributions from the community. Please follow the guidelines in the [CONTRIBUTING.md](CONTRIBUTING.md) file.
+We welcome contributions from the community. Please follow the guidelines in the [CONTRIBUTING.md](https://github.com/antijob/neuro-parser/blob/main/CONTRIBUTING.md).
 
 ---
 
