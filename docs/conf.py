@@ -19,6 +19,7 @@ project = "Neuro parser"
 copyright = f"{date.today().year}, Antijob"
 author = "Antijob"
 release = "1.0"
+language = "ru"
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
