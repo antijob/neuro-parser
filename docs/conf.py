@@ -29,7 +29,6 @@ extensions = [
     'sphinx.ext.napoleon',
     'sphinx.ext.viewcode',
     'recommonmark',
-    'markdown-extra'
 ]
 
 templates_path = ["_templates"]

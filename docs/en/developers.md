@@ -2,19 +2,6 @@
 
 This document provides guidelines for developers contributing to the project, covering Python package management, running the project locally or in production, setting up a Telegram bot, broadcasting messages, and API usage.
 
-## Table of Contents
-1. [Managing Python Packages](#managing-python-packages)
-2. [Running Locally](#running-locally)
-3. [Running in Production](#running-in-production)
-4. [Telegram Bot Setup](#telegram-bot-setup)
-5. [Model API](#model-api)
-6. [REST API Interface](#rest-api-interface)
-7. [Infrastructure](#infrastructure)
-8. [Contributing](#contributing)
-9. [Contact](#contact)
-
----
-
 ## Managing Python Packages
 
 For managing Python packages, we use [PDM](https://pdm-project.org/):

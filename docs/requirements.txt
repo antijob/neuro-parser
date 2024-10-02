@@ -2,4 +2,3 @@ sphinx
 sphinx_rtd_theme
 sphinx-notfound-page
 recommonmark
-markdown-extra
