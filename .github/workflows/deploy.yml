@@ -13,6 +13,9 @@ on:
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
 
+env:
+  DEPLOY_LOCATION: /opt/services/neuro-parser
+
 jobs:
   deploy:
     name: "Deploy environment"
@@ -100,7 +103,7 @@ jobs:
 
       - name: Start the app
         run: |
-          cd /opt/services/neuro-parser
+          cd ${DEPLOY_LOCATION}
           docker compose -f docker-compose.prod.yaml pull
           docker compose -f docker-compose.prod.yaml up -d
 
