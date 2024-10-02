@@ -78,12 +78,11 @@ jobs:
               --md-report-flavor gfm \
               --md-report-output /${TEST_REPORT_ROOT}/${TEST_REPORT_OUTPUT}
 
-      - name: Clean-up tests
+      - name: Ensure tests aren't running anymore
         working-directory: ${{ env.TEST_DIR }}
         if: always()
         run: |
           docker compose -f docker-compose.yaml down --timeout=0;
-          find . -mindepth 1 -delete
 
       # Reporting coverage
       # https://github.com/romeovs/lcov-reporter-action
@@ -116,3 +115,9 @@ jobs:
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "</details>" >> $GITHUB_STEP_SUMMARY
           fi
+      
+      - name: Cleanup tests
+        if: always()
+        run: |
+          echo "Cleaning up test dir: ${TEST_DIR}"
+          rm -rf ${TEST_DIR};
