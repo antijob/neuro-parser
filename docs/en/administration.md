@@ -4,10 +4,6 @@ Here are some features that may not be obvious but are important for using the p
 
 ## Sending messages to the bot
 
-Here is the translation into English in `.md` format:
-
-## Mass messaging functionality
-
 The project has a feature for administrators to send messages to multiple channels through the Django admin panel.
 
 ### How to use
