@@ -20,7 +20,7 @@ jobs:
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
-      
+
       - name: Prepare environment
         run: |
           export NEURO_PARSER_VERSION=$(echo ${GITHUB_REF#refs/heads/} | tr '/' '-');
@@ -30,7 +30,7 @@ jobs:
           echo "NEURO_PARSER_VERSION=${NEURO_PARSER_VERSION}" >> "$GITHUB_ENV";
           echo "COMPOSE_PROJECT_NAME=${COMPOSE_PROJECT_NAME}" >> "$GITHUB_ENV";
           echo "TEST_DIR=${TEST_DIR}" >> "$GITHUB_ENV";
-      
+
       - name: Clone project to a separate work directory
         run: |
           mkdir -p ${TEST_DIR};
@@ -38,7 +38,7 @@ jobs:
           cp -a ./. ${TEST_DIR}/;
 
       - name: Prepare .env
-        working-directory: ${{ env.TEST_DIR }} 
+        working-directory: ${{ env.TEST_DIR }}
         run: |
           cp .env.template .env
           sed -i \
@@ -78,12 +78,13 @@ jobs:
               --md-report-flavor gfm \
               --md-report-output /${TEST_REPORT_ROOT}/${TEST_REPORT_OUTPUT}
 
-      - name: Ensure tests aren't running anymore
+      - name: Clean-up tests
         working-directory: ${{ env.TEST_DIR }}
         if: always()
         run: |
-          docker compose -f docker-compose.yaml down --timeout=0
-        
+          docker compose -f docker-compose.yaml down --timeout=0;
+          find . -mindepth 1 -delete
+
       # Reporting coverage
       # https://github.com/romeovs/lcov-reporter-action
       - name: Coverage comment
