@@ -28,12 +28,6 @@
 
 ---
 
-## Разработчикам
-
-Инструкции для разработчиков и установка проекта для локальной и продакшн среды находятся в файле [DEVELOPERS.md](DEVELOPERS.md).
-
----
-
 ## Вклад в проект
 
 Мы приветствуем участие сообщества. Пожалуйста, следуйте рекомендациям, изложенным в файле [CONTRIBUTING.md](CONTRIBUTING.md).
@@ -70,13 +64,6 @@ The parser searches for links to news and posts from these sources, then downloa
 ## Documentation and Usage Instructions
 
 Available at [readthedocs](https://neuro-parser.readthedocs.io/en/latest/)
-
-
----
-
-## For Developers
-
-Developer instructions and project setup for local and production environments can be found in the [developers guide](https://neuro-parser.readthedocs.io/ru/latest/ru/developers.html) file.
 
 ---
 
