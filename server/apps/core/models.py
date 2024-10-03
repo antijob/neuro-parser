@@ -216,10 +216,12 @@ class Article(models.Model):
     )
     is_duplicate = models.BooleanField(verbose_name="Дубликат", default=False)
     duplicate_url = models.URLField(
-        verbose_name="Дубликат чего", null=True, blank=True)
+        verbose_name="Дубликат чего", max_length=1024, null=True, blank=True
+    )
     is_redirect = models.BooleanField(verbose_name="Редирект", default=False)
     redirect_url = models.URLField(
-        verbose_name="Редирект куда", null=True, blank=True)
+        verbose_name="Редирект куда", max_length=1024, null=True, blank=True
+    )
 
     rate = models.JSONField(verbose_name="Оценка релевантности", default=dict)
     incident = models.OneToOneField(
