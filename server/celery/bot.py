@@ -1,6 +1,6 @@
 import asyncio
 
-from aiogram.exceptions import TelegramRetryAfter
+from aiogram.exceptions import TelegramRetryAfter, TelegramForbiddenError
 from celery.signals import celeryd_init, worker_shutdown
 from celery.utils.log import get_task_logger
 
@@ -47,6 +47,10 @@ def send_message_to_channels(msg: str, chat_id: int, inc_id: int = None):
     async def send_message():
         try:
             await bot.send_message(text=msg, chat_id=chat_id, reply_markup=keyboard)
+        except TelegramForbiddenError as e:
+            raise TelegramForbiddenError(
+                "Bot can't acces the chat, please check it. Chat id: " + str(chat_id)
+            ) from e
         except Exception as e:
             logger.error(f"Error sending message to channel: {e}")
             raise
