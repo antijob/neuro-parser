@@ -13,6 +13,10 @@ class ClientFactory:
         source: Optional[Source] = None, article: Optional[Article] = None
     ) -> ClientBase:
         if source.needs_proxy:
-            proxy = await ProxyManager.get_proxy()
-            return HttpClient(proxy=proxy)
+            settings = await ProxyManager.get_proxy()
+            return HttpClient(
+                proxy=settings["proxy_url"],
+                login=settings["proxy_login"],
+                password=settings["proxy_password"],
+            )
         return HttpClient()
