@@ -282,8 +282,9 @@ class Proxy(models.Model):
     port = models.PositiveIntegerField(
         _("Порт"),
         validators=[MinValueValidator(1), MaxValueValidator(65535)],
-        unique=True,
     )
+    login = models.CharField(_("Логин"), max_length=128, null=True, blank=True)
+    password = models.CharField(_("Пароль"), max_length=128, null=True, blank=True)
     country = models.ForeignKey(
         Country, on_delete=models.CASCADE, verbose_name=_("Страна")
     )
