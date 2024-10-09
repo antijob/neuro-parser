@@ -6,10 +6,12 @@ on:
   workflow_call:
 
 concurrency:
-  group: ${{ github.workflow }}
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 env:
-  COMPOSE_PROJECT_NAME: "neuro-parser-test"
+  COMPOSE_PROJECT_NAME_PREFIX: "np-test"
+  TEST_DIR_ROOT: /tmp/neuro-parser
 
 jobs:
   test:
@@ -18,12 +20,25 @@ jobs:
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
-      
-      - name: Prepare branch name
+
+      - name: Prepare environment
         run: |
-          echo "NEURO_PARSER_VERSION=$(echo ${GITHUB_REF#refs/heads/} | tr '/' '-')" >> "$GITHUB_ENV";
+          export NEURO_PARSER_VERSION=$(echo ${GITHUB_REF#refs/heads/} | tr '/' '-');
+          export COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME_PREFIX}-${NEURO_PARSER_VERSION}";
+          export TEST_DIR="${TEST_DIR_ROOT}/${COMPOSE_PROJECT_NAME}";
+
+          echo "NEURO_PARSER_VERSION=${NEURO_PARSER_VERSION}" >> "$GITHUB_ENV";
+          echo "COMPOSE_PROJECT_NAME=${COMPOSE_PROJECT_NAME}" >> "$GITHUB_ENV";
+          echo "TEST_DIR=${TEST_DIR}" >> "$GITHUB_ENV";
+
+      - name: Clone project to a separate work directory
+        run: |
+          mkdir -p ${TEST_DIR};
+          find ${TEST_DIR} -mindepth 1 -delete;
+          cp -a ./. ${TEST_DIR}/;
 
       - name: Prepare .env
+        working-directory: ${{ env.TEST_DIR }}
         run: |
           cp .env.template .env
           sed -i \
@@ -35,8 +50,9 @@ jobs:
           API_RPS: "100/minute"
 
       - name: Execute tests in Docker
+        working-directory: ${{ env.TEST_DIR }}
         env:
-          TEST_REPORT_ROOT: /tmp/artifacts/tests
+          TEST_REPORT_ROOT: ${{ env.TEST_DIR }}/test-results
           TEST_REPORT_OUTPUT: md_report.${{ github.run_id }}.md
           TEST_COVERAGE_OUTPUT: ${{ github.run_id }}.coverage
         run: |
@@ -63,10 +79,11 @@ jobs:
               --md-report-output /${TEST_REPORT_ROOT}/${TEST_REPORT_OUTPUT}
 
       - name: Ensure tests aren't running anymore
+        working-directory: ${{ env.TEST_DIR }}
         if: always()
         run: |
-          docker compose -f docker-compose.yaml down --timeout=0
-        
+          docker compose -f docker-compose.yaml down --timeout=0;
+
       # Reporting coverage
       # https://github.com/romeovs/lcov-reporter-action
       - name: Coverage comment
@@ -75,7 +92,7 @@ jobs:
         with:
           title: "coverage-report"
           delete-old-comments: true
-          lcov-file: ${{ env.TEST_COVERAGE_FILE }}
+          lcov-file: /${{ env.TEST_COVERAGE_FILE }}
 
       # Reporting to PR details and Job summary
       # https://github.com/thombashi/pytest-md-report
@@ -98,3 +115,9 @@ jobs:
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "</details>" >> $GITHUB_STEP_SUMMARY
           fi
+      
+      - name: Cleanup tests
+        if: always()
+        run: |
+          echo "Cleaning up test dir: ${TEST_DIR}"
+          rm -rf ${TEST_DIR};
