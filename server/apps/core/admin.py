@@ -2,7 +2,7 @@
 
 from django.contrib import admin
 from server.apps.core.admins.filters.downvote_filter import DownvoteFilter
-
+from server.apps.core.admins.actions.export_incidents_as_csv_action import export_incidents_as_csv
 from server.apps.core.models import (
     Article,
     MediaIncident,
@@ -55,6 +55,7 @@ class MediaIncidentAdmin(admin.ModelAdmin):
                     "status", "rate_article", "downvote")
     autocomplete_fields = ["related_article", "duplicate"]
     list_filter = ["status", "incident_type", DownvoteFilter]
+    actions = [export_incidents_as_csv]
     search_fields = ["title"]
 
     def rate_article(self, obj):

@@ -7,9 +7,9 @@ class DownvoteFilter(admin.SimpleListFilter):
 
     def lookups(self, request, model_admin):
         return [
-            ('1', 'Больше 1'),
-            ('2', 'Больше 2'),
-            ('5', 'Больше 5'),
+            ('1', '1 и более'),
+            ('2', '2 и более'),
+            ('5', '5 и более'),
         ]
 
     def queryset(self, request, queryset):
