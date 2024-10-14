@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from django.contrib import admin
+from server.apps.core.admins.filters.downvote_filter import DownvoteFilter
 
 from server.apps.core.models import (
     Article,
@@ -33,7 +34,8 @@ class IncidentTypeAdmin(admin.ModelAdmin):
         for obj in queryset:
             obj.is_active = False
             obj.save()
-        self.message_user(request, f"{queryset.count()} models will be switched.")
+        self.message_user(
+            request, f"{queryset.count()} models will be switched.")
 
     disable_models.short_description = "Disable models"
 
@@ -41,15 +43,18 @@ class IncidentTypeAdmin(admin.ModelAdmin):
         for obj in queryset:
             obj.is_active = True
             obj.save()
-        self.message_user(request, f"{queryset.count()} models will be switched.")
+        self.message_user(
+            request, f"{queryset.count()} models will be switched.")
 
     enable_models.short_description = "Enable models"
 
 
 @admin.register(MediaIncident)
 class MediaIncidentAdmin(admin.ModelAdmin):
-    list_display = ("any_title", "incident_type", "status", "rate_article")
+    list_display = ("any_title", "incident_type",
+                    "status", "rate_article", "downvote")
     autocomplete_fields = ["related_article", "duplicate"]
+    list_filter = ["status", "incident_type", DownvoteFilter]
     search_fields = ["title"]
 
     def rate_article(self, obj):
@@ -80,7 +85,8 @@ class ArticleAdmin(admin.ModelAdmin):
         for obj in queryset:
             obj.is_parsed = False
             obj.save()
-        self.message_user(request, f"{queryset.count()} articles will be parsed.")
+        self.message_user(
+            request, f"{queryset.count()} articles will be parsed.")
 
     force_parse.short_description = "Force parse"
 
@@ -121,7 +127,8 @@ class SourceAdmin(admin.ModelAdmin):
         for obj in queryset:
             obj.is_active = False
             obj.save()
-        self.message_user(request, f"{queryset.count()} sources were deactivate.")
+        self.message_user(
+            request, f"{queryset.count()} sources were deactivate.")
 
     activate.short_description = "Activate sources"
     deactivate.short_description = "Deactivate sources"
