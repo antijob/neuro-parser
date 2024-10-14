@@ -28,7 +28,7 @@ class IncidentPredictor:
     registry.register(LlamaPredictor)
 
     @classmethod
-    def make_predictor(cls, incident_type: IncidentType) -> Optional[PredictorBase]:
+    def _make_predictor(cls, incident_type: IncidentType) -> Optional[PredictorBase]:
         try:
             predictor = cls.registry.choose(incident_type)
             return predictor(incident_type)
@@ -36,7 +36,7 @@ class IncidentPredictor:
             logger.error(f"Error in setup_incident_type: {e}", exc_info=True)
 
     @staticmethod
-    def create_incident(
+    def _create_incident(
         article: Article, incident_type: IncidentType
     ) -> Optional[MediaIncident]:
         try:
@@ -66,11 +66,11 @@ class IncidentPredictor:
                 if not incident_type.is_active:
                     continue
 
-                predictor = cls.make_predictor(incident_type)
+                predictor = cls._make_predictor(incident_type)
                 for article in batch:
                     is_incident, rate = predictor.is_incident(article)
                     if is_incident:
-                        incident = cls.create_incident(article, incident_type)
+                        incident = cls._create_incident(article, incident_type)
                         if incident is not None:
                             result_incidents.append(incident)
                     if rate:

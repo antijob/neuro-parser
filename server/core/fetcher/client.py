@@ -52,6 +52,7 @@ class NPClient:
             article.source = source
 
         ArticleParser.postprocess_article(article, content)
+        article.is_downloaded = True
         await sync_to_async(article.save, thread_sensitive=True)()
 
         return article
