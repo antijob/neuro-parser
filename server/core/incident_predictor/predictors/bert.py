@@ -6,7 +6,6 @@ import logging
 from typing import Any
 import tqdm
 import torch
-from server.libs.morphy import normalize_text
 
 from server.apps.core.models import IncidentType, Article
 
@@ -47,14 +46,13 @@ class BertPredictor(PredictorBase):
         return False
 
     def is_incident(self, article: Article) -> tuple[bool, Any]:
-        normalized_text = normalize_text(article.text)
         try:
             encoding = self.tokenizer(
-                normalized_text,
+                article.text,
                 return_tensors="pt",
                 padding=True,
                 truncation=True,
-                max_length=256,
+                max_length=512,
             )
             input_ids = encoding["input_ids"]
             dataset = torch.utils.data.TensorDataset(
