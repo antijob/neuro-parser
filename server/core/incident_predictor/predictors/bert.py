@@ -6,7 +6,6 @@ import logging
 from typing import Any
 import tqdm
 import torch
-from server.libs.morphy import normalize_text
 
 from server.apps.core.models import IncidentType, Article
 
@@ -25,10 +24,8 @@ logger = logging.getLogger(__name__)
 class BertPredictor(PredictorBase):
     def __init__(self, incident_type: IncidentType):
         model_directory = MODELS_DIR.joinpath(incident_type.model_path)
-        self.tokenizer = AutoTokenizer.from_pretrained(
-            model_directory, use_fast=False)
-        self.model = BertForSequenceClassification.from_pretrained(
-            model_directory)
+        self.tokenizer = AutoTokenizer.from_pretrained(model_directory, use_fast=False)
+        self.model = BertForSequenceClassification.from_pretrained(model_directory)
         self.model.eval()
 
         self.incident_type = incident_type
@@ -47,14 +44,13 @@ class BertPredictor(PredictorBase):
         return False
 
     def is_incident(self, article: Article) -> tuple[bool, Any]:
-        normalized_text = normalize_text(article.text)
         try:
             encoding = self.tokenizer(
-                normalized_text,
+                article.text,
                 return_tensors="pt",
                 padding=True,
                 truncation=True,
-                max_length=256,
+                max_length=512,
             )
             input_ids = encoding["input_ids"]
             dataset = torch.utils.data.TensorDataset(
@@ -74,9 +70,7 @@ class BertPredictor(PredictorBase):
             logits = torch.tensor([predictions_neg, predictions_pos])
             probabilities = torch.nn.functional.softmax(logits, dim=0).tolist()
 
-            is_incident = (
-                probabilities[0] > self.incident_type.treshold
-            )
+            is_incident = probabilities[0] > self.incident_type.treshold
             rate = probabilities
 
             return is_incident, rate
