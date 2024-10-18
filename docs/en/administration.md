@@ -34,6 +34,12 @@ Instructions for developers and setting up the project for local and production 
 
 There is a possibility to hide each individual category for each channel. This may be related to the need to separate models or security requirements.
 
+#### Downloading incidents to csv
+
+1. Go to the "Incidents from the media" tab.
+2. Set the necessary filters in the left part.
+3. Select the desired incidents and use the "Export selected records to CSV" action in the dropdown menu.
+
 ### How to use
 
 To do this, go to the admin panel in `Channel incident types`, find the record with the desired type of incident and channel ID, and open it. In the settings, a new field **show** has appeared. If it is enabled, the category is displayed in the channel settings in Telegram. If disabled, the category is not displayed.
