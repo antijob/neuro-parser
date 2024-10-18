@@ -1,17 +1,16 @@
-import asyncio
 import logging
 
 from asgiref.sync import async_to_sync
 from django.contrib import admin, messages
 from django.shortcuts import render
+from django.utils.translation import gettext_lazy as _
 
-from server.apps.bot.bot_instance import bot, close_bot
+from server.apps.bot.bot_instance import get_bot
 from server.apps.bot.models import (
     Channel,
     ChannelCountry,
     ChannelIncidentType,
 )
-from aiogram.exceptions import TelegramNotFound
 
 from .forms import BroadcastForm, ChannelCountryForm
 
@@ -48,25 +47,18 @@ class ChannelAdmin(admin.ModelAdmin):
 
                 async def send_messages():
                     success_count = 0
-                    for channel in channels:
-                        try:
-                            await bot.send_message(text=message, chat_id=str(channel))
-                            success_count += 1
-                        except TelegramNotFound:
-                            logger.error(f"ChatNotFound for channel {channel}")
-                            continue
-                        except Exception as e:
-                            logger.error(
-                                f"Failed to send message to channel {channel}: {e}"
-                            )
-                            self.message_user(
-                                request,
-                                "Ошибка при отправке сообщения",
-                                level=messages.ERROR,
-                            )
-                            return None
-                    await asyncio.sleep(2)
-                    await close_bot()
+                    async with get_bot() as bot:
+                        for channel in channels:
+                            try:
+                                await bot.send_message(
+                                    text=message, chat_id=str(channel)
+                                )
+                                success_count += 1
+                            except Exception as e:
+                                logger.error(
+                                    f"Failed to send message to channel {channel}: {e}"
+                                )
+                                continue
 
                     return success_count
 
@@ -74,6 +66,7 @@ class ChannelAdmin(admin.ModelAdmin):
                 self.message_user(
                     request,
                     f"Сообщение отправлено в {success_count} каналов из {len(channels)}",
+                    level=messages.INFO,
                 )
                 return None
         else:
@@ -95,8 +88,23 @@ class ChannelAdmin(admin.ModelAdmin):
 
 @admin.register(ChannelIncidentType)
 class ChannelIncidentTypeAdmin(admin.ModelAdmin):
-    list_display = ["channel", "incident_type", "status"]
+    list_display = ["channel", "incident_type", "status", "show"]
+    list_filter = ["channel", "incident_type", "status", "show"]
+    search_fields = ["channel__name", "incident_type__name"]
     inlines = [ChannelSubscriptionInline]
+
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        field = super().formfield_for_dbfield(db_field, request, **kwargs)
+        if db_field.name == "show":
+            field.help_text = _(
+                "При отключении этого поля, поле <b>status</b> также будет отключено"
+            )
+        return field
+
+    def save_model(self, request, obj, form, change):
+        if not obj.show:
+            obj.status = False
+        super().save_model(request, obj, form, change)
 
 
 @admin.register(ChannelCountry)

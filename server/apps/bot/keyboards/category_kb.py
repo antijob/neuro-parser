@@ -25,7 +25,7 @@ def category_keyboard(chn: Channel) -> InlineKeyboardMarkup:
     """
     Creates inline keyboard for all types of incidents that we have in IncidentType model.
     """
-    types = ChannelIncidentType.objects.filter(channel=chn).order_by("id")
+    types = ChannelIncidentType.objects.filter(channel=chn, show=True).order_by("id")
     builder = InlineKeyboardBuilder()
 
     for item in types:

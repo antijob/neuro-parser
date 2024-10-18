@@ -20,7 +20,9 @@ class Fetcher:
         self.coroutines: list[Coroutine] = []
 
     @staticmethod
-    async def download_article(article: Article, source: Source) -> Optional[Article]:
+    async def download_article(
+        article: Article, source: Optional[Source] = None
+    ) -> Optional[Article]:
         try:
             async with NPClient() as client:
                 return await client.get_article(article, source)

@@ -21,142 +21,89 @@ services:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
       - "traefik-public-certificates:/certificates"
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.dashboard.rule=Host(`${TRAEFIK_HOST}`)"
-      - "traefik.http.routers.dashboard.tls=true"
-      - "traefik.http.routers.dashboard.tls.certresolver=letsencrypt"
-      - "traefik.http.routers.dashboard.service=api@internal"
-      - "traefik.http.routers.dashboard.middlewares=auth"
-      - "traefik.http.middlewares.auth.basicauth.users=testuser:$$apr1$$jIKW.bdS$$eKXe4Lxjgy/rH65wP1iQe1"
+      traefik.enable: "true"
+      traefik.http.routers.dashboard.rule: "Host(`${TRAEFIK_HOST}`)"
+      traefik.http.routers.dashboard.tls: "true"
+      traefik.http.routers.dashboard.tls.certresolver: "letsencrypt"
+      traefik.http.routers.dashboard.service: "api@internal"
+      traefik.http.routers.dashboard.middlewares: "auth"
+      traefik.http.middlewares.auth.basicauth.users: "testuser:$$apr1$$jIKW.bdS$$eKXe4Lxjgy/rH65wP1iQe1"
     environment:
-      - CF_DNS_API_TOKEN=${CF_DNS_API_TOKEN}
+      CF_DNS_API_TOKEN: ${CF_DNS_API_TOKEN}
     networks:
       - djangonetwork
 
   db:
-    image: postgres:13.4
+    extends:
+      file: docker-compose.yaml
+      service: db
     volumes:
       - postgres_data_prod:/var/lib/postgresql/data
-    networks:
-      - djangonetwork
-    environment:
-      - POSTGRES_DB=${POSTGRES_DB}
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_HOST_AUTH_METHOD=md5
-    env_file:
-      - .env
 
-  celery:
-    build:
-      context: .
-      dockerfile: ./docker/web/Dockerfile.prod
-    command: /bin/bash -c "chmod +x ./docker/celery/entrypoint.sh && ./docker/celery/entrypoint.sh"
+  web:
     image: antijob/neuro-parser:${NEURO_PARSER_VERSION}
+    extends:
+      file: docker-compose.yaml
+      service: web
+    command: /bin/bash -c ./docker/web/entrypoint-prod.sh
+    environment:
+      DEBUG: "False"
     volumes:
-      - /root/models:/home/github-actions/code/models
-    restart: always
-    depends_on:
-      - redis
-      - db
-    networks:
-      - djangonetwork
+      - /root/models:/code/models
+      - "staticfiles-data:/code/public/static"
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.django.rule: "Host(`${HOST}`)"
+      traefik.http.routers.django.entrypoints: "websecure"
+      traefik.http.routers.django.tls: "true"
+      traefik.http.routers.django.tls.certresolver: "letsencrypt"
+    
+  celery:
+    image: antijob/neuro-parser:${NEURO_PARSER_VERSION}
+    extends:
+      file: docker-compose.yaml
+      service: celery
+    volumes:
+      - /root/models:/code/models
+
+  bot:
+    image: antijob/neuro-parser:${NEURO_PARSER_VERSION}
+    extends:
+      file: docker-compose.yaml
+      service: bot
+    volumes: []
 
   flower:
-    image: mher/flower
-    container_name: flower
-    command: celery flower
-    environment:
-      - CELERY_BROKER_URL=redis://redis:6379/0
-      - CELERY_RESULT_BACKEND=redis://redis:6379/0
-      - FLOWER_BASIC_AUTH=${FLOWER_USER}:${FLOWER_PASSWORD}
-    ports:
-      - 5555:5555
-    env_file:
-      - .env
-    networks:
-      - djangonetwork
-    restart: always
+    extends:
+      file: docker-compose.yaml
+      service: flower
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.flower.rule=Host(`${FLOWER_HOST}`)"
-      - "traefik.http.routers.flower.entrypoints=websecure"
-      - "traefik.http.routers.flower.tls=true"
-      - "traefik.http.routers.flower.tls.certresolver=letsencrypt"
-    depends_on:
-      - redis
-      - web
-      - celery
+      traefik.enable: "true"
+      traefik.http.routers.flower.rule: "Host(`${FLOWER_HOST}`)"
+      traefik.http.routers.flower.entrypoints: "websecure"
+      traefik.http.routers.flower.tls: "true"
+      traefik.http.routers.flower.tls.certresolver: "letsencrypt"
+
+  redis:
+    extends:
+      file: docker-compose.yaml
+      service: redis
 
   nginx:
     image: nginx:1.23
     restart: unless-stopped
     volumes:
-      - type: volume
-        source: staticfiles-data
-        target: /usr/share/nginx/html/static
-        read_only: true
+      - staticfiles-data:/usr/share/nginx/html/static:ro
     depends_on:
       - web
     networks:
       - djangonetwork
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.staticfiles.rule=Host(`${HOST}`) && PathPrefix(`/static/`)"
-      - "traefik.http.routers.staticfiles.entrypoints=websecure"
-      - "traefik.http.routers.staticfiles.tls=true"
-      - "traefik.http.routers.staticfiles.tls.certresolver=letsencrypt"
-
-  bot:
-    build:
-      context: .
-      dockerfile: ./docker/web/Dockerfile.prod
-    command: /bin/bash -c "chmod +x ./docker/bot/entrypoint.sh && ./docker/bot/entrypoint.sh"
-    volumes:
-      - .:/code
-    restart: always
-    depends_on:
-      - redis
-      - web
-    networks:
-      - djangonetwork
-
-  web:
-    command: /bin/bash -c "chmod +x ./docker/web/entrypoint-prod.sh && ./docker/web/entrypoint-prod.sh"
-    build:
-      context: .
-      dockerfile: ./docker/web/Dockerfile.prod
-    image: antijob/neuro-parser:${NEURO_PARSER_VERSION}
-    volumes:
-      - /root/models:/home/github-actions/code/models
-      - "staticfiles-data:/home/github-actions/code/public/static"
-    expose:
-      - 8000
-    env_file:
-      - .env
-    environment:
-      - DEBUG=False
-      - POSTGRES_DB=${POSTGRES_DB}
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - DJANGO_ALLOWED_HOSTS=${HOST}
-    depends_on:
-      - db
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.django.rule=Host(`${HOST}`)"
-      - "traefik.http.routers.django.entrypoints=websecure"
-      - "traefik.http.routers.django.tls=true"
-      - "traefik.http.routers.django.tls.certresolver=letsencrypt"
-    networks:
-      - djangonetwork
-
-  redis:
-    image: redis:alpine
-    expose:
-      - "6379"
-    networks:
-      - djangonetwork
+      traefik.enable: "true"
+      traefik.http.routers.staticfiles.rule: "Host(`${HOST}`) && PathPrefix(`/static/`)"
+      traefik.http.routers.staticfiles.entrypoints: "websecure"
+      traefik.http.routers.staticfiles.tls: "true"
+      traefik.http.routers.staticfiles.tls.certresolver: "letsencrypt"
 
 volumes:
   staticfiles-data:

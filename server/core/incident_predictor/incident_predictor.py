@@ -1,57 +1,19 @@
 import logging
-from typing import Union
+
+from typing import Optional
 import datetime
 
-from server.libs.morphy import normalize_text
-from server.libs import chat_gpt
-
 from server.apps.core.models import IncidentType, Article, MediaIncident
+from server.libs.handler import HandlerRegistry
 
-from transformers import AutoTokenizer, BertForSequenceClassification
+from .predictors.base_predictor import PredictorBase
+from .predictors.bert import BertPredictor
+from .predictors.llama import LlamaPredictor
 
-from server.settings.components.common import MODELS_DIR
-
-# COSINE.PY
-import os
-import tqdm
-
-from django.conf import settings
-
-import torch
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-
-
-def rate_with_model_and_tokenizer(normalized_text, model, tokenizer):
-    try:
-        encoding = tokenizer(
-            normalized_text,
-            return_tensors="pt",
-            padding=True,
-            truncation=True,
-            max_length=256,
-        )
-        input_ids = encoding["input_ids"]
-        dataset = torch.utils.data.TensorDataset(
-            input_ids,
-        )
-        model_iter = torch.utils.data.DataLoader(
-            dataset, batch_size=1, shuffle=False)
-
-        predictions_pos = 0
-        predictions_neg = 0
-        for text in tqdm.tqdm(model_iter):
-            outputs = model(text[0])
-            predictions_pos += outputs.logits[0][1].item()
-            predictions_neg += outputs.logits[0][0].item()
-        logits = torch.tensor([predictions_neg, predictions_pos])
-        probabilities = torch.nn.functional.softmax(logits, dim=0)
-        return probabilities.tolist()
-    except Exception as e:
-        logger.error(f"Error in rate_with_model_and_tokenizer: {e}")
-        return [0, 0]  # Default value if an error occurs
 
 
 # THERE SHOULD BE 2 pipelines
@@ -59,58 +21,26 @@ def rate_with_model_and_tokenizer(normalized_text, model, tokenizer):
 # 1 -- unique url pipeline
 # 2 -- urls batch pipeline
 
+
 class IncidentPredictor:
-    current_incident_type: IncidentType
-    tokenizer: any
-    model: any
-    is_gpt_setup: bool
+    registry = HandlerRegistry[PredictorBase]()
+    registry.register(BertPredictor)
+    registry.register(LlamaPredictor)
 
-    def setup_incident_type(self, it: IncidentType):
+    @classmethod
+    def make_predictor(cls, incident_type: IncidentType) -> Optional[PredictorBase]:
         try:
-            self.current_incident_type = it
-
-            self.is_gpt_setup = False
-            if it.model_path:
-                model_directory = MODELS_DIR.joinpath(it.model_path)
-                self.tokenizer = AutoTokenizer.from_pretrained(
-                    model_directory, use_fast=False)
-                self.model = BertForSequenceClassification.from_pretrained(
-                    model_directory
-                )
-                self.model.eval()
-            elif it.chat_gpt_prompt:
-                self.is_gpt_setup = True
+            predictor = cls.registry.choose(incident_type)
+            return predictor(incident_type)
         except Exception as e:
-            logger.error(f"Error in setup_incident_type: {e}")
+            logger.error(f"Error in setup_incident_type: {e}", exc_info=True)
 
-    # Как-то надо в этом месте отмечать, что article -- mutable
-    def _is_incident(self, article: Article = None) -> bool:
-        if article is None:
-            return False
+    @staticmethod
+    def create_incident(
+        article: Article, incident_type: IncidentType
+    ) -> Optional[MediaIncident]:
         try:
-            normalized_text = normalize_text(article.text)
-            if self.is_gpt_setup:
-                return chat_gpt.predict_is_incident(
-                    normalized_text,
-                    self.current_incident_type.chat_gpt_prompt,
-                    self.current_incident_type.description,
-                    article,
-                )
-            else:
-                relevance = rate_with_model_and_tokenizer(
-                    normalized_text, self.model, self.tokenizer
-                )
-                article.rate[self.current_incident_type.description] = relevance
-                article.save()
-
-                return relevance[0] - relevance[1] > self.current_incident_type.treshold
-        except Exception as e:
-            logger.error(f"Error in _is_incident: {e}")
-            return False
-
-    def _create_incident(self, article: Article) -> MediaIncident:
-        try:
-            return MediaIncident.objects.create(
+            media_incident = MediaIncident.objects.create(
                 urls=[article.url],
                 status=MediaIncident.UNPROCESSED,
                 title=article.any_title(),
@@ -119,54 +49,38 @@ class IncidentPredictor:
                 description=article.text,
                 related_article=article,
                 public_description=article.text,
-                incident_type=self.current_incident_type,
+                incident_type=incident_type,
                 region=article.region,
                 country=article.country,
             )
+            return media_incident
         except Exception as e:
-            logger.error(f"Error in _create_incident: {e}")
-            return None  # Default value if an error occurs
+            logger.error(f"Error in create_incident: {e}")
+            return None
 
-    def predict_batch(self, batch: list[Article]) -> int:
+    @classmethod
+    def predict_batch(cls, batch: list[Article]) -> list[MediaIncident]:
         try:
-            incidents_count: int = 0
+            result_incidents: list[MediaIncident] = []
             for incident_type in IncidentType.objects.all():
                 if not incident_type.is_active:
                     continue
 
-                self.setup_incident_type(incident_type)
+                predictor = cls.make_predictor(incident_type)
                 for article in batch:
-                    if self._is_incident(article):
-                        self._create_incident(article)
-                        incidents_count += 1
-            return incidents_count
+                    is_incident, rate = predictor.is_incident(article)
+                    if is_incident:
+                        incident = cls.create_incident(article, incident_type)
+                        if incident is not None:
+                            result_incidents.append(incident)
+                    if rate:
+                        article.rate[incident_type.description] = rate
+                        article.save()
+            return result_incidents
         except Exception as e:
             logger.error(f"Error in predict_batch: {e}")
             raise
 
-    # def predict(self, article: Article) -> Union[MediaIncident, None]:
-    #     try:
-    #         for incident_type in IncidentType.objects.all():
-    #             if not incident_type.is_active:
-    #                 continue
-
-    #             self.setup_incident_type(incident_type)
-    #             normalized_text = normalize_text(article.text)
-
-    #             if self.is_gpt_setup:
-    #                 is_incident = chat_gpt.predict_is_incident(
-    #                     normalized_text,
-    #                     incident_type.chat_gpt_prompt,
-    #                     incident_type.description,
-    #                     article,
-    #                 )
-    #                 if is_incident:
-    #                     return self._create_incident(article)
-
-    #             if not incident_type.model_path:
-    #                 continue
-    #             if is_incident:
-    #                 return self._create_incident(article)
-    #     except Exception as e:
-    #         print(f"Error in predict: {e}")
-    #     return None
+    @classmethod
+    def predict(cls, article: Article) -> list[MediaIncident]:
+        return cls.predict_batch([article])

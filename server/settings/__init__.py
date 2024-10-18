@@ -14,26 +14,25 @@ from decouple import config as c
 
 
 from split_settings.tools import include, optional
-c.path = '../../.env'
 
-ENV = c('DJANGO_ENV')
+c.path = "../../.env"
+
+ENV = c("DJANGO_ENV")
 
 base_settings = [
-    'components/common.py',
-    'components/logging.py',
-    'components/caches.py',
-    'components/celery.py',
-    'components/sentry.py',
+    "components/common.py",
+    "components/logging.py",
+    "components/caches.py",
+    "components/celery.py",
+    "components/sentry.py",
     "components/telegram.py",
-
+    "components/api.py",
     # You can even use glob:
     # 'components/*.py'
-
     # Select the right env:
-    'environments/{0}.py'.format(ENV),
-
+    "environments/{0}.py".format(ENV),
     # Optionally override some settings:
-    optional('environments/local.py'),
+    optional("environments/local.py"),
 ]
 
 # Include settings:

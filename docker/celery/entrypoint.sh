@@ -18,7 +18,7 @@ trap cleanup SIGINT SIGTERM
 
 # Ожидание доступности сервера PostgreSQL
 log "Ожидание доступности сервера PostgreSQL на db:5432..."
-while !</dev/tcp/db/5432; do
+while ! </dev/tcp/db/5432; do
   sleep 1
 done
 log "PostgreSQL доступен."
@@ -30,6 +30,10 @@ watchmedo auto-restart -d ./server/celery/ -p '*.py' -- celery -A server worker 
 # Запуск celery worker для queue parser
 log "Запуск celery worker для queue parser..."
 watchmedo auto-restart -d ./server/celery/ -p '*.py' -- celery -A server worker --loglevel=info -E -c 1 -n parser -Q parser &
+
+# Запуск celery worker для queue bot
+log "Запуск celery worker для queue bot..."
+watchmedo auto-restart -d ./server/celery/ -p '*.py' -- celery -A server worker --loglevel=info -E -c 1 -n bot -Q bot &
 
 # Запуск celery beat
 log "Запуск celery beat..."

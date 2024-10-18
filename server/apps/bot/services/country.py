@@ -46,7 +46,7 @@ def create_settings(chn: Channel):
             if not ChannelIncidentType.objects.filter(
                 channel=chn, incident_type=it
             ).exists():
-                cit = ChannelIncidentType(channel=chn, incident_type=it, status=True)
+                cit = ChannelIncidentType(channel=chn, incident_type=it, status=False)
                 channel_incident_types.append(cit)
                 for c in Country.objects.all():
                     if not ChannelCountry.objects.filter(

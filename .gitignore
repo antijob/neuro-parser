@@ -58,6 +58,7 @@ __pycache__/
 # Distribution / packaging
 .Python
 env/
+venv/
 develop-eggs/
 dist/
 downloads/
@@ -67,6 +68,7 @@ lib64/
 parts/
 sdist/
 var/
+venv/
 *.egg-info/
 .installed.cfg
 *.egg
@@ -218,7 +220,10 @@ media/
 
 # Configuration file with private data:
 config/.env
-.env
+# Ignore all secret env vars
+.env*
+# Do not ignore the template file
+!.env.template
 
 # Local settings files:
 *local.py

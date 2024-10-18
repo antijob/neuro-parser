@@ -14,25 +14,31 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         with transaction.atomic():
             all_channels = Channel.objects.all()
-            result = (0, 0)
+            logger.info(f"Starting processing {len(all_channels)} channels.")
+            result_sum = (0, 0)
             for channel in all_channels:
                 result = self.process_channel(channel)
-                logger.info(
-                    f"Created {result[0]} ChannelIncidentType and {result[1]} ChannelCountry for channel {channel}"
-                )
+                result_sum = (result_sum[0] + result[0], result_sum[1] + result[1])
+            logger.info(
+                f"Processed all channels.  Created {result_sum[0]} ChannelIncidentType(s) and {result_sum[1]} ChannelCountry(ies)."
+            )
 
         logger.info("All statuses created or updated successfully")
 
     def process_channel(self, channel):
-        # Process IncidentTypes
         cit_created = 0
         cc_created = 0
+
+        # Process IncidentTypes
         for incident_type in IncidentType.objects.all():
             channel_incident_type, created = ChannelIncidentType.objects.get_or_create(
                 channel=channel, incident_type=incident_type, defaults={"status": True}
             )
             if created:
                 cit_created += 1
+                logger.info(
+                    f"Created ChannelIncidentType {channel_incident_type.id} for channel {channel.id} and incident type {incident_type.id}."
+                )
 
             # Process Countries for each ChannelIncidentType
             for country in Country.objects.all():
@@ -41,10 +47,13 @@ class Command(BaseCommand):
                     country=country,
                     defaults={
                         "status": True,
-                        "enabled_regions": (get_region_codes(country)),
+                        "enabled_regions": get_region_codes(country),
                     },
                 )
                 if created:
                     cc_created += 1
+                    logger.info(
+                        f"Created ChannelCountry {channel_country.id} for ChannelIncidentType {channel_incident_type.id} and country {country.id}."
+                    )
 
-            return (cit_created, cc_created)
+        return (cit_created, cc_created)
