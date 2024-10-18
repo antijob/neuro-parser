@@ -83,7 +83,7 @@ class SourceParser:
     registry.register(CommonParser)
 
     @classmethod
-    async def extract_all_news_urls(cls, source: Source) -> Iterable[str]:
+    async def _extract_all_news_urls(cls, source: Source) -> Iterable[str]:
         url = source.url
         html = await get_source_data(source)
         if html is None:
@@ -95,7 +95,7 @@ class SourceParser:
 
     @classmethod
     def create_new_articles(cls, source: Source) -> int:
-        urls = async_to_sync(cls.extract_all_news_urls)(source)
+        urls = async_to_sync(cls._extract_all_news_urls)(source)
         if not urls:
             return 0
         added = add_articles(source, urls)
