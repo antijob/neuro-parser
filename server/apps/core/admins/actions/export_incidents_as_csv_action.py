@@ -2,7 +2,10 @@ import csv
 from django.http import HttpResponse
 
 
-def export_incidents_as_csv(modeladmin, request, queryset):
+def export_incidents_as_csv(self, request, queryset):
+    """
+    Export selected incidents as CSV
+    """
     response = HttpResponse(content_type="text/csv")
     response["Content-Disposition"] = 'attachment; filename="filtered_data.csv"'
 
