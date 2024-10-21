@@ -1,22 +1,19 @@
 from typing import Iterable, Optional
-from .parsers.base_parser import ParserBase
 
-import re
+from asgiref.sync import async_to_sync
 from lxml.html.clean import Cleaner
 from selectolax.parser import HTMLParser
 
-
-from .parsers.vk_parser import VkParser
-from .parsers.ok_parser import OkParser
-from .parsers.tg_parser import TgParser
-from .parsers.common_parser import CommonParser
-from .parsers.rss_parser import RssParser
-
 from server.apps.core.models import Article, Source
 from server.core.fetcher import Fetcher
+from server.libs.handler import HandlerRegistry
 
-from asgiref.sync import async_to_sync
-
+from .parsers.base_parser import ParserBase
+from .parsers.common_parser import CommonParser
+from .parsers.ok_parser import OkParser
+from .parsers.rss_parser import RssParser
+from .parsers.tg_parser import TgParser
+from .parsers.vk_parser import VkParser
 
 CLEANER = Cleaner(
     scripts=True,
@@ -64,30 +61,26 @@ def build_document(html, clean=False):
 
 
 def add_articles(source: Source, urls: list[str]) -> list[Article]:
-    pattern = re.compile(r"https?://(?P<url_without_method>.+)")
     added = []
 
     for url in urls:
-        match = pattern.match(url)
-        if not match:
-            continue
-
-        url_without_method = match.group("url_without_method")
-
-        if not Article.objects.filter(url__iendswith=url_without_method).exists():
-            try:
-                added.append(Article.objects.create(url=url, source=source))
-            except Exception as e:
-                raise type(e)(
-                    f"When adding articles with {url} exception occurred: {e}"
-                )
+        try:
+            article, created = Article.objects.get_or_create(url=url, source=source)
+            if created:
+                added.append(article)
+        except Exception as e:
+            raise type(e)(f"When adding articles with {url} exception occurred: {e}")
 
     return added
 
 
 class SourceParser:
-    parsers: list[ParserBase] = [VkParser, OkParser, TgParser]
-    document_parsers: list[ParserBase] = [RssParser, CommonParser]
+    registry = HandlerRegistry[ParserBase]()
+    registry.register(VkParser)
+    registry.register(OkParser)
+    registry.register(TgParser)
+    registry.register(RssParser)
+    registry.register(CommonParser)
 
     @classmethod
     async def extract_all_news_urls(cls, source: Source) -> Iterable[str]:
@@ -96,18 +89,9 @@ class SourceParser:
         if html is None:
             return None
 
-        document = build_document(html)
-
-        for parser in cls.parsers:
-            if parser.can_handle(url):
-                return parser.extract_urls(url, document)
-
         document = build_document(html, clean=True)
-
-        for parser in cls.document_parsers:
-            if parser.can_handle(url):
-                return parser.extract_urls(url, document)
-        raise ValueError("No suitable parser found")
+        parser = cls.registry.choose(url)
+        return parser.extract_urls(url, document)
 
     @classmethod
     def create_new_articles(cls, source: Source) -> int:

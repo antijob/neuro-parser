@@ -1,0 +1,70 @@
+name: "Building workflow"
+
+on:
+  workflow_call:
+    inputs:
+      runType:
+        type: string
+        required: true
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on:
+      [
+        "self-hosted",
+        "neuroparser",
+        "${{ github.ref == 'refs/heads/main' && 'production' || 'staging' }}",
+      ]
+    environment: ${{ github.ref == 'refs/heads/main' && 'Prod' || github.ref == 'refs/heads/stage' && 'Staging' || 'Unknown' }}
+    outputs:
+      branch_name: ${{ steps.build.outputs.branch_name }}
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+
+      # Build these images only when related files are changed
+      - name: Filter out app changes
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          base: ${{ github.ref }}
+          filters: |
+            web:
+              - 'server/**'
+              - 'docker/**'
+              - '.github/**'
+              - '*.py'
+              - 'pyproject.toml'
+
+      - name: Build python
+        id: build
+        if: ${{ steps.filter.outputs.web == 'true' || inputs.runType == 'Force build' }}
+        run: |
+          branch=$(echo "${GITHUB_REF#refs/heads/}" | tr '/' '-')
+          echo "Branch name with / substituted for - : $branch"
+
+          # "Preparing" the environment by just copying over stub .env file
+          cp .env.template .env
+
+          NEURO_PARSER_VERSION=${branch} \
+            docker compose -f docker-compose.prod.yaml build web
+
+      - name: login to docker registry
+        if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/stage') &&  (inputs.runType == 'Force build')
+        run: echo "${{ secrets.docker_password }}" | docker login -u ${{ secrets.docker_username }} --password-stdin
+
+      - name: push to registry
+        if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/stage') &&  (inputs.runType == 'Force build')
+        run: |
+          branch=$(echo "${GITHUB_REF#refs/heads/}" | tr '/' '-')
+          echo "Branch name with / substituted for - : $branch"
+          NEURO_PARSER_VERSION=${branch} \
+            docker compose -f docker-compose.prod.yaml push web
+
+      - name: logout from docker registry
+        if: always()
+        run: docker logout

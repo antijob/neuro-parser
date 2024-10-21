@@ -1,6 +1,7 @@
 name: CI
 
 on:
+  pull_request:
   push:
     branches:
       - main
@@ -19,7 +20,7 @@ on:
 jobs:
   clean:
     name: Clean images
-    runs-on: ["self-hosted", "neuroparser", "production"]
+    runs-on: ["self-hosted", "neuroparser", "${{ github.ref == 'refs/heads/main' && 'production' || 'staging' }}"]
     steps:
       - name: Clean unused images and network
         run: |
@@ -29,222 +30,36 @@ jobs:
     name: Build
     needs:
       - clean
-    runs-on: "ubuntu-latest"
-    environment: ${{ github.ref == 'refs/heads/main' && 'Prod' || github.ref == 'refs/heads/stage' && 'Staging' || 'Unknown' }}
-    outputs:
-      branch_name: ${{ steps.build.outputs.branch_name }}
-    steps:
-      - name: Check out repository code
-        uses: actions/checkout@v3
-
-      # Build these images only when related files are changed
-      - name: Filter out app changes
-        uses: dorny/paths-filter@v2
-        id: filter
-        with:
-          base: ${{ github.ref }}
-          filters: |
-            web:
-              - 'server/**'
-              - 'docker/**'
-              - '*.py'
-              - 'pyproject.toml'
-
-      - name: Prepare .env
-        if: ${{ steps.filter.outputs.web == 'true' || github.event.inputs.runType == 'Force build' }}
-        run: |
-          cp .env.template .env
-          sed -i \
-            -e s,^POSTGRES_USER=.*,POSTGRES_USER=$POSTGRES_USER, \
-            -e s,^POSTGRES_PASSWORD=.*,POSTGRES_PASSWORD=$POSTGRES_PASSWORD, \
-            -e s,^SENTRY_DSN=.*,SENTRY_DSN=$SENTRY_DSN, \
-            -e s,^TELEGRAM_BOT_TOKEN=.*,TELEGRAM_BOT_TOKEN=$TELEGRAM_BOT_TOKEN, \
-            -e s,^TELEGRAM_BOT_NAME=.*,TELEGRAM_BOT_NAME=$TELEGRAM_BOT_NAME, \
-            -e s,^TELEGRAM_BOT_URL=.*,TELEGRAM_BOT_URL=$TELEGRAM_BOT_URL, \
-            -e s,^DJANGO_KEY=.*,DJANGO_KEY=$DJANGO_KEY, \
-            -e s,^CF_DNS_API_TOKEN=.*,CF_DNS_API_TOKEN=$CF_DNS_API_TOKEN, \
-            -e s,^API_TOKEN=.*,API_TOKEN=$API_TOKEN, \
-            -e s,^CHAT_GPT_KEY=.*,CHAT_GPT_KEY=$CHAT_GPT_KEY, \
-            -e s,^FLOWER_USER=.*,FLOWER_USER=$FLOWER_USER, \
-            -e s,^FLOWER_PASSWORD=.*,FLOWER_PASSWORD=$FLOWER_PASSWORD, \
-            -e s,^FLOWER_HOST=.*,FLOWER_HOST=$FLOWER_HOST, \
-            -e s,^HOST=.*,HOST=$HOST, \
-            -e s,^ACME_EMAIL=.*,ACME_EMAIL=$ACME_EMAIL, \
-            .env
-        env:
-          POSTGRES_USER: "${{ secrets.POSTGRES_USER }}"
-          POSTGRES_PASSWORD: "${{ secrets.POSTGRES_PASSWORD }}"
-          SENTRY_DSN: "${{ secrets.SENTRY_DSN }}"
-          TELEGRAM_BOT_TOKEN: "${{ secrets.TELEGRAM_BOT_TOKEN }}"
-          TELEGRAM_BOT_NAME: "${{ vars.TELEGRAM_BOT_NAME }}"
-          TELEGRAM_BOT_URL: "${{ vars.TELEGRAM_BOT_URL }}"
-          DJANGO_KEY: "${{ secrets.DJANGO_KEY}}"
-          CF_DNS_API_TOKEN: "${{ secrets.CF_DNS_API_TOKEN }}"
-          API_TOKEN: "${{ secrets.API_TOKEN }}"
-          CHAT_GPT_KEY: "${{ secrets.CHAT_GPT_KEY }}"
-          FLOWER_USER: "${{ secrets.FLOWER_USER }}"
-          FLOWER_PASSWORD: "${{ secrets.FLOWER_PASSWORD }}"
-          FLOWER_HOST: "${{ vars.FLOWER_HOST }}"
-          HOST: "${{ vars.HOST }}"
-          ACME_EMAIL: "${{ secrets.ACME_EMAIL }}"
-
-      - name: Build python
-        id: build
-        if: ${{ steps.filter.outputs.web == 'true' || github.event.inputs.runType == 'Force build' }}
-        run: |
-          branch=$(echo "${GITHUB_REF#refs/heads/}" | tr '/' '-')
-          echo "Branch name with / substituted for - : $branch"
-          NEURO_PARSER_VERSION=${branch} \
-            docker compose -f docker-compose.prod.yaml build web
-
-      - name: login to docker registry
-        if: ${{ steps.filter.outputs.web == 'true' || github.event.inputs.runtype == 'force build' }}
-        run: echo "${{ secrets.docker_password }}" | docker login -u ${{ secrets.docker_username }} --password-stdin
-
-      - name: push to registry
-        if: ${{ steps.filter.outputs.web == 'true' || github.event.inputs.runtype == 'force build' }}
-        run: |
-          branch=$(echo "${GITHUB_REF#refs/heads/}" | tr '/' '-')
-          echo "Branch name with / substituted for - : $branch"
-          NEURO_PARSER_VERSION=${branch} \
-            docker compose -f docker-compose.prod.yaml push web
-
-      - name: logout from docker registry
-        if: ${{ steps.filter.outputs.web == 'true' || github.event.inputs.runtype == 'force build' }}
-        run: docker logout
+    uses: "./.github/workflows/build.yml"
+    secrets: inherit
+    with:
+      runType: "${{ github.event.inputs.runType }}"
 
   test:
     name: Run tests
-    runs-on: ["self-hosted", "neuroparser", "production"]
-    if: ${{ always() }}
-    steps:
-      - name: Here we run tests
-        run: |
-          echo "Running tests..."
+    needs:
+      - build
+    uses: "./.github/workflows/tests.web.yml"
+    secrets: inherit
 
   start_staging:
     name: Start staging
     needs:
       - test
       - build
-    runs-on: ["self-hosted", "neuroparser", "staging"]
-    if: github.ref == 'refs/heads/stage'
-    environment: Staging
-    steps:
-      - name: Check out repository code
-        uses: actions/checkout@v3
+    uses: "./.github/workflows/deploy.yml"
+    if: success() && github.ref == 'refs/heads/stage'
+    secrets: inherit
+    with:
+      environment: staging
 
-      - name: login to docker registry
-        run: echo "${{ secrets.docker_password }}" | docker login -u ${{ secrets.docker_username }} --password-stdin
-
-      - name: Prepare .env
-        run: |
-          cp .env.template .env
-          sed -i \
-            -e s,^POSTGRES_USER=.*,POSTGRES_USER=$POSTGRES_USER, \
-            -e s,^POSTGRES_PASSWORD=.*,POSTGRES_PASSWORD=$POSTGRES_PASSWORD, \
-            -e s,^SENTRY_DSN=.*,SENTRY_DSN=$SENTRY_DSN, \
-            -e s,^TELEGRAM_BOT_TOKEN=.*,TELEGRAM_BOT_TOKEN=$TELEGRAM_BOT_TOKEN, \
-            -e s,^TELEGRAM_BOT_NAME=.*,TELEGRAM_BOT_NAME=$TELEGRAM_BOT_NAME, \
-            -e s,^TELEGRAM_BOT_URL=.*,TELEGRAM_BOT_URL=$TELEGRAM_BOT_URL, \
-            -e s,^DJANGO_KEY=.*,DJANGO_KEY=$DJANGO_KEY, \
-            -e s,^CF_DNS_API_TOKEN=.*,CF_DNS_API_TOKEN=$CF_DNS_API_TOKEN, \
-            -e s,^API_TOKEN=.*,API_TOKEN=$API_TOKEN, \
-            -e s,^CHAT_GPT_KEY=.*,CHAT_GPT_KEY=$CHAT_GPT_KEY, \
-            -e s,^FLOWER_USER=.*,FLOWER_USER=$FLOWER_USER, \
-            -e s,^FLOWER_PASSWORD=.*,FLOWER_PASSWORD=$FLOWER_PASSWORD, \
-            -e s,^FLOWER_HOST=.*,FLOWER_HOST=$FLOWER_HOST, \
-            -e s,^HOST=.*,HOST=$HOST, \
-            -e s,^ACME_EMAIL=.*,ACME_EMAIL=$ACME_EMAIL, \
-            .env
-          branch=$(echo "${GITHUB_REF#refs/heads/}" | tr '/' '-')
-          echo "Branch name with / substituted for - : $branch"
-          echo NEURO_PARSER_VERSION=${branch} >> .env
-        env:
-          POSTGRES_USER: "${{ secrets.POSTGRES_USER }}"
-          POSTGRES_PASSWORD: "${{ secrets.POSTGRES_PASSWORD }}"
-          SENTRY_DSN: "${{ secrets.SENTRY_DSN }}"
-          TELEGRAM_BOT_TOKEN: "${{ secrets.TELEGRAM_BOT_TOKEN }}"
-          TELEGRAM_BOT_NAME: "${{ vars.TELEGRAM_BOT_NAME_STAGE }}"
-          TELEGRAM_BOT_URL: "${{ vars.TELEGRAM_BOT_URL_STAGE }}"
-          DJANGO_KEY: "${{ secrets.DJANGO_KEY}}"
-          CF_DNS_API_TOKEN: "${{ secrets.CF_DNS_API_TOKEN }}"
-          API_TOKEN: "${{ secrets.API_TOKEN }}"
-          CHAT_GPT_KEY: "${{ secrets.CHAT_GPT_KEY }}"
-          FLOWER_USER: "${{ secrets.FLOWER_USER }}"
-          FLOWER_PASSWORD: "${{ secrets.FLOWER_PASSWORD }}"
-          FLOWER_HOST: "${{ vars.FLOWER_HOST }}"
-          HOST: "${{ vars.HOST_STAGE }}"
-          ACME_EMAIL: "${{ secrets.ACME_EMAIL }}"
-
-      - name: Start the app
-        run: |
-          docker compose -f docker-compose.prod.yaml pull
-          docker compose -f docker-compose.prod.yaml up -d
-
-      - name: logout from docker registry
-        if: ${{ always() }}
-        run: docker logout
   start_prod:
     name: Start prod
     needs:
       - test
       - build
-    runs-on: ["self-hosted", "neuroparser", "production"]
-    if: github.ref == 'refs/heads/main'
-    environment: Prod
-    steps:
-      - name: Check out repository code
-        uses: actions/checkout@v3
-
-      - name: login to docker registry
-        run: echo "${{ secrets.docker_password }}" | docker login -u ${{ secrets.docker_username }} --password-stdin
-
-      - name: Prepare .env
-        run: |
-          cp .env.template .env
-          sed -i \
-            -e s,^POSTGRES_USER=.*,POSTGRES_USER=$POSTGRES_USER, \
-            -e s,^POSTGRES_PASSWORD=.*,POSTGRES_PASSWORD=$POSTGRES_PASSWORD, \
-            -e s,^SENTRY_DSN=.*,SENTRY_DSN=$SENTRY_DSN, \
-            -e s,^TELEGRAM_BOT_TOKEN=.*,TELEGRAM_BOT_TOKEN=$TELEGRAM_BOT_TOKEN, \
-            -e s,^TELEGRAM_BOT_NAME=.*,TELEGRAM_BOT_NAME=$TELEGRAM_BOT_NAME, \
-            -e s,^TELEGRAM_BOT_URL=.*,TELEGRAM_BOT_URL=$TELEGRAM_BOT_URL, \
-            -e s,^DJANGO_KEY=.*,DJANGO_KEY=$DJANGO_KEY, \
-            -e s,^CF_DNS_API_TOKEN=.*,CF_DNS_API_TOKEN=$CF_DNS_API_TOKEN, \
-            -e s,^API_TOKEN=.*,API_TOKEN=$API_TOKEN, \
-            -e s,^CHAT_GPT_KEY=.*,CHAT_GPT_KEY=$CHAT_GPT_KEY, \
-            -e s,^FLOWER_USER=.*,FLOWER_USER=$FLOWER_USER, \
-            -e s,^FLOWER_PASSWORD=.*,FLOWER_PASSWORD=$FLOWER_PASSWORD, \
-            -e s,^FLOWER_HOST=.*,FLOWER_HOST=$FLOWER_HOST, \
-            -e s,^HOST=.*,HOST=$HOST, \
-            -e s,^ACME_EMAIL=.*,ACME_EMAIL=$ACME_EMAIL, \
-            .env
-          branch=$(echo "${GITHUB_REF#refs/heads/}" | tr '/' '-')
-          echo "Branch name with / substituted for - : $branch"
-          echo NEURO_PARSER_VERSION=${branch} >> .env
-        env:
-          POSTGRES_USER: "${{ secrets.POSTGRES_USER }}"
-          POSTGRES_PASSWORD: "${{ secrets.POSTGRES_PASSWORD }}"
-          SENTRY_DSN: "${{ secrets.SENTRY_DSN }}"
-          TELEGRAM_BOT_TOKEN: "${{ secrets.TELEGRAM_BOT_TOKEN }}"
-          TELEGRAM_BOT_NAME: "${{ vars.TELEGRAM_BOT_NAME }}"
-          TELEGRAM_BOT_URL: "${{ vars.TELEGRAM_BOT_URL }}"
-          DJANGO_KEY: "${{ secrets.DJANGO_KEY}}"
-          CF_DNS_API_TOKEN: "${{ secrets.CF_DNS_API_TOKEN }}"
-          API_TOKEN: "${{ secrets.API_TOKEN }}"
-          CHAT_GPT_KEY: "${{ secrets.CHAT_GPT_KEY }}"
-          FLOWER_USER: "${{ secrets.FLOWER_USER }}"
-          FLOWER_PASSWORD: "${{ secrets.FLOWER_PASSWORD }}"
-          FLOWER_HOST: "${{ vars.FLOWER_HOST }}"
-          HOST: "${{ vars.HOST }}"
-          ACME_EMAIL: "${{ secrets.ACME_EMAIL }}"
-
-      - name: Start the app
-        run: |
-          docker compose -f docker-compose.prod.yaml pull
-          docker compose -f docker-compose.prod.yaml up -d
-
-      - name: logout from docker registry
-        if: ${{ always() }}
-        run: docker logout
+    uses: "./.github/workflows/deploy.yml"
+    if: success() && github.ref == 'refs/heads/main'
+    secrets: inherit
+    with:
+      environment: production
