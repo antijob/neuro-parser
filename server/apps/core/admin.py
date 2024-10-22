@@ -44,7 +44,7 @@ class IncidentTypeAdmin(admin.ModelAdmin):
 
 @admin.register(MediaIncident)
 class MediaIncidentAdmin(admin.ModelAdmin):
-    list_display = ("any_title", "incident_type", "status", "downvote")
+    list_display = ("any_title", "incident_type", "create_date", "status", "downvote")
     autocomplete_fields = ["related_article", "duplicate"]
     list_filter = ["status", "incident_type", DownvoteFilter]
     actions = [export_incidents_as_csv, downvoted_incidents]
