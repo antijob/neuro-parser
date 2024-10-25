@@ -70,6 +70,7 @@ jobs:
 
           # NOTICE: running dev version of docker-compose.yaml on purpose, to not mistakingly do anything production-like.
           docker compose -f docker-compose.yaml run \
+              --build \
               --rm \
               -e COVERAGE_FILE=${TEST_REPORT_ROOT}/coverage.db \
               -u $UID \
