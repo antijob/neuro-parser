@@ -47,7 +47,7 @@ jobs:
     uses: "./.github/workflows/tests.web.yml"
     secrets: inherit
     with:
-      keepTests: "${{ github.event.inputs.keepTests }}"
+      keepTests: ${{ github.event.inputs.keepTests }}
 
   start_staging:
     name: Start staging
