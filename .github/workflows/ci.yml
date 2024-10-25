@@ -16,6 +16,11 @@ on:
         options:
           - Force build
           - Default
+      keepTests:
+        description: "Keep test artifacts and folders. They will automatically be kept in case of failed tests"
+        required: false
+        default: false
+        type: boolean
 
 jobs:
   clean:
@@ -41,6 +46,8 @@ jobs:
       - build
     uses: "./.github/workflows/tests.web.yml"
     secrets: inherit
+    with:
+      keepTests: "${{ github.event.inputs.keepTests }}"
 
   start_staging:
     name: Start staging

@@ -4,6 +4,12 @@ name: Web tests
 
 on:
   workflow_call:
+    inputs:
+      # force keeping tests regardless of the outcome
+      keepTests:
+        type: boolean
+        default: false
+        required: false
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -117,7 +123,7 @@ jobs:
           fi
       
       - name: Cleanup tests
-        if: always()
+        if: inputs.keepTests || success()
         run: |
           echo "Cleaning up test dir: ${TEST_DIR}"
           rm -rf ${TEST_DIR};
