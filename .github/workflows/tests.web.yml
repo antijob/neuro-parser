@@ -4,6 +4,12 @@ name: Web tests
 
 on:
   workflow_call:
+    inputs:
+      # force keeping tests regardless of the outcome
+      keepTests:
+        type: boolean
+        default: false
+        required: false
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -64,6 +70,7 @@ jobs:
 
           # NOTICE: running dev version of docker-compose.yaml on purpose, to not mistakingly do anything production-like.
           docker compose -f docker-compose.yaml run \
+              --build \
               --rm \
               -e COVERAGE_FILE=${TEST_REPORT_ROOT}/coverage.db \
               -u $UID \
@@ -117,7 +124,7 @@ jobs:
           fi
       
       - name: Cleanup tests
-        if: always()
+        if: inputs.keepTests || success()
         run: |
           echo "Cleaning up test dir: ${TEST_DIR}"
           rm -rf ${TEST_DIR};
