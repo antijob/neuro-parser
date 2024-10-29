@@ -58,7 +58,7 @@ class SourceParser:
 
     @classmethod
     async def create_new_articles(cls, source: Source) -> int:
-        urls = await cls.extract_all_news_urls(source)
+        urls = await cls._extract_all_news_urls(source)
         if not urls:
             return 0
 
