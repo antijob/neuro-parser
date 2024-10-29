@@ -1,6 +1,5 @@
 import pytest
-from server.core.fetcher.client import NPClient
-from server.core.fetcher.client import NPClient
+from server.core.fetcher.clients import HttpClient
 from server.core.fetcher.libs.exceptions import BadCodeException
 from server.apps.core.models import Article, Source
 from server.core.article_parser import ArticleParser
@@ -16,7 +15,7 @@ async def test_get_article_success(load_test_data, mock_aiohttp, article, source
 
     mock_aiohttp.get(article.url, status=200, body=content)
 
-    async with NPClient() as client:
+    async with HttpClient() as client:
         result = await client.get_article(article, source)
 
     assert result == article
@@ -40,7 +39,7 @@ async def test_get_article_redirect(load_test_data, mock_aiohttp, article, sourc
     )
     mock_aiohttp.get(redirect_url, status=200, body=content)
 
-    async with NPClient() as client:
+    async with HttpClient() as client:
         result = await client.get_article(article, source)
 
     assert result != article
@@ -53,7 +52,7 @@ async def test_get_article_redirect(load_test_data, mock_aiohttp, article, sourc
 async def test_get_article_bad_code(mock_aiohttp, article, source):
     mock_aiohttp.get(article.url, status=404)
 
-    async with NPClient() as client:
+    async with HttpClient() as client:
         with pytest.raises(BadCodeException):
             await client.get_article(article, source)
 
@@ -64,7 +63,7 @@ async def test_get_source_success(load_test_data, mock_aiohttp, source):
     content = load_test_data("source.html")
     mock_aiohttp.get(source.url, status=200, body=content)
 
-    async with NPClient() as client:
+    async with HttpClient() as client:
         result = await client.get_source(source)
 
     assert result == content
@@ -75,6 +74,6 @@ async def test_get_source_success(load_test_data, mock_aiohttp, source):
 async def test_get_source_bad_code(mock_aiohttp, source):
     mock_aiohttp.get(source.url, status=500)
 
-    async with NPClient() as client:
+    async with HttpClient() as client:
         with pytest.raises(BadCodeException):
             await client.get_source(source)
