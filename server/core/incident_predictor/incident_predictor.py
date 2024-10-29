@@ -10,16 +10,9 @@ from .predictors.base_predictor import PredictorBase
 from .predictors.bert import BertPredictor
 from .predictors.llama import LlamaPredictor
 
-
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-
-
-# THERE SHOULD BE 2 pipelines
-
-# 1 -- unique url pipeline
-# 2 -- urls batch pipeline
 
 
 class IncidentPredictor:
@@ -67,6 +60,9 @@ class IncidentPredictor:
                     continue
 
                 predictor = cls._make_predictor(incident_type)
+                if not predictor:
+                    continue
+
                 for article in batch:
                     is_incident, rate = predictor.is_incident(article)
                     if is_incident:
@@ -78,7 +74,9 @@ class IncidentPredictor:
                         article.save()
             return result_incidents
         except Exception as e:
-            logger.error(f"Error in predict_batch: {e}")
+            logger.error(
+                f"Error in predict_batch: {e} with predictor: {predictor}. Batch: {batch}"
+            )
             raise
 
     @classmethod

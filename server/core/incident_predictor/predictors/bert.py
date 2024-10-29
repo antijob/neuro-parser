@@ -36,10 +36,11 @@ class BertPredictor(PredictorBase):
             model_directory = MODELS_DIR.joinpath(incident_type.model_path)
 
             if not model_directory.exists() or not model_directory.is_dir():
-                raise FileNotFoundError(
-                    f"Model directory {model_directory} does not exist"
+                logger.exception(
+                    f"Model directory {model_directory} does not exist "
                     "or is not a directory."
                 )
+                return False
             return True
         return False
 
