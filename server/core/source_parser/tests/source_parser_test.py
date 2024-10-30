@@ -23,4 +23,5 @@ from server.core.source_parser.parsers.common_parser import CommonParser
     ],
 )
 def test_registry_choose(source_url, expected_parser):
-    assert SourceParser.registry.choose(source_url) == expected_parser
+    source = Source(url=source_url)
+    assert SourceParser.registry.choose(source) == expected_parser
