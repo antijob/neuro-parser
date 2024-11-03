@@ -1,5 +1,4 @@
 import asyncio
-from logging import log
 
 from aiogram.exceptions import TelegramRetryAfter, TelegramForbiddenError
 from celery.signals import celeryd_init, worker_shutdown
@@ -29,7 +28,7 @@ def close_bot_instance(**kwargs):
 
 class SendMessageTask(app.Task):
     queue = "bot"
-    rate_limit = "0.8/s"
+    rate_limit = "0.5/s"
     autoretry_for = (TelegramRetryAfter,)
     max_retries = 5
     retry_backoff = 30

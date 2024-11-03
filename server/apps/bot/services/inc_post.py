@@ -96,7 +96,7 @@ def get_incident_post_data(inc: MediaIncident) -> IncidentPostData:
     channels = []
     for chn in all_channels:
         if process_channel(chn, inc, msg):
-            channels.append(chn.id)
+            channels.append(chn.channel_id)
 
     return IncidentPostData(
         message=msg,
