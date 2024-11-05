@@ -1,4 +1,6 @@
-from typing import Iterable, Union
+from typing import Union
+
+import logging
 from .parsers.base_parser import ParserBase
 
 from .parsers.vk_parser import VkParser
@@ -8,10 +10,14 @@ from .parsers.common_parser import CommonParser
 from .parsers.rss_parser import RssParser
 
 from server.apps.core.models import Article, Source
-from server.core.fetcher import Fetcher
 from server.libs.handler import HandlerRegistry
 
 from asgiref.sync import sync_to_async
+
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 async def add_articles(
@@ -47,27 +53,18 @@ class SourceParser:
     registry.register(CommonParser)
 
     @classmethod
-    async def _extract_all_news_urls(cls, source: Source) -> Iterable[str]:
-        url = source.url
-        html = await Fetcher.download_source(source)
-        if html is None:
-            return None
-
+    async def create_new_articles(cls, source: Source, data: str) -> int:
         parser = cls.registry.choose(source)
-        return parser.extract_urls(url, html)
-
-    @classmethod
-    async def create_new_articles(cls, source: Source) -> int:
-        urls = await cls._extract_all_news_urls(source)
-        if not urls:
+        articles = parser.extract_urls(source.url, data)
+        if not articles:
             return 0
 
-        added = await add_articles(source, urls)
+        added = await add_articles(source, articles)
         for article in added:
             try:
                 await sync_to_async(article.save)()
             except Exception as e:
-                raise type(e)(
+                logger.exception(
                     f"When adding articles with {article.url} exception occurred: {e}"
                 )
         return len(added)

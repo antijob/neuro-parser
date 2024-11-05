@@ -11,9 +11,8 @@ class OkParser(ParserBase):
         return re.match(r"https://ok\.ru/", source.url)
 
     @classmethod
-    def extract_urls(cls, url: str, document=None) -> Iterable[str]:
-        document = build_document(document)
-
+    def extract_urls(cls, url: str, html: str) -> Iterable[str]:
+        document = build_document(html)
         for node in document.css("a.media-text_a"):
             news_page_link = "https://ok.ru" + node.attributes["href"]
             yield news_page_link

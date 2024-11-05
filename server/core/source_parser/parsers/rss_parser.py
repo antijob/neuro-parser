@@ -28,12 +28,8 @@ class RssParser(ParserBase):
         return re.match(r"https?://.*\.(rss|xml|feed)$", source.url) is not None
 
     @classmethod
-    def extract_urls(cls, source_url: str, document=None) -> Iterable[str]:
-        if document is None:
-            return []
-
-        document = build_document(document, clean=True)
-
+    def extract_urls(cls, source_url: str, html: str) -> Iterable[str]:
+        document = build_document(html, clean=True)
         rss_urls = find_rss_urls(source_url, document)
         for rss_url in rss_urls:
             data_parsed = feedparser.parse(rss_url)
