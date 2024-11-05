@@ -65,7 +65,7 @@ class Fetcher:
 
     def await_tasks(self) -> int:
         async def gather(tasks):
-            return await asyncio.gather(*tasks, return_exceptions=False)
+            return await asyncio.gather(*tasks, return_exceptions=True)
 
         results = asyncio.run(gather(self.coroutines))
 

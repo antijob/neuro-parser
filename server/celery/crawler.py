@@ -28,7 +28,7 @@ def update_sources():
         tasks.append(SourceParser.create_new_articles(source))
 
     async def gather(tasks):
-        return await asyncio.gather(*tasks, return_exceptions=False)
+        return await asyncio.gather(*tasks, return_exceptions=True)
 
     results = asyncio.run(gather(tasks))
 
