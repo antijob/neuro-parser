@@ -8,7 +8,7 @@ from server.apps.core.models import Article, Source
 
 from .libs.exceptions import BadCodeException, ClientError
 from .tasks import fetch_source_articles
-from .clients import ClientFactory
+from .clients import ClientFactory, ClientSourceData
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -41,7 +41,7 @@ class Fetcher:
             return None
 
     @staticmethod
-    async def download_source(source: Source) -> Optional[str]:
+    async def download_source(source: Source) -> ClientSourceData:
         try:
             async with ClientFactory.get_client(source) as client:
                 return await client.get_source(source)

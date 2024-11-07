@@ -1,7 +1,10 @@
 from abc import ABC, abstractmethod
-from typing import Optional
+from typing import Union
 
 from server.apps.core.models import Source, Article
+
+# ClientSourceData may be raw html data, list of urls, list of built Articles or None
+ClientSourceData = Union[str, list[str], list[Article], None]
 
 
 class ClientBase(ABC):
@@ -24,7 +27,7 @@ class ClientBase(ABC):
         pass
 
     @abstractmethod
-    async def get_source(self, source: Source) -> Optional[str]:
+    async def get_source(self, source: Source) -> ClientSourceData:
         """
         Fetches raw data from the source.
         """
