@@ -10,7 +10,6 @@ from server.core.fetcher.libs.exceptions import BadCodeException
 from server.core.fetcher.libs.url_preparer import URLPreparer
 from server.core.fetcher.libs.user_agent import session_random_headers
 
-<<<<<<<< HEAD:server/core/fetcher/clients/http_client.py
 from .base_client import ClientBase
 
 logger = logging.getLogger(__name__)
