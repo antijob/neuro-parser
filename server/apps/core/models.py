@@ -1,17 +1,18 @@
 import datetime
 
 from django.contrib.postgres.fields import ArrayField
-from django.utils.translation import gettext_lazy as _
+from django.core.validators import (
+    MaxValueValidator,
+    MinValueValidator,
+    validate_ipv4_address,
+)
 from django.db import models
 from django.urls import reverse
-from django.core.validators import (
-    validate_ipv4_address,
-    MinValueValidator,
-    MaxValueValidator,
-)
+from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 
+from server.apps.core.data.llm import LLM_TEMPLATE_DEFAULT, SYSTEM_LLM_PROMPT_DEFAULT
 from server.apps.core.data.regions import COUNTRIES, REGIONS
-from server.apps.core.data.llm import SYSTEM_LLM_PROMPT_DEFAULT, LLM_TEMPLATE_DEFAULT
 from server.apps.users.models import User
 
 
