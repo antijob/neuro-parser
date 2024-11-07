@@ -23,12 +23,19 @@ def crawl_chain():
 def update_sources():
     tasks: list[Coroutine] = []
 
+    async def crawl_task(source: Source) -> int:
+        data = await Fetcher.download_source(source)
+        if not data:
+            raise Exception(f"Empty fetch from source: {source.url}")
+        urls_count = await SourceParser.create_new_articles(source, data)
+        return urls_count
+
     sources = Source.objects.filter(is_active=True)
     for source in sources:
-        tasks.append(SourceParser.create_new_articles(source))
+        tasks.append(crawl_task(source))
 
     async def gather(tasks):
-        return await asyncio.gather(*tasks, return_exceptions=False)
+        return await asyncio.gather(*tasks, return_exceptions=True)
 
     results = asyncio.run(gather(tasks))
 
