@@ -230,7 +230,7 @@ class Article(models.Model):
         blank=True,
         on_delete=models.SET_NULL,
     )
-    create_date = models.DateTimeField("Дата создания", auto_now_add=True)
+    create_date = models.DateTimeField("Дата создания", default=timezone.now())
     publication_date = models.DateField("Дата публикации", null=True, blank=True)
 
     def save(self, *args, **kwargs):

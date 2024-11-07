@@ -28,7 +28,7 @@ def close_bot_instance(**kwargs):
 
 class SendMessageTask(app.Task):
     queue = "bot"
-    rate_limit = "0.8/s"
+    rate_limit = "0.5/s"
     autoretry_for = (TelegramRetryAfter,)
     max_retries = 5
     retry_backoff = 30
@@ -37,23 +37,30 @@ class SendMessageTask(app.Task):
 
 
 @app.task(base=SendMessageTask)
-def send_message_to_channels(msg: str, chat_id: int, inc_id: int = None):
+def send_message_to_channel(msg: str, chat_id: int, inc_id: int = 0):
     global bot
+    keyboard = None
+
     if bot is None:
         setup_bot_instance()
 
-    keyboard = downvote_keyboard(inc_id)
+    if inc_id != 0:
+        try:
+            keyboard = downvote_keyboard(inc_id)
+        except Exception as e:
+            logger.error(f"Can't make downvote_keyboard: {e}")
 
     async def send_message():
         try:
             await bot.send_message(text=msg, chat_id=chat_id, reply_markup=keyboard)
-        except TelegramForbiddenError as e:
-            raise TelegramForbiddenError(
+        except TelegramForbiddenError:
+            logger.error(
                 "Bot can't acces the chat, please check it. Chat id: " + str(chat_id)
-            ) from e
+            )
+            return "Bot can't acces the chat, please check it. Chat id: " + str(chat_id)
         except Exception as e:
             logger.error(f"Error sending message to channel: {e}")
-            raise
+            return f"Error sending message to channel: {e}"
         return "Message sent"
 
     try:

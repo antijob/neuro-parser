@@ -1,26 +1,28 @@
-import asyncio
 import logging
 import sys
+from dataclasses import dataclass
 from typing import Optional
 
-from aiogram.exceptions import TelegramBadRequest
-from asgiref.sync import sync_to_async
 
 from server.apps.bot.data.messages import NEW_INCIDENT_TEMPLATE
 from server.apps.bot.models import Channel, ChannelCountry, ChannelIncidentType
 from server.apps.core.models import MediaIncident
-from server.celery.bot import send_message_to_channels
 
 logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 logger = logging.getLogger(__name__)
 
 
-@sync_to_async
+@dataclass
+class IncidentPostData:
+    incident_id: str
+    message: str
+    channel_id_list: list[str]
+
+
 def get_all_channels() -> list[Channel]:
     return list(Channel.objects.all())
 
 
-@sync_to_async
 def get_channel_data(
     chn: Channel, inc: MediaIncident
 ) -> tuple[Optional[ChannelIncidentType], Optional[ChannelCountry]]:
@@ -37,7 +39,6 @@ def get_channel_data(
         return None, None
 
 
-@sync_to_async
 def prepare_message(inc: MediaIncident) -> str:
     return NEW_INCIDENT_TEMPLATE.format(
         cat=inc.incident_type.description.replace(" ", "_"),
@@ -53,57 +54,52 @@ def prepare_message(inc: MediaIncident) -> str:
     )
 
 
-async def process_channel(chn, inc: MediaIncident, msg: str) -> bool:
-    try:
-        channel_incident, channel_country = await get_channel_data(chn, inc)
-        if not (channel_incident and channel_country):
-            logger.warning(f"No data for channel {chn.channel_id}")
-            return False
-
-        if not (channel_incident.status and channel_country.status):
-            logger.info(f"Skipping channel {chn.channel_id} due to status checks")
-            return False
-
-        if inc.region:
-            if inc.region.name not in channel_country.enabled_regions:
-                logger.info(f"Skipping channel {chn.channel_id} due to region mismatch")
-                return False
-
-        try:
-            send_message_to_channels.delay(msg, chn.channel_id, inc_id=inc.id)
-        except TelegramBadRequest as e:
-            logger.warning(f"Can't send message to channel {chn.channel_id}: {e}")
-        logger.info(f"Sent message to channel {chn.channel_id}")
-        return True
-    except Exception as e:
-        logger.error(f"Error processing channel {chn.channel_id}: {e}", exc_info=True)
+def process_channel(chn, inc: MediaIncident, msg: str) -> bool:
+    channel_incident, channel_country = get_channel_data(chn, inc)
+    if not (channel_incident and channel_country):
         return False
 
+    if not (channel_incident.status and channel_country.status):
+        return False
 
-async def post_incident(inc: MediaIncident):
+    if inc.region:
+        if inc.region.name not in channel_country.enabled_regions:
+            return False
+    return True
+
+    # try:
+    #     send_message_to_channels.delay(msg, chn.channel_id, inc_id=inc.id)
+    # except TelegramBadRequest as e:
+    #     error_traceback = traceback.format_exc()
+    #     return PostingResult(
+    #         succes=False,
+    #         channel_id=chn,
+    #         error_type=type(e).__name__,
+    #         error_message=str(e),
+    #         error_traceback=error_traceback,
+    #     )
+    #
+
+
+def get_incident_post_data(inc: MediaIncident) -> IncidentPostData:
     """
-    Asynchronously post media incident to all relevant channels.
-
-    Usage in sync context:
-    asyncio.run(post_incident(incident))
+    Checks settings for all channels
+    Returns dataclass with
+    - incidint id to make downvote kb
+    - msg to send
+    - list of channel ids that pass checks
     """
-    logger.info(f"Starting post_incident for incident: {inc.id}")
-    try:
-        all_channels = await get_all_channels()
-        logger.info(f"Retrieved {len(all_channels)} channels")
+    all_channels = get_all_channels()
 
-        msg = await prepare_message(inc)
-        logger.info("Message prepared successfully")
+    msg = prepare_message(inc)
 
-        tasks = [process_channel(chn, inc, msg) for chn in all_channels]
-        results = await asyncio.gather(*tasks, return_exceptions=True)
+    channels = []
+    for chn in all_channels:
+        if process_channel(chn, inc, msg):
+            channels.append(chn.channel_id)
 
-        success_count = sum(1 for r in results if r is True)
-        error_count = sum(1 for r in results if r is False)
-
-        logger.info(
-            f"Processed all channels. Successes: {success_count}, Errors: {error_count}"
-        )
-    except Exception as e:
-        logger.error(f"Error in post_incident: {e}", exc_info=True)
-        raise
+    return IncidentPostData(
+        message=msg,
+        incident_id=inc.id,
+        channel_id_list=channels,
+    )
