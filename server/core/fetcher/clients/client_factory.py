@@ -10,4 +10,6 @@ class ClientFactory:
     def get_client(
         source: Optional[Source] = None, article: Optional[Article] = None
     ) -> ClientBase:
+        if source.is_tg_hidden:
+            return TelethonClient()
         return HttpClient()

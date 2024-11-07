@@ -184,6 +184,9 @@ class Source(models.Model):
     region = models.ForeignKey(
         Region, on_delete=models.CASCADE, default=None, null=True, blank=True
     )
+    is_tg_hidden = models.BooleanField(
+        verbose_name="Скрытый канал в телеграме", default=False
+    )
 
     class Meta:
         verbose_name = "Источник"
