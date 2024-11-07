@@ -116,3 +116,8 @@ class SourceAdmin(admin.ModelAdmin):
                     region=obj.region,
                 )
                 new_source.save()
+
+
+@admin.register(Proxy)
+class ProxyAdmin(admin.ModelAdmin):
+    list_display = ("ip", "port", "country", "is_active")
