@@ -67,19 +67,6 @@ def process_channel(chn, inc: MediaIncident, msg: str) -> bool:
             return False
     return True
 
-    # try:
-    #     send_message_to_channels.delay(msg, chn.channel_id, inc_id=inc.id)
-    # except TelegramBadRequest as e:
-    #     error_traceback = traceback.format_exc()
-    #     return PostingResult(
-    #         succes=False,
-    #         channel_id=chn,
-    #         error_type=type(e).__name__,
-    #         error_message=str(e),
-    #         error_traceback=error_traceback,
-    #     )
-    #
-
 
 def get_incident_post_data(inc: MediaIncident) -> IncidentPostData:
     """

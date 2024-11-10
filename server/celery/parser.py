@@ -97,7 +97,6 @@ def create_incidents(batch):
         for incident in incidents_created:
             logger.info(f"Queueing notification for incident: {incident}")
             incident_post_data = get_incident_post_data(incident)
-            results = []
             for chn_id in incident_post_data.channel_id_list:
                 results.append(
                     send_message_to_channel(
