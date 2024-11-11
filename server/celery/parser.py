@@ -98,13 +98,12 @@ def create_incidents(batch):
             logger.info(f"Queueing notification for incident: {incident}")
             incident_post_data = get_incident_post_data(incident)
             for chn_id in incident_post_data.channel_id_list:
-                results.append(
-                    send_message_to_channel(
-                        incident_post_data.message,
-                        int(chn_id),
-                        int(incident_post_data.incident_id),
-                    )
+                task_result = send_message_to_channel.delay(
+                    incident_post_data.message,
+                    int(chn_id),
+                    int(incident_post_data.incident_id),
                 )
+                results.append(task_result)
 
         return (
             f"Batch finished. Incidents created: {incidents_count}, results: {results}"
