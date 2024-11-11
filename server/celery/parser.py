@@ -103,6 +103,9 @@ def create_incidents(batch):
                     int(chn_id),
                     int(incident_post_data.incident_id),
                 )
+                logger.debug(
+                    f"Messsage {incident_post_data.message[:100]} for chat {chn_id} was sent to post task"
+                )
                 results.append(task_result)
 
         return (
