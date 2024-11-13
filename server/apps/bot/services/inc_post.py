@@ -1,7 +1,6 @@
 import logging
 import sys
 from dataclasses import dataclass
-from typing import Optional
 
 
 from server.apps.bot.data.messages import NEW_INCIDENT_TEMPLATE
@@ -19,26 +18,6 @@ class IncidentPostData:
     channel_id_list: list[str]
 
 
-def get_all_channels() -> list[Channel]:
-    return list(Channel.objects.all())
-
-
-def get_channel_data(
-    chn: Channel, inc: MediaIncident
-) -> tuple[Optional[ChannelIncidentType], Optional[ChannelCountry]]:
-    try:
-        channel_incident = ChannelIncidentType.objects.get(
-            channel=chn, incident_type=inc.incident_type
-        )
-        channel_country = ChannelCountry.objects.get(
-            channel_incident_type=channel_incident, country=inc.country
-        )
-        return channel_incident, channel_country
-    except Exception as e:
-        logger.error(f"Error getting channel data: {e}")
-        return None, None
-
-
 def prepare_message(inc: MediaIncident) -> str:
     return NEW_INCIDENT_TEMPLATE.format(
         cat=inc.incident_type.description.replace(" ", "_"),
@@ -54,8 +33,26 @@ def prepare_message(inc: MediaIncident) -> str:
     )
 
 
-def process_channel(chn, inc: MediaIncident, msg: str) -> bool:
-    channel_incident, channel_country = get_channel_data(chn, inc)
+def process_channel(chn, inc: MediaIncident) -> bool:
+    """
+    checks should we or not send a message to the given channel
+    1. ch_inc and ch_country should exist
+    2. they status field should be True
+    3. if in the given inc exists region field
+          it should be in ch_country enabled_regions list
+    """
+    channel_incident = ChannelIncidentType.objects.get(
+        channel=chn, incident_type=inc.incident_type
+    )
+
+    channel_country = ChannelCountry.objects.get(
+        channel_incident_type=channel_incident, country=inc.country
+    )
+
+    logger.debug(
+        f"Processing chanel for sending msg: {channel_incident}, {channel_country}"
+    )
+
     if not (channel_incident and channel_country):
         return False
 
@@ -76,14 +73,16 @@ def get_incident_post_data(inc: MediaIncident) -> IncidentPostData:
     - msg to send
     - list of channel ids that pass checks
     """
-    all_channels = get_all_channels()
+    all_channels = list(Channel.objects.all())
 
     msg = prepare_message(inc)
 
     channels = []
     for chn in all_channels:
-        if process_channel(chn, inc, msg):
+        if process_channel(chn, inc):
             channels.append(chn.channel_id)
+
+    logger.debug(f"Created list of chn id's to send msg: {channels}")
 
     return IncidentPostData(
         message=msg,
