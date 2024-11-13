@@ -1,18 +1,21 @@
+import logging
+import sys
 from datetime import datetime, timedelta
 from itertools import islice
 
 from celery import group
 from celery.utils.log import get_task_logger
 
-from server.apps.bot.services.inc_post import get_incident_post_data, IncidentPostData
+from server.apps.bot.services.inc_post import get_incident_post_data
 from server.apps.core.models import Article
 from server.core.article_index.query_checker import mark_duplicates
 from server.core.incident_predictor import IncidentPredictor
 from server.settings.components.celery import INCIDENT_BATCH_SIZE
 
-from .celery_app import app
 from .bot import send_message_to_channel
+from .celery_app import app
 
+logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 logger = get_task_logger(__name__)
 
 
@@ -97,6 +100,9 @@ def create_incidents(batch):
         for incident in incidents_created:
             logger.info(f"Queueing notification for incident: {incident}")
             incident_post_data = get_incident_post_data(incident)
+            logger.debug(
+                f"Start cycle to send messages with that data: {incident_post_data}"
+            )
             for chn_id in incident_post_data.channel_id_list:
                 task_result = send_message_to_channel.delay(
                     incident_post_data.message,
