@@ -40,7 +40,6 @@ jobs:
             "FLOWER_USER"
             "FLOWER_PASSWORD"
             "FLOWER_HOST"
-            "DEBUG"
             "HOST"
             "ACME_EMAIL"
           )
