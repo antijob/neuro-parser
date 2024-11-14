@@ -74,6 +74,12 @@ jobs:
             -e s,^HOST=.*,HOST=$HOST, \
             -e s,^ACME_EMAIL=.*,ACME_EMAIL=$ACME_EMAIL, \
             .env
+
+          # Conditionally set DEBUG if it exists
+          if [ -n "$DEBUG" ]; then
+            sed -i -e s,^DEBUG=.*,DEBUG=$DEBUG, .env
+          fi
+
           branch=$(echo "${GITHUB_REF#refs/heads/}" | tr '/' '-')
           echo "Branch name with / substituted for - : $branch"
           echo NEURO_PARSER_VERSION=${branch} >> .env
