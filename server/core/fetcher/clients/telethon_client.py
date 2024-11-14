@@ -2,8 +2,9 @@ import logging
 from typing import Any
 from telethon import TelegramClient
 from asgiref.sync import sync_to_async
-import re
 import asyncio
+
+from server.core.fetcher.libs.url_parser import get_telegram_ids
 
 from server.apps.core.models import Article, Source
 
@@ -34,95 +35,48 @@ class TelethonClient(ClientBase):
 
     async def __aenter__(self):
         await self._lock.acquire()
+        logger.debug("TelethonClient: Aquire lock")
         await self.client.connect()
         if not await self.client.is_user_authorized():
+            logger.debug("TelethonClient: Release lock (not authorized)")
             self._lock.release()
             raise Exception("User is not authorized")
         return self
 
     async def __aexit__(self, exc_type, exc_value, traceback):
         await self.client.disconnect()
+        logger.debug("TelethonClient: Release lock")
         self._lock.release()
 
-    @staticmethod
-    def get_ids(url: str) -> list:
-        pattern_message = (
-            r"(?P<baseurl>https:\/\/[^\/]+\/(?:c\/)?)(?P<channel>\d+)\/(?P<message>\d+)"
-        )
-        pattern_channel = r"(?P<baseurl>https:\/\/[^\/]+\/(c\/)?)(?P<channel>[^\/]+)"
-
-        match = re.match(pattern_message, url)
-        if match:
-            base_url = match.group("baseurl")
-            channel = match.group("channel")
-            message = match.group("message")
-
-            if channel.isdigit():
-                channel = int(channel)
-            if message.isdigit():
-                message = int(message)
-
-            return [base_url, channel, message]
-
-        match = re.match(pattern_channel, url)
-        if match:
-            base_url = match.group("baseurl")
-            # is_hidden = match.group("is_hidden")
-            channel = match.group("channel")
-
-            if channel.isdigit():
-                channel = int(channel)
-
-            return [base_url, channel]
-
-        return []
-
     async def get_article(self, article: Article, source: Source) -> Article:
-        ids = self.get_ids(article.url)
+        ids = get_telegram_ids(article.url)
+        if not ids.message_id:
+            return article
 
-        if ids and len(ids) == 3:
-            entity = await self.client.get_entity(PeerChannel(ids[1]))
-            message = await self.client.get_messages(entity, ids=ids[2])
+        entity = await self.client.get_entity(PeerChannel(ids.channel_id))
+        message = await self.client.get_messages(entity, ids=ids.message_id)
 
-            if message:
-                article.title = f"Message from {source.url}"
-                article.text = message.message
-                article.publication_date = message.date
+        if message:
+            article.title = f"Message from {source.url}"
+            article.text = message.message
+            article.publication_date = message.date
 
-                await sync_to_async(article.save, thread_sensitive=True)()
+            await sync_to_async(article.save, thread_sensitive=True)()
 
         return article
 
     async def get_source(self, source: Source) -> dict[str, Any]:
-        ids = self.get_ids(source.url)
+        ids = get_telegram_ids(source.url)
 
         res: dict[str, Any] = {}
 
-        if ids and len(ids) >= 1:
-            if isinstance(ids[1], int):
-                entity = await self.client.get_entity(PeerChannel(ids[1]))
-            else:
-                entity = ids[1]
-
-            messages = await self.client.get_messages(entity, limit=10)
-            for message in messages:
-                url = f"{ids[0]}{ids[1]}/{message.id}"
-                res[url] = message
+        entity = ids.channel_id
+        messages = await self.client.get_messages(entity, limit=10)
+        for message in messages:
+            url = f"{ids.base_url}{ids.channel_id}/{message.id}"
+            res[url] = message
 
         return res
-
-        # elif re.match(user_regex, url):
-        #     match = re.search(user_regex, url)
-        #     if match:
-        #         username = match.group("username")
-        #         # Fetch user details
-        #         entity = await self.client.get_entity(username)
-        #         if hasattr(entity, "about"):
-        #             return entity.about  # User bio
-        #         else:
-        #             return None
-
-        # return None
 
     async def init_session_async(self):
         await self.client.start()
