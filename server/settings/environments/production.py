@@ -7,8 +7,10 @@ SECURITY WARNING: don't run with debug turned on in production!
 """
 
 from server.settings.components.common import BASE_DIR
+from decouple import config as c
+c.path = '../../../.env'
 
-DEBUG = False
+DEBUG = c('DEBUG', False)
 
 ALLOWED_HOSTS = [
     '*'
