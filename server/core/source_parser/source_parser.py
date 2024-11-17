@@ -16,7 +16,6 @@ from asgiref.sync import sync_to_async
 
 
 # Configure logging
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 

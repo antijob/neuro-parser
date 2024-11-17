@@ -5,7 +5,6 @@ import nltk
 from nltk.corpus import stopwords
 
 # Configure logging
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 _nltk_initialized = False

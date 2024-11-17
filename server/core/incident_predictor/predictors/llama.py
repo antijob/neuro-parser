@@ -8,7 +8,6 @@ from server.apps.core.models import IncidentType, Article
 from .base_predictor import PredictorBase
 
 # Configure logging
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 

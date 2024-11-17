@@ -12,7 +12,6 @@ from server.libs.handler import HandlerRegistry
 
 
 # Configure logging
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
@@ -44,7 +43,10 @@ class ArticleParser:
                 else:
                     article.publication_date = datetime.date.today()
         except ValueError as e:
-            logger.warning(f"Value error during postprocessing of article {article.url}: {e}")
+            logger.warning(
+                f"Value error during postprocessing of article {article.url}: {e}"
+            )
         except Exception as e:
-            logger.error(f"Unexpected error during postprocessing of article {article.url}: {e}")
-
+            logger.error(
+                f"Unexpected error during postprocessing of article {article.url}: {e}"
+            )
