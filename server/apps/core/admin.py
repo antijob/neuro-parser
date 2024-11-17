@@ -1,28 +1,27 @@
-# -*- coding: utf-8 -*-
-
 from django.contrib import admin
-from server.apps.core.admins.filters.downvote_filter import DownvoteFilter
-from server.apps.core.admins.actions.export_incidents_as_csv_action import (
-    export_incidents_as_csv,
-)
-from server.apps.core.admins.actions.disable_models_action import disable_models
-from server.apps.core.admins.actions.enable_models_action import enable_models
-from server.apps.core.admins.actions.downvoted_incident_action import (
-    downvoted_incidents,
-)
+
 from server.apps.core.admins.actions.activate_source_action import activate_source
 from server.apps.core.admins.actions.deactivate_source_action import (
     deactivate_source,
 )
+from server.apps.core.admins.actions.disable_models_action import disable_models
+from server.apps.core.admins.actions.downvoted_incident_action import (
+    downvoted_incidents,
+)
+from server.apps.core.admins.actions.enable_models_action import enable_models
+from server.apps.core.admins.actions.export_incidents_as_csv_action import (
+    export_incidents_as_csv,
+)
+from server.apps.core.admins.filters.downvote_filter import DownvoteFilter
+from server.apps.core.forms import IncidentTypeForm, SourceForm
 from server.apps.core.models import (
     Article,
-    MediaIncident,
-    Source,
-    IncidentType,
     Country,
+    IncidentType,
+    MediaIncident,
     Region,
+    Source,
 )
-from server.apps.core.forms import IncidentTypeForm
 
 
 @admin.register(Country)
@@ -92,6 +91,7 @@ class ArticleAdmin(admin.ModelAdmin):
 
 @admin.register(Source)
 class SourceAdmin(admin.ModelAdmin):
+    form = SourceForm
     list_display = ("url", "country", "region", "is_active")
     actions = [deactivate_source, activate_source]
     search_fields = ["url"]

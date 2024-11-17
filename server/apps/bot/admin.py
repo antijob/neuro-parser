@@ -90,7 +90,6 @@ class ChannelAdmin(admin.ModelAdmin):
 class ChannelIncidentTypeAdmin(admin.ModelAdmin):
     list_display = ["channel", "incident_type", "status", "show"]
     list_filter = ["channel", "incident_type", "status", "show"]
-    search_fields = ["channel__name", "incident_type__name"]
     inlines = [ChannelSubscriptionInline]
 
     def formfield_for_dbfield(self, db_field, request, **kwargs):
