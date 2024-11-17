@@ -1,53 +1,50 @@
-# Администрирование проекта
+# Project Administration
 
-Здесь описаны некоторые функции которые могут быть не очевидны, но важны для использования проекта в случае самостоятельной установки.
+This document contains instructions for administrators, including managing Python packages, running the project locally and in production, setting up the Telegram bot, sending messages and using the API.
 
-## Рассылка сообщений в бот
+## Sending messages to the bot
 
-В этом проекте реализована возможность для администраторов рассылать сообщения в несколько каналов через панель администратора Django.
+The project has a feature for administrators to send messages to multiple channels through the Django admin panel.
 
-### Как использовать
+### How to use
 
-Инструкции для разработчиков и настройки проекта для локальной и продакшен среды можно найти в файле [DEVELOPERS.md](DEVELOPERS.md).
+Instructions for developers and setting up the project for local and production environments can be found in the file [DEVELOPERS.md](DEVELOPERS.md).
 
-#### 1. Выбор каналов
+#### 1. Selecting channels
 
-1. Перейдите в панель администратора Django вашего проекта.
-2. Откройте список каналов (`Channel`).
-3. Выберите каналы, в которые вы хотите отправить сообщение.
+1. Go to the Django admin panel of your project.
+2. Open the list of channels (`Channel`).
+3. Select the channels you want to send a message to.
 
-#### 2. Использование функции рассылки
+#### 2. Using the mass messaging feature
 
-1. После выбора каналов выберите действие "Отправить сообщение в выбранные каналы" из выпадающего списка действий.
-2. Нажмите кнопку "Применить".
-3. На новой странице введите текст сообщения и подтвердите выбранные каналы.
-4. Нажмите кнопку для отправки сообщения.
+1. After selecting channels, select the action "Send message to selected channels" from the dropdown list of actions.
+2. Click the "Apply" button.
+3. On the new page, enter the text of the message and confirm the selected channels.
+4. Click the button to send the message.
 
-#### 3. Обработка сообщений
+#### 3. Processing messages
 
-- Если каналы не выбраны, вы получите предупреждение "Каналы не выбраны".
-- После успешной отправки вы получите сообщение с указанием количества каналов, в которые было отправлено сообщение.
-- В случае возникновения ошибки при отправке вы получите уведомление в панели администратора.
-
-
-## Отключение отдельных моделей для конкретных чатов
-
-Существует возможность скрывать каждую отдельную категорию для каждого канала. Это может быть связанно с необходимостью разделения моделей или требованиями безопасности.
+- If no channels are selected, you will receive a warning "Channels are not selected".
+- After a successful send, you will receive a message with the number of channels to which the message was sent.
+- If an error occurs while sending, you will receive a notification in the admin panel.
 
 
-#### Скачивание инцидентов в csv
+## Disabling individual models for specific chats
 
-1. Перейдите во вкладку "Инциденты из СМИ".
-2. В левой части настройте нужные фильтры.
-3. Выберите нужные инциденты и в выпадающей панели "Action" используйте "Экспортировать выбранные записи в CSV"
+There is a possibility to hide each individual category for each channel. This may be related to the need to separate models or security requirements.
 
+#### Downloading incidents to csv
 
-### Как использовать
+1. Go to the "Incidents from the media" tab.
+2. Set the necessary filters in the left part.
+3. Select the desired incidents and use the "Export selected records to CSV" action in the dropdown menu.
 
-Для этого нужно зайти в панели администратора в `Channel incident types`, найти запись с нужным типом инцидента и ID канала и открыть. В настройках теперь появилось поле **show**. Если оно включено, то категория отображается в настройках канала в Telegram. Если выключено, то категория не показывается.
+### How to use
 
-### Особенности
+To do this, go to the admin panel in `Channel incident types`, find the record with the desired type of incident and channel ID, and open it. In the settings, a new field **show** has appeared. If it is enabled, the category is displayed in the channel settings in Telegram. If disabled, the category is not displayed.
 
-- При выключении поля **show** также отключается поле **status**. Это означает, что если мы скрываем категорию для канала, то инциденты из этой категории больше не приходят в этот канал.
+### Features
 
+- When the **show** field is disabled, the **status** field is also disabled. This means that if we hide a category for a channel, incidents from this category are no longer sent to this channel.
 
