@@ -1,10 +1,8 @@
 import logging
-import sys
 from datetime import datetime, timedelta
 from itertools import islice
 
 from celery import group
-from celery.utils.log import get_task_logger
 
 from server.apps.bot.services.inc_post import get_incident_post_data
 from server.apps.core.models import Article
@@ -15,8 +13,7 @@ from server.settings.components.celery import INCIDENT_BATCH_SIZE
 from .bot import send_message_to_channel
 from .celery_app import app
 
-logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
-logger = get_task_logger(__name__)
+logger = logging.getLogger("parser")
 
 
 def split_every(n, iterable):
