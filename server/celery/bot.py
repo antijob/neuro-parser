@@ -1,6 +1,8 @@
 import asyncio
+import logging
+import sys
 
-from aiogram.exceptions import TelegramRetryAfter, TelegramForbiddenError
+from aiogram.exceptions import TelegramForbiddenError, TelegramRetryAfter
 from celery.signals import celeryd_init, worker_shutdown
 from celery.utils.log import get_task_logger
 
@@ -9,6 +11,7 @@ from server.apps.bot.keyboards.downvote_kb import downvote_keyboard
 
 from .celery_app import app
 
+logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 logger = get_task_logger(__name__)
 
 bot = None

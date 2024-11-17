@@ -9,7 +9,6 @@ from .libs.exceptions import BadCodeException
 
 
 # Configure logging
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 

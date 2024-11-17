@@ -10,7 +10,6 @@ from server.core.source_parser import SourceParser
 
 
 # Configure logging
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 

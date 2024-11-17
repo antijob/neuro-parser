@@ -11,7 +11,6 @@ from server.apps.core.models import IncidentType, Article
 
 
 # Configure logging
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Code use llama model for text classification.
