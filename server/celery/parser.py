@@ -98,7 +98,9 @@ def create_incidents(batch):
             logger.info(f"Queueing notification for incident: {incident}")
             incident_post_data = get_incident_post_data(incident)
             logger.debug(
-                f"Start cycle to send messages with that data: {incident_post_data}"
+                f"Start cycle to send messages with that data\n"
+                f"INC_ID: {incident_post_data.incident_id}\n"
+                f"CHANNELS: {incident_post_data.channel_id_list}"
             )
             for chn_id in incident_post_data.channel_id_list:
                 task_result = send_message_to_channel.delay(
