@@ -92,8 +92,7 @@ class ArticleAdmin(admin.ModelAdmin):
 
 @admin.register(Source)
 class SourceAdmin(admin.ModelAdmin):
-    form = SourceForm
-    list_display = ("url", "country", "region", "is_active")
+    list_display = ("url", "country", "region", "needs_proxy", "is_active")
     actions = [deactivate_source, activate_source]
     search_fields = ["url"]
 
@@ -114,6 +113,7 @@ class SourceAdmin(admin.ModelAdmin):
                     is_active=obj.is_active,
                     country=obj.country,
                     region=obj.region,
+                    needs_proxy=obj.needs_proxy,
                 )
                 new_source.save()
 
