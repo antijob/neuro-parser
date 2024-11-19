@@ -38,8 +38,8 @@ def update_sources():
     async def gather(tasks):
         return await asyncio.gather(*tasks, return_exceptions=True)
 
-    loop = asyncio.get_event_loop()
-    results = loop.run_until_complete(asyncio.gather(*tasks, return_exceptions=True))
+    loop = asyncio.new_event_loop()
+    results = loop.run_until_complete(gather(tasks))
 
     urls_count = 0
     for res in results:

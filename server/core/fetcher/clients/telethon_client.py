@@ -20,10 +20,11 @@ from telethon.tl.types import PeerUser, PeerChat, PeerChannel
 logging.basicConfig(level=logging.WARNING)
 logger = logging.getLogger(__name__)
 
+TELETHON_LOCK: bool = False
+
 
 class TelethonClient(ClientBase):
     session_name = "telethon_session"
-    _lock = asyncio.Lock()
 
     def __init__(
         self, telegram_api_id=TELEGRAM_API_ID, telegram_api_hash=TELEGRAM_API_HASH
@@ -34,19 +35,24 @@ class TelethonClient(ClientBase):
         logging.getLogger("telethon").setLevel(level=logging.CRITICAL)
 
     async def __aenter__(self):
-        await self._lock.acquire()
-        logger.debug("TelethonClient: Aquire lock")
+        global TELETHON_LOCK
+        while TELETHON_LOCK is True:
+            await asyncio.sleep(1)
+            logger.debug("TelethonClient: Can't lock, sleep")
+        TELETHON_LOCK = True
+        logger.exception("TelethonClient: Aquire lock")
         await self.client.connect()
         if not await self.client.is_user_authorized():
-            logger.debug("TelethonClient: Release lock (not authorized)")
-            self._lock.release()
+            logger.exception("TelethonClient: Release lock (not authorized)")
+            TELETHON_LOCK = False
             raise Exception("User is not authorized")
         return self
 
     async def __aexit__(self, exc_type, exc_value, traceback):
+        global TELETHON_LOCK
         await self.client.disconnect()
-        logger.debug("TelethonClient: Release lock")
-        self._lock.release()
+        logger.exception("TelethonClient: Release lock")
+        TELETHON_LOCK = False
 
     async def get_article(self, article: Article, source: Source) -> Article:
         ids = get_telegram_ids(article.url)
