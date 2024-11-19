@@ -14,6 +14,8 @@ class DownvoteFilter(admin.SimpleListFilter):
         ]
 
     def queryset(self, request, queryset):
-        if self.value():
+        if self.value() == "0":
+            return queryset.filter(downvote=0)
+        elif self.value():
             return queryset.filter(downvote__gte=int(self.value()))
         return queryset
