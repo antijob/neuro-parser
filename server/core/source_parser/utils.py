@@ -1,9 +1,29 @@
 # Some functions that used across different modules
-import dateparser
-from datetime import datetime
 from typing import Union
-from urllib.parse import urlparse, urljoin, unquote
-import re
+from urllib.parse import urlparse, urljoin
+
+from lxml.html.clean import Cleaner
+from selectolax.parser import HTMLParser
+
+
+CLEANER = Cleaner(
+    scripts=True,
+    javascript=True,
+    comments=True,
+    style=True,
+    links=True,
+    meta=True,
+    add_nofollow=False,
+    page_structure=True,
+    processing_instructions=True,
+    embedded=True,
+    frames=True,
+    forms=True,
+    annoying_tags=True,
+    kill_tags=["img", "noscript", "button"],
+    remove_unknown_tags=True,
+    safe_attrs_only=False,
+)
 
 
 def count_links(node) -> int:
@@ -53,3 +73,16 @@ def get_absolute_url(source_url: str, url: str) -> Union[str, None]:
 def is_rss_link(url):
     path = str(urlparse(url).path)
     return "rss" in path or path.endswith(".xml") or "feed" in path
+
+
+def build_document(html: str, clean=False) -> HTMLParser:
+    """
+    Return etree document
+    cleans it if clean = True
+    """
+    html.replace("\xa0", " ")
+
+    if clean:
+        html = CLEANER.clean_html(html)
+
+    return HTMLParser(html)

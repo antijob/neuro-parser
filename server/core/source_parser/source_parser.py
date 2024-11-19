@@ -1,77 +1,46 @@
-from typing import Iterable, Optional
+from typing import Union
 
-from asgiref.sync import async_to_sync
-from lxml.html.clean import Cleaner
-from selectolax.parser import HTMLParser
+import logging
+from .parsers.base_parser import ParserBase
+
+from .parsers.vk_parser import VkParser
+from .parsers.ok_parser import OkParser
+from .parsers.tg_parser import TgParser
+from .parsers.common_parser import CommonParser
+from .parsers.rss_parser import RssParser
 
 from server.apps.core.models import Article, Source
-from server.core.fetcher import Fetcher
 from server.libs.handler import HandlerRegistry
 
-from .parsers.base_parser import ParserBase
-from .parsers.common_parser import CommonParser
-from .parsers.ok_parser import OkParser
-from .parsers.rss_parser import RssParser
-from .parsers.tg_parser import TgParser
-from .parsers.vk_parser import VkParser
-
-CLEANER = Cleaner(
-    scripts=True,
-    javascript=True,
-    comments=True,
-    style=True,
-    links=True,
-    meta=True,
-    add_nofollow=False,
-    page_structure=True,
-    processing_instructions=True,
-    embedded=True,
-    frames=True,
-    forms=True,
-    annoying_tags=True,
-    kill_tags=["img", "noscript", "button"],
-    remove_unknown_tags=True,
-    safe_attrs_only=False,
-)
+from asgiref.sync import sync_to_async
 
 
-async def get_source_data(source: Source) -> Optional[str]:
-    """Get document by given url"""
-    html = await Fetcher.download_source(source)
-    if html:
-        html = html.replace("\xa0", " ")
-    return html
+# Configure logging
+logger = logging.getLogger(__name__)
 
 
-def build_document(html, clean=False):
-    """
-    Return etree document
-    cleans it if clean = True
-    """
-    if not html:
-        return None
-    if clean:
-        html = CLEANER.clean_html(html)
-    try:
-        document = HTMLParser(html)
-    except ValueError:
-        pass
+async def add_articles(
+    source: Source, articles: list[Union[str, Article]]
+) -> list[Article]:
+    added_articles: list[Article] = []
+    added_urls: set[str] = set()
 
-    return document
+    for article in articles:
+        if isinstance(article, Article):
+            url = article.url
+            article = article
+        else:
+            url = article
+            article = Article(url=url, source=source)
 
+        if url in added_urls:
+            continue
 
-def add_articles(source: Source, urls: list[str]) -> list[Article]:
-    added = []
+        if not await sync_to_async(Article.objects.filter(url=url).exists)():
+            added_articles.append(article)
+            added_urls.add(url)
 
-    for url in urls:
-        try:
-            article, created = Article.objects.get_or_create(url=url, source=source)
-            if created:
-                added.append(article)
-        except Exception as e:
-            raise type(e)(f"When adding articles with {url} exception occurred: {e}")
-
-    return added
+    return added_articles
 
 
 class SourceParser:
@@ -83,20 +52,18 @@ class SourceParser:
     registry.register(CommonParser)
 
     @classmethod
-    async def extract_all_news_urls(cls, source: Source) -> Iterable[str]:
-        url = source.url
-        html = await get_source_data(source)
-        if html is None:
-            return None
-
-        document = build_document(html, clean=True)
-        parser = cls.registry.choose(url)
-        return parser.extract_urls(url, document)
-
-    @classmethod
-    def create_new_articles(cls, source: Source) -> int:
-        urls = async_to_sync(cls.extract_all_news_urls)(source)
-        if not urls:
+    async def create_new_articles(cls, source: Source, data: str) -> int:
+        parser = cls.registry.choose(source)
+        articles = parser.extract_urls(source.url, data)
+        if not articles:
             return 0
-        added = add_articles(source, urls)
+
+        added = await add_articles(source, articles)
+        for article in added:
+            try:
+                await sync_to_async(article.save)()
+            except Exception as e:
+                logger.exception(
+                    f"When adding articles with {article.url} exception occurred: {e}"
+                )
         return len(added)

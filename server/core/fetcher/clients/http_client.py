@@ -10,8 +10,10 @@ from server.core.fetcher.libs.url_preparer import URLPreparer
 from server.apps.core.models import Article, Source
 from server.core.article_parser import ArticleParser
 
+from .base_client import ClientBase
 
-class NPClient:
+
+class HttpClient(ClientBase):
     def __init__(self):
         pass
 
@@ -52,6 +54,7 @@ class NPClient:
             article.source = source
 
         ArticleParser.postprocess_article(article, content)
+        article.is_downloaded = True
         await sync_to_async(article.save, thread_sensitive=True)()
 
         return article

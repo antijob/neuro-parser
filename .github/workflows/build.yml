@@ -54,11 +54,11 @@ jobs:
             docker compose -f docker-compose.prod.yaml build web
 
       - name: login to docker registry
-        if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/stage') &&  (inputs.runType == 'Force build')
+        if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/stage') || (inputs.runType == 'Force build')
         run: echo "${{ secrets.docker_password }}" | docker login -u ${{ secrets.docker_username }} --password-stdin
 
       - name: push to registry
-        if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/stage') &&  (inputs.runType == 'Force build')
+        if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/stage') ||  (inputs.runType == 'Force build')
         run: |
           branch=$(echo "${GITHUB_REF#refs/heads/}" | tr '/' '-')
           echo "Branch name with / substituted for - : $branch"

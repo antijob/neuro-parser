@@ -7,6 +7,7 @@ class DownvoteFilter(admin.SimpleListFilter):
 
     def lookups(self, request, model_admin):
         return [
+            ("0", "0 downvotes"),
             ("1", "1 и более"),
             ("2", "2 и более"),
             ("5", "5 и более"),

@@ -10,16 +10,8 @@ from .predictors.base_predictor import PredictorBase
 from .predictors.bert import BertPredictor
 from .predictors.llama import LlamaPredictor
 
-
 # Configure logging
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-
-
-# THERE SHOULD BE 2 pipelines
-
-# 1 -- unique url pipeline
-# 2 -- urls batch pipeline
 
 
 class IncidentPredictor:
@@ -28,15 +20,18 @@ class IncidentPredictor:
     registry.register(LlamaPredictor)
 
     @classmethod
-    def make_predictor(cls, incident_type: IncidentType) -> Optional[PredictorBase]:
+    def _make_predictor(cls, incident_type: IncidentType) -> Optional[PredictorBase]:
         try:
             predictor = cls.registry.choose(incident_type)
             return predictor(incident_type)
         except Exception as e:
-            logger.error(f"Error in setup_incident_type: {e}", exc_info=True)
+            logger.exception(
+                f"Error in setup_incident_type. Incident type: {incident_type}. Exception: {e}",
+                exc_info=True,
+            )
 
     @staticmethod
-    def create_incident(
+    def _create_incident(
         article: Article, incident_type: IncidentType
     ) -> Optional[MediaIncident]:
         try:
@@ -66,11 +61,14 @@ class IncidentPredictor:
                 if not incident_type.is_active:
                     continue
 
-                predictor = cls.make_predictor(incident_type)
+                predictor = cls._make_predictor(incident_type)
+                if not predictor:
+                    continue
+
                 for article in batch:
                     is_incident, rate = predictor.is_incident(article)
                     if is_incident:
-                        incident = cls.create_incident(article, incident_type)
+                        incident = cls._create_incident(article, incident_type)
                         if incident is not None:
                             result_incidents.append(incident)
                     if rate:
@@ -78,7 +76,9 @@ class IncidentPredictor:
                         article.save()
             return result_incidents
         except Exception as e:
-            logger.error(f"Error in predict_batch: {e}")
+            logger.error(
+                f"Error in predict_batch: {e} with predictor: {predictor}. Batch: {batch}"
+            )
             raise
 
     @classmethod

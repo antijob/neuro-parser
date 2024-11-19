@@ -11,7 +11,6 @@ from server.apps.core.models import IncidentType, Article
 
 
 # Configure logging
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Code use llama model for text classification.
@@ -36,10 +35,11 @@ class BertPredictor(PredictorBase):
             model_directory = MODELS_DIR.joinpath(incident_type.model_path)
 
             if not model_directory.exists() or not model_directory.is_dir():
-                raise FileNotFoundError(
-                    f"Model directory {model_directory} does not exist"
+                logger.exception(
+                    f"Model directory {model_directory} does not exist "
                     "or is not a directory."
                 )
+                return False
             return True
         return False
 

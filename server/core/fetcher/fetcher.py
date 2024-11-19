@@ -5,13 +5,12 @@ import logging
 from typing import Coroutine, Iterable
 from server.apps.core.models import Article, Source
 
-from .client import NPClient
-from .libs.exceptions import BadCodeException, ClientError
 
+from .libs.exceptions import BadCodeException, ClientError
 from .tasks import fetch_source_articles
+from .clients import ClientFactory, ClientSourceData
 
 # Configure logging
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
@@ -24,7 +23,7 @@ class Fetcher:
         article: Article, source: Optional[Source] = None
     ) -> Optional[Article]:
         try:
-            async with NPClient() as client:
+            async with ClientFactory.get_client(source, article) as client:
                 return await client.get_article(article, source)
         except ClientError as e:
             logger.error(
@@ -41,9 +40,9 @@ class Fetcher:
             return None
 
     @staticmethod
-    async def download_source(source: Source) -> Optional[str]:
+    async def download_source(source: Source) -> ClientSourceData:
         try:
-            async with NPClient() as client:
+            async with ClientFactory.get_client(source) as client:
                 return await client.get_source(source)
         except ClientError as e:
             logger.error(
@@ -63,12 +62,12 @@ class Fetcher:
         coro = fetch_source_articles(source, list(articles))
         self.coroutines.append(coro)
 
-    async def _await(self) -> list[int]:
-        results = await asyncio.gather(*self.coroutines, return_exceptions=False)
-        return results
-
     def await_tasks(self) -> int:
-        results = asyncio.run(self._await())
+        async def gather(tasks):
+            return await asyncio.gather(*tasks, return_exceptions=True)
+
+        results = asyncio.run(gather(self.coroutines))
+
         fetched_total = 0
         for res in results:
             if isinstance(res, BaseException):

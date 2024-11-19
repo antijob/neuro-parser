@@ -3,13 +3,12 @@ import logging
 
 from server.apps.core.models import Article, Source
 
-from .client import NPClient
+from .clients import ClientFactory
 from .libs.statistics import CoroutineStatistics
 from .libs.exceptions import BadCodeException
 
 
 # Configure logging
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
@@ -22,7 +21,7 @@ async def fetch_source_articles(source: Source, articles: list[Article]):
     logger.info(f"Start task. Source {source.url}: {articles_length} articles")
     statistics = CoroutineStatistics(source.url, articles_length)
 
-    async with NPClient() as client:
+    async with ClientFactory.get_client(source) as client:
         delay = 1 / rps
 
         for article in articles:
