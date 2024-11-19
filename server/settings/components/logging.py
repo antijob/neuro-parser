@@ -1,7 +1,9 @@
-# -*- coding: utf-8 -*-
-
 # Logging
 # https://docs.djangoproject.com/en/1.11/topics/logging/
+
+import logging
+
+from server.settings import ENV
 
 LOGGING = {
     "version": 1,
@@ -41,12 +43,17 @@ LOGGING = {
         "parser": {
             "handlers": ["console"],
             "propagate": True,
-            "level": "DEBUG",
+            "level": "INFO",
         },
         "security": {
             "handlers": ["console-verbose"],
-            "level": "DEBUG",
+            "level": "INFO",
             "propagate": False,
         },
     },
 }
+
+if ENV == "development":
+    LOGGING["loggers"]["parser"]["level"] = "DEBUG"
+    LOGGING["loggers"]["security"]["level"] = "DEBUG"
+    logging.info("Logging level for parser and security sets to DEBUG")
