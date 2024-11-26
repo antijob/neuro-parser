@@ -1,10 +1,10 @@
 from abc import ABC, abstractmethod
-from typing import Union
+from typing import Union, Any
 
 from server.apps.core.models import Source, Article
 
-# ClientSourceData may be raw html data, list of urls, list of built Articles or None
-ClientSourceData = Union[str, list[str], list[Article], None]
+# ClientSourceData may be raw html data, list of urls, list of built Articles, dict of urls and relevant data or None
+ClientSourceData = Union[str, list[str], list[Article], dict[str, Any], None]
 
 
 class ClientBase(ABC):

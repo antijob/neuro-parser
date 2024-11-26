@@ -25,7 +25,8 @@ def update_sources():
     async def crawl_task(source: Source) -> int:
         data = await Fetcher.download_source(source)
         if not data:
-            raise Exception(f"Empty fetch from source: {source.url}")
+            logger.exception(f"update_sources: Empty fetch from source: {source.url}")
+            return 0
         urls_count = await SourceParser.create_new_articles(source, data)
         return urls_count
 
@@ -36,7 +37,8 @@ def update_sources():
     async def gather(tasks):
         return await asyncio.gather(*tasks, return_exceptions=True)
 
-    results = asyncio.run(gather(tasks))
+    loop = asyncio.new_event_loop()
+    results = loop.run_until_complete(gather(tasks))
 
     urls_count = 0
     for res in results:
