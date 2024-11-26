@@ -19,8 +19,9 @@ from server.apps.core.models import (
     Country,
     IncidentType,
     MediaIncident,
-    Region,
     Proxy,
+    Region,
+    Source,
 )
 
 

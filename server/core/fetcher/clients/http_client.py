@@ -56,7 +56,7 @@ class HttpClient(ClientBase):
         )
 
         if self.proxy is not None:
-            proxy_url = f"http://{self.proxy}"
+            proxy_url = self.proxy
             logger.info(f"Using proxy: {proxy_url}")
         else:
             proxy_url = None
