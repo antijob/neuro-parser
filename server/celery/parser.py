@@ -92,7 +92,6 @@ def create_incidents(batch):
             art.save()
             logger.info(f"Marked article as parsed: {art}")
 
-        logger.debug("Start sending messages for", incidents_created)
         results = []
         for incident in incidents_created:
             logger.info(f"Queueing notification for incident: {incident}")

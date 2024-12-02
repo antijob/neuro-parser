@@ -1,13 +1,18 @@
-# -*- coding: utf-8 -*-
 import datetime
 
 from django.contrib.postgres.fields import ArrayField
+from django.core.validators import (
+    MaxValueValidator,
+    MinValueValidator,
+    validate_ipv4_address,
+)
 from django.db import models
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 
+from server.apps.core.data.llm import LLM_TEMPLATE_DEFAULT, SYSTEM_LLM_PROMPT_DEFAULT
 from server.apps.core.data.regions import COUNTRIES, REGIONS
-from server.apps.core.data.llm import SYSTEM_LLM_PROMPT_DEFAULT, LLM_TEMPLATE_DEFAULT
 from server.apps.users.models import User
 
 
@@ -179,11 +184,12 @@ class Source(models.Model):
     country = models.ForeignKey(
         Country,
         on_delete=models.CASCADE,
-        default=11,
+        default=DEFAULT_COUNTRY_ID,
     )
     region = models.ForeignKey(
-        Region, on_delete=models.CASCADE, default=None, null=True, blank=True
+        Region, on_delete=models.SET_NULL, default=None, null=True, blank=True
     )
+    needs_proxy = models.BooleanField(verbose_name=_("Требуется прокси"), default=False)
 
     class Meta:
         verbose_name = "Источник"
@@ -268,3 +274,28 @@ class Article(models.Model):
     def country(self):
         country = self.source.country if self.source else "RUS"
         return country
+
+
+class Proxy(models.Model):
+    ip = models.GenericIPAddressField(
+        _("IP адрес"), protocol="IPv4", validators=[validate_ipv4_address], unique=True
+    )
+    port = models.PositiveIntegerField(
+        _("Порт"),
+        validators=[MinValueValidator(1), MaxValueValidator(65535)],
+    )
+    login = models.CharField(_("Логин"), max_length=128, null=True, blank=True)
+    password = models.CharField(_("Пароль"), max_length=128, null=True, blank=True)
+    country = models.ForeignKey(
+        Country, on_delete=models.CASCADE, verbose_name=_("Страна")
+    )
+    is_active = models.BooleanField(_("Активен"), default=True)
+
+    def __str__(self):
+        return f"{self.ip}:{self.port}"
+
+    class Meta:
+        verbose_name = _("Прокси")
+        verbose_name_plural = _("Прокси")
+        unique_together = ("ip", "port")
+        ordering = ["country", "ip", "port"]
