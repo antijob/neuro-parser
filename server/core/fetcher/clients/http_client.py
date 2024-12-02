@@ -6,7 +6,7 @@ from asgiref.sync import sync_to_async
 
 from server.apps.core.models import Article, Source
 from server.core.article_parser import ArticleParser
-from server.core.fetcher.libs.exceptions import BadCodeException
+from server.core.fetcher.libs.proxy import ProxyManager
 from server.core.fetcher.libs.url_preparer import URLPreparer
 from server.core.fetcher.libs.user_agent import session_random_headers
 
@@ -87,7 +87,21 @@ class HttpClient(ClientBase):
                     return [content, str(response.url)]
                 else:
                     logger.error(f"Request failed with status code: {response.status}")
-                    raise BadCodeException(response.status)
+        except (
+            aiohttp.ClientHttpProxyError,
+            aiohttp.ClientProxyConnectionError,
+            aiohttp.ClientConnectorError,
+            aiohttp.ClientOSError,
+        ) as e:
+            logger.exception(f"Client or proxy error during request: {e}")
+            logger.info("Starting avaialability checker for proxy: {proxy_url}")
+            if await ProxyManager.check_proxy(
+                proxy_url, self.proxy_login, self.proxy_password
+            ):
+                logger.info(f"Proxy works good: {proxy_url}")
+            else:
+                logger.info(f"Proxy not working and will be disabled: {proxy_url}")
+                ProxyManager.disable_proxy(proxy_url)
         except Exception as e:
             logger.exception(f"An error occurred during the request: {str(e)}")
             raise

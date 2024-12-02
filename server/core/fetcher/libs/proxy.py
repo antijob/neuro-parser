@@ -1,8 +1,10 @@
 import logging
-from typing import Optional
 from dataclasses import dataclass
+from typing import Optional
+
 import aiohttp
 from asgiref.sync import sync_to_async
+
 from server.apps.core.models import Proxy
 
 logger = logging.getLogger(__name__)
@@ -52,13 +54,13 @@ class ProxyManager:
 
             proxy_url = f"http://{proxy.ip}:{proxy.port}"
 
-            if not await ProxyManager._check_proxy(
-                proxy_url, proxy.login, proxy.password
-            ):
-                await sync_to_async(
-                    lambda: Proxy.objects.filter(id=proxy.id).update(is_active=False)
-                )()
-                return ProxyData(error_msg=f"Proxy {proxy_url} validation failed")
+            # if not await ProxyManager.check_proxy(
+            #     proxy_url, proxy.login, proxy.password
+            # ):
+            #     await sync_to_async(
+            #         lambda: Proxy.objects.filter(id=proxy.id).update(is_active=False)
+            #     )()
+            #     return ProxyData(error_msg=f"Proxy {proxy_url} validation failed")
 
             return ProxyData(url=proxy_url, login=proxy.login, password=proxy.password)
 
@@ -67,11 +69,12 @@ class ProxyManager:
             return ProxyData(error_msg=f"Unexpected error: {str(e)}")
 
     @classmethod
-    async def _check_proxy(
+    async def check_proxy(
         cls, proxy_url: str, proxy_login: str, proxy_pass: str
     ) -> bool:
         """
         Validate proxy by making a test request.
+        - proxy_url ip:port
         """
         timeout = aiohttp.ClientTimeout(total=cls.TIMEOUT_SECONDS)
 
@@ -90,3 +93,14 @@ class ProxyManager:
             except Exception as e:
                 logger.error(f"Proxy {proxy_url} check failed: {str(e)}", exc_info=True)
                 return False
+
+    @classmethod
+    def disable_proxy(cls, proxy_url: str) -> None:
+        """
+        Marks Proxy with given url as disabled
+        """
+        if ":" in proxy_url:
+            proxy_url = proxy_url.strip(":")[0]
+
+        proxy = Proxy.objects.filter(proxy_url=proxy_url)
+        proxy.update(is_active=False)
