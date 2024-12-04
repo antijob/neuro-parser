@@ -48,3 +48,8 @@ To do this, go to the admin panel in `Channel incident types`, find the record w
 
 - When the **show** field is disabled, the **status** field is also disabled. This means that if we hide a category for a channel, incidents from this category are no longer sent to this channel.
 
+#### 4. Hidden Telegram channels
+
+Telethon client is used for parsing, its configuration is described in the [developer guide](developers.md).
+To activate the client, check the box `"Hidden Telegram channel"` in the source settings
+
