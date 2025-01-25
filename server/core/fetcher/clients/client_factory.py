@@ -1,10 +1,11 @@
 import logging
-from typing import Optional
+from typing import Optional, Union
 
 from server.apps.core.models import Article, Source
-from server.core.fetcher.libs.proxy import ProxyData, ProxyManager
+from server.core.fetcher.libs.proxy import ProxyManager
 
 from .http_client import HttpClient
+from .http_proxy import HttpProxyClient
 
 logger = logging.getLogger("parser")
 
@@ -13,14 +14,22 @@ class ClientFactory:
     @staticmethod
     async def get_client(
         source: Source, article: Optional[Article] = None
-    ) -> HttpClient:
-        if source.needs_proxy:
-            settings: ProxyData = await ProxyManager.get_proxy()
-            if settings.is_valid:
-                return HttpClient(
-                    proxy=settings.url,
-                    login=settings.login,
-                    password=settings.password,
-                )
-            logger.error(settings.error_msg)
-        return HttpClient()
+    ) -> Union[HttpClient, HttpProxyClient]:
+        if not source.needs_proxy:
+            logger.debug(f"Creating client without proxy for source: {source}")
+            return HttpClient()
+
+        try:
+            proxy_data = await ProxyManager.get_proxy()
+            logger.info(
+                f"Got proxy for source {source}: valid={proxy_data.is_valid}"
+                f"{f', error={proxy_data.error_msg}' if not proxy_data.is_valid else ''}"
+            )
+        except Exception as e:
+            logger.error(f"Error getting proxy for source {source}: {str(e)}")
+            proxy_data = None
+
+        # Create client with appropriate settings
+        client = HttpProxyClient(proxy_data=proxy_data, use_proxy=True)
+
+        return client

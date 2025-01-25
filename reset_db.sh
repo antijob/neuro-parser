@@ -24,15 +24,15 @@ run_command "docker-compose exec db psql -U postgres -d postgres -c 'DROP DATABA
 run_command "docker-compose exec db psql -U postgres -d postgres -c 'CREATE DATABASE \"neural-parser\";'"
 
 # Restore db dump
-run_command "docker-compose exec db psql -U postgres -d neural-parser -f /code/dump.sql"
+# run_command "docker-compose exec db psql -U postgres -d neural-parser -f /code/dump.sql"
 
 # Apply migrations
-# run_command "docker-compose exec web python manage.py migrate"
+run_command "docker-compose exec web python manage.py migrate"
 
 # Create superuser
 run_command "docker-compose exec web python manage.py createsuperuser --noinput --email np@np.com"
 
 # Apply fixtures
-# run_command "docker compose exec web python manage.py loaddata incident_types.json"
+run_command "docker compose exec web python manage.py loaddata incident_types.json"
 
 echo "Database reset process completed successfully"
