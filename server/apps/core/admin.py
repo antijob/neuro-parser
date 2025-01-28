@@ -86,7 +86,8 @@ class ArticleAdmin(admin.ModelAdmin):
         for obj in queryset:
             obj.is_parsed = False
             obj.save()
-        self.message_user(request, f"{queryset.count()} articles will be parsed.")
+        self.message_user(
+            request, f"{queryset.count()} articles will be parsed.")
 
     force_parse.short_description = "Force parse"
 
@@ -121,4 +122,5 @@ class SourceAdmin(admin.ModelAdmin):
 
 @admin.register(Proxy)
 class ProxyAdmin(admin.ModelAdmin):
-    list_display = ("ip", "port", "country", "is_active")
+    list_display = ("ip", "port", "country", "is_active",
+                    "last_check", "error_type", "error_message")

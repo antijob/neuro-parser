@@ -49,7 +49,8 @@ DEFAULT_COUNTRY_ID: int = 11  # Russia
 
 
 class Country(models.Model):
-    name = models.CharField("Страна", choices=COUNTRIES, default="RUS", max_length=100)
+    name = models.CharField("Страна", choices=COUNTRIES,
+                            default="RUS", max_length=100)
 
     def __str__(self) -> str:
         return self.get_full_country_name()
@@ -63,7 +64,8 @@ class Country(models.Model):
 
 
 class Region(models.Model):
-    name = models.CharField("Регион", choices=REGIONS, default="ALL", max_length=100)
+    name = models.CharField("Регион", choices=REGIONS,
+                            default="ALL", max_length=100)
     country = models.ForeignKey(Country, on_delete=models.CASCADE)
 
     def __str__(self) -> str:
@@ -137,7 +139,8 @@ class BaseIncident(models.Model):
     public_title = models.CharField(
         "Публичное название", max_length=512, null=True, blank=True
     )
-    public_description = models.TextField("Публичное описание", null=True, blank=True)
+    public_description = models.TextField(
+        "Публичное описание", null=True, blank=True)
 
     class Meta:
         abstract = True
@@ -179,7 +182,8 @@ class MediaIncident(BaseIncident):
 
 
 class Source(models.Model):
-    url = models.TextField(verbose_name="URL списка новостей", null=False, unique=True)
+    url = models.TextField(
+        verbose_name="URL списка новостей", null=False, unique=True)
     is_active = models.BooleanField(verbose_name="Активен", default=True)
     country = models.ForeignKey(
         Country,
@@ -189,7 +193,8 @@ class Source(models.Model):
     region = models.ForeignKey(
         Region, on_delete=models.SET_NULL, default=None, null=True, blank=True
     )
-    needs_proxy = models.BooleanField(verbose_name=_("Требуется прокси"), default=False)
+    needs_proxy = models.BooleanField(
+        verbose_name=_("Требуется прокси"), default=False)
 
     class Meta:
         verbose_name = "Источник"
@@ -212,7 +217,8 @@ class Article(models.Model):
     title = models.TextField(
         verbose_name="Заголовок", default="", blank=True, null=True
     )
-    text = models.TextField(verbose_name="Текст", default="", blank=True, null=True)
+    text = models.TextField(verbose_name="Текст",
+                            default="", blank=True, null=True)
     is_downloaded = models.BooleanField(verbose_name="Скачана", default=False)
     is_parsed = models.BooleanField(verbose_name="Обработана", default=False)
     is_incident_created = models.BooleanField(
@@ -237,7 +243,8 @@ class Article(models.Model):
         on_delete=models.SET_NULL,
     )
     create_date = models.DateTimeField("Дата создания", default=timezone.now)
-    publication_date = models.DateField("Дата публикации", null=True, blank=True)
+    publication_date = models.DateField(
+        "Дата публикации", null=True, blank=True)
 
     def save(self, *args, **kwargs):
         self.title = self.any_title()
@@ -285,17 +292,22 @@ class Proxy(models.Model):
         validators=[MinValueValidator(1), MaxValueValidator(65535)],
     )
     login = models.CharField(_("Логин"), max_length=128, null=True, blank=True)
-    password = models.CharField(_("Пароль"), max_length=128, null=True, blank=True)
+    password = models.CharField(
+        _("Пароль"), max_length=128, null=True, blank=True)
     country = models.ForeignKey(
         Country, on_delete=models.CASCADE, verbose_name=_("Страна")
     )
     is_active = models.BooleanField(_("Активен"), default=True)
-
-    def __str__(self):
-        return f"{self.ip}:{self.port}"
+    last_check = models.DateTimeField(_("Последняя проверка"), null=True)
+    error_type = models.CharField(_("Тип ошибки"), max_length=50, null=True)
+    error_message = models.TextField(
+        _("Сообщение об ошибке"), blank=True, null=True)
 
     class Meta:
         verbose_name = _("Прокси")
         verbose_name_plural = _("Прокси")
         unique_together = ("ip", "port")
         ordering = ["country", "ip", "port"]
+
+    def __str__(self):
+        return f"{self.ip}:{self.port}"
