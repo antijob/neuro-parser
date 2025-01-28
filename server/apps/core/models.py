@@ -298,8 +298,8 @@ class Proxy(models.Model):
         Country, on_delete=models.CASCADE, verbose_name=_("Страна")
     )
     is_active = models.BooleanField(_("Активен"), default=True)
-    last_check = models.DateTimeField(_("Последняя проверка"), null=True)
-    error_type = models.CharField(_("Тип ошибки"), max_length=50, null=True)
+    last_check = models.DateTimeField(_("Последняя проверка"), null=True, blank=True)
+    error_type = models.CharField(_("Тип ошибки"), max_length=50, null=True, blank=True)
     error_message = models.TextField(
         _("Сообщение об ошибке"), blank=True, null=True)
 
