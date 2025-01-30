@@ -57,9 +57,20 @@ class HttpProxyClient:
     async def _get_with_proxy_retry(
         self, url: str, retry_count: int = 0
     ) -> Tuple[str, str]:
-        """Make HTTP request with proxy retry logic."""
-        if not self._proxy_data or not self._proxy_data.is_valid:
-            if self._use_proxy:
+        """Make HTTP request with proxy retry logic.
+        If use_proxy is True, first tries without proxy, then with proxy on failure.
+        """
+        # First try without proxy if this is the first attempt
+        if self._use_proxy and retry_count == 0:
+            try:
+                logger.info(f"Attempting direct request without proxy to: {url}")
+                return await self._make_request(url)
+            except (aiohttp.ClientError, ProxyException) as e:
+                logger.info(f"Direct request failed: {str(e)}. Will retry with proxy.")
+
+        # If we need to use proxy, ensure we have valid proxy data
+        if self._use_proxy:
+            if not self._proxy_data or not self._proxy_data.is_valid:
                 self._proxy_data = await ProxyManager.get_proxy()
                 if not self._proxy_data.is_valid:
                     raise ProxyException("No valid proxy available")
