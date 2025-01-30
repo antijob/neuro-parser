@@ -47,7 +47,7 @@ services:
       service: web
     command: /bin/bash -c ./docker/web/entrypoint-prod.sh
     environment:
-      DEBUG: "False"
+      DEBUG: "${DEBUG}"
     volumes:
       - /root/models:/code/models
       - "staticfiles-data:/code/public/static"
@@ -57,7 +57,7 @@ services:
       traefik.http.routers.django.entrypoints: "websecure"
       traefik.http.routers.django.tls: "true"
       traefik.http.routers.django.tls.certresolver: "letsencrypt"
-    
+
   celery:
     image: antijob/neuro-parser:${NEURO_PARSER_VERSION}
     extends:

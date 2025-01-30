@@ -18,7 +18,6 @@ from asgiref.sync import sync_to_async
 
 
 # Configure logging
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
@@ -57,6 +56,10 @@ class SourceParser:
 
     @classmethod
     async def create_new_articles(cls, source: Source, data: str) -> int:
+        if not data:  # Return early if we have no data
+            logger.warning(f"No data received for source {source.url}")
+            return 0
+
         parser = cls.registry.choose(source)
         articles = parser.extract_urls(source.url, data)
         if not articles:

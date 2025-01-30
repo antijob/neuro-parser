@@ -117,6 +117,9 @@ class CommonParser(ParserBase):
     @classmethod
     def extract_urls(cls, source_url: str, document: str) -> Iterable[str]:
         document = build_document(document, clean=True)
+        if document is None:
+            return []
+
         document.strip_tags(TAGS_WITHOUT_CONTENT)
         document.strip_tags(SERVICE_TAGS)
         for link in document.css("a"):

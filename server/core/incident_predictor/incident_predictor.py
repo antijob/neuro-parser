@@ -11,7 +11,6 @@ from .predictors.bert import BertPredictor
 from .predictors.llama import LlamaPredictor
 
 # Configure logging
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 

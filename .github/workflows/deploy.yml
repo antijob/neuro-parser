@@ -19,11 +19,11 @@ env:
 jobs:
   deploy:
     name: "Deploy environment"
-    runs-on: ["self-hosted", "neuroparser", "${{ inputs.environment }}" ]
+    runs-on: ["self-hosted", "neuroparser", "${{ inputs.environment }}"]
     environment: ${{ inputs.environment }}
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v4 
+        uses: actions/checkout@v4
 
       - name: login to docker registry
         run: echo "${{ secrets.docker_password }}" | docker login -u ${{ secrets.docker_username }} --password-stdin
@@ -49,7 +49,7 @@ jobs:
               env_check_failed=1;
             fi
           done
-          if [ $env_check_failed == 1 ]; then 
+          if [ $env_check_failed == 1 ]; then
             echo "Please check if you're deploying to correct environment and all variables are set";
             exit 10;
           fi;
@@ -69,9 +69,16 @@ jobs:
             -e s,^FLOWER_USER=.*,FLOWER_USER=$FLOWER_USER, \
             -e s,^FLOWER_PASSWORD=.*,FLOWER_PASSWORD=$FLOWER_PASSWORD, \
             -e s,^FLOWER_HOST=.*,FLOWER_HOST=$FLOWER_HOST, \
+            -e s,^DEBUG=.*,DEBUG=$DEBUG, \
             -e s,^HOST=.*,HOST=$HOST, \
             -e s,^ACME_EMAIL=.*,ACME_EMAIL=$ACME_EMAIL, \
             .env
+
+          # Conditionally set DEBUG if it exists
+          if [ -n "$DEBUG" ]; then
+            sed -i -e s,^DEBUG=.*,DEBUG=$DEBUG, .env
+          fi
+
           branch=$(echo "${GITHUB_REF#refs/heads/}" | tr '/' '-')
           echo "Branch name with / substituted for - : $branch"
           echo NEURO_PARSER_VERSION=${branch} >> .env
@@ -89,9 +96,10 @@ jobs:
           FLOWER_USER: "${{ secrets.FLOWER_USER }}"
           FLOWER_PASSWORD: "${{ secrets.FLOWER_PASSWORD }}"
           FLOWER_HOST: "${{ vars.FLOWER_HOST }}"
+          DEBUG: "${{ vars.DEBUG }}"
           HOST: "${{ vars.HOST }}"
           ACME_EMAIL: "${{ secrets.ACME_EMAIL }}"
-      
+
       - name: "Copy the app"
         run: |
           docker run \

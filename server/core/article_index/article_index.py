@@ -6,7 +6,6 @@ from server.apps.core.models import Article
 from datetime import datetime, timedelta
 
 # Configure logging
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 SIMHASH_INDEX_KEY_TEMPLATE = "simhash-index-{dim}-{tol}"
@@ -14,6 +13,7 @@ SIMHASH_DIMENSION = 128
 SIMHASH_TOLERANCE = 8
 SIMHASH_INDEX_TIMEOUT = 3600 * 3  # 3 hours
 clear_text = re.compile(r"http\S+")  # remove links
+
 
 def get_latest_unique_articles() -> list[Article]:
     try:
@@ -29,6 +29,7 @@ def get_latest_unique_articles() -> list[Article]:
         logger.error(f"Error fetching latest unique articles: {e}")
         return []
 
+
 def make_simhash_from_article(article: Article) -> Simhash:
     try:
         title = article.title if article.title else ""
@@ -40,6 +41,7 @@ def make_simhash_from_article(article: Article) -> Simhash:
     except Exception as e:
         logger.error(f"Error creating Simhash from article {article.id}: {e}")
         return Simhash("")
+
 
 def get_simhash_distance(url1: str, url2: str) -> int:
     try:
@@ -54,6 +56,7 @@ def get_simhash_distance(url1: str, url2: str) -> int:
     except Exception as e:
         logger.error(f"Error calculating Simhash distance between articles: {e}")
         return -1
+
 
 class ArticleIndex:
     simhashIndex: SimhashIndex

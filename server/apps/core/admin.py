@@ -1,28 +1,28 @@
-# -*- coding: utf-8 -*-
-
 from django.contrib import admin
-from server.apps.core.admins.filters.downvote_filter import DownvoteFilter
-from server.apps.core.admins.actions.export_incidents_as_csv_action import (
-    export_incidents_as_csv,
-)
-from server.apps.core.admins.actions.disable_models_action import disable_models
-from server.apps.core.admins.actions.enable_models_action import enable_models
-from server.apps.core.admins.actions.downvoted_incident_action import (
-    downvoted_incidents,
-)
+
 from server.apps.core.admins.actions.activate_source_action import activate_source
 from server.apps.core.admins.actions.deactivate_source_action import (
     deactivate_source,
 )
+from server.apps.core.admins.actions.disable_models_action import disable_models
+from server.apps.core.admins.actions.downvoted_incident_action import (
+    downvoted_incidents,
+)
+from server.apps.core.admins.actions.enable_models_action import enable_models
+from server.apps.core.admins.actions.export_incidents_as_csv_action import (
+    export_incidents_as_csv,
+)
+from server.apps.core.admins.filters.downvote_filter import DownvoteFilter
+from server.apps.core.forms import IncidentTypeForm, SourceForm
 from server.apps.core.models import (
     Article,
-    MediaIncident,
-    Source,
-    IncidentType,
     Country,
+    IncidentType,
+    MediaIncident,
+    Proxy,
     Region,
+    Source,
 )
-from server.apps.core.forms import IncidentTypeForm
 
 
 @admin.register(Country)
@@ -68,6 +68,7 @@ class MediaIncidentAdmin(admin.ModelAdmin):
 class ArticleAdmin(admin.ModelAdmin):
     list_display = (
         "url",
+        "create_date",
         "publication_date",
         "create_date",
         "title",
@@ -85,14 +86,15 @@ class ArticleAdmin(admin.ModelAdmin):
         for obj in queryset:
             obj.is_parsed = False
             obj.save()
-        self.message_user(request, f"{queryset.count()} articles will be parsed.")
+        self.message_user(
+            request, f"{queryset.count()} articles will be parsed.")
 
     force_parse.short_description = "Force parse"
 
 
 @admin.register(Source)
 class SourceAdmin(admin.ModelAdmin):
-    list_display = ("url", "country", "region", "is_active")
+    list_display = ("url", "country", "region", "needs_proxy", "is_active")
     actions = [deactivate_source, activate_source]
     search_fields = ["url"]
 
@@ -113,5 +115,12 @@ class SourceAdmin(admin.ModelAdmin):
                     is_active=obj.is_active,
                     country=obj.country,
                     region=obj.region,
+                    needs_proxy=obj.needs_proxy,
                 )
                 new_source.save()
+
+
+@admin.register(Proxy)
+class ProxyAdmin(admin.ModelAdmin):
+    list_display = ("ip", "port", "country", "is_active",
+                    "last_check", "error_type", "error_message")

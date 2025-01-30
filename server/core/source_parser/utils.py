@@ -75,12 +75,16 @@ def is_rss_link(url):
     return "rss" in path or path.endswith(".xml") or "feed" in path
 
 
-def build_document(html: str, clean=False) -> HTMLParser:
+def build_document(html: str, clean=False) -> Union[HTMLParser, None]:
     """
     Return etree document
     cleans it if clean = True
+    Returns None if input is None or empty
     """
-    html.replace("\xa0", " ")
+    if not html:
+        return None
+
+    html = html.replace("\xa0", " ")
 
     if clean:
         html = CLEANER.clean_html(html)

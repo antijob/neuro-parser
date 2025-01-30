@@ -1,19 +1,19 @@
+import logging
 from datetime import datetime, timedelta
 from itertools import islice
 
 from celery import group
-from celery.utils.log import get_task_logger
 
-from server.apps.bot.services.inc_post import get_incident_post_data, IncidentPostData
+from server.apps.bot.services.inc_post import get_incident_post_data
 from server.apps.core.models import Article
 from server.core.article_index.query_checker import mark_duplicates
 from server.core.incident_predictor import IncidentPredictor
 from server.settings.components.celery import INCIDENT_BATCH_SIZE
 
-from .celery_app import app
 from .bot import send_message_to_channel
+from .celery_app import app
 
-logger = get_task_logger(__name__)
+logger = logging.getLogger("parser")
 
 
 def split_every(n, iterable):
@@ -92,20 +92,25 @@ def create_incidents(batch):
             art.save()
             logger.info(f"Marked article as parsed: {art}")
 
-        logger.debug("Start sending messages for", incidents_created)
         results = []
         for incident in incidents_created:
             logger.info(f"Queueing notification for incident: {incident}")
             incident_post_data = get_incident_post_data(incident)
-            results = []
+            logger.debug(
+                f"Start cycle to send messages with that data\n"
+                f"INC_ID: {incident_post_data.incident_id}\n"
+                f"CHANNELS: {incident_post_data.channel_id_list}"
+            )
             for chn_id in incident_post_data.channel_id_list:
-                results.append(
-                    send_message_to_channel(
-                        incident_post_data.message,
-                        int(chn_id),
-                        int(incident_post_data.incident_id),
-                    )
+                task_result = send_message_to_channel.delay(
+                    incident_post_data.message,
+                    int(chn_id),
+                    int(incident_post_data.incident_id),
                 )
+                logger.debug(
+                    f"Messsage {incident_post_data.message[:100]} for chat {chn_id} was sent to post task"
+                )
+                results.append(task_result)
 
         return (
             f"Batch finished. Incidents created: {incidents_count}, results: {results}"
