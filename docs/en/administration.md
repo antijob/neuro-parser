@@ -8,7 +8,7 @@ This project implements a feature for administrators to send messages to multipl
 
 ### How to Use
 
-Instructions for developers and project configuration for local and production environments can be found in the [DEVELOPERS.md](developers.md) file.
+Instructions for developers and project configuration for local and production environments can be found in the [DEVELOPERS.md](DEVELOPERS.md) file.
 
 #### 1. Channel Selection
 
@@ -43,7 +43,7 @@ To do this, go to the admin panel in `Channel incident types`, find the entry wi
 
 ## Hidden Telegram channels
 
-Telethon client is used for parsing, its configuration is described in the [developer guide](developers.md).
+Telethon client is used for parsing, its configuration is described in the [developer guide](DEVELOPERS.md).
 To activate the client, check the box `"Hidden Telegram channel"` in the source settings
 
 ## Proxies for Sources
