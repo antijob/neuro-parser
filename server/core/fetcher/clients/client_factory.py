@@ -19,6 +19,7 @@ class ClientFactory:
         if source.is_tg_hidden:
             logger.debug(f"Creating client for Telegram hidden source: {source}")
             return TelethonClient()
+            
         if not source.needs_proxy:
             logger.debug(f"Creating client without proxy for source: {source}")
             return HttpClient()
