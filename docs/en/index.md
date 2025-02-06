@@ -31,33 +31,33 @@ The project is built using modern technologies, including Python, Django, Docker
 
 1. Install dependencies using PDM:
 
-    ```bash
-    pdm install
-    ```
+   ```bash
+   pdm install
+   ```
 
 2. Configure the `.env` file based on `.env.template`.
 3. Start the containers:
 
-    ```bash
-    docker-compose up -d
-    ```
+   ```bash
+   docker-compose up -d
+   ```
 
 4. Configure local domains in the `/etc/hosts` file:
 
-    ```bash
-    127.0.0.1 report.local
-    ```
+   ```bash
+   127.0.0.1 report.local
+   ```
 
 ### Production Deployment
 
 1. Configure the `.env` file and create the database.
 2. Use the production configuration:
 
-    ```bash
-    docker-compose -f docker-compose.prod.yaml up -d
-    ```
+   ```bash
+   docker-compose -f docker-compose.prod.yaml up -d
+   ```
 
-Detailed instructions are available in the file [developers.md](developers.md).
+Detailed instructions are available in the file [DEVELOPERS.md](DEVELOPERS.md).
 
 ---
 
@@ -69,7 +69,7 @@ The following resources are available for development:
 - **Local Run and Debugging.**
 - **API Documentation:** Swagger at `/swagger-ui`.
 
-Read the complete guide [here](developers.md).
+Read the complete guide [here](DEVELOPERS.md).
 
 ---
 

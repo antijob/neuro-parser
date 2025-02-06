@@ -8,6 +8,8 @@ from .parsers.ok_parser import OkParser
 from .parsers.tg_parser import TgParser
 from .parsers.common_parser import CommonParser
 from .parsers.rss_parser import RssParser
+from .parsers.tg_hidden_parser import TgHiddenParser
+
 
 from server.apps.core.models import Article, Source
 from server.libs.handler import HandlerRegistry
@@ -45,6 +47,7 @@ async def add_articles(
 
 class SourceParser:
     registry = HandlerRegistry[ParserBase]()
+    registry.register(TgHiddenParser)
     registry.register(VkParser)
     registry.register(OkParser)
     registry.register(TgParser)
@@ -58,7 +61,7 @@ class SourceParser:
             return 0
 
         parser = cls.registry.choose(source)
-        articles = parser.extract_urls(source.url, data)
+        articles = parser.extract_urls(source, data)
         if not articles:
             return 0
 

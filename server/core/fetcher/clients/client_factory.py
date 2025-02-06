@@ -5,6 +5,7 @@ from server.apps.core.models import Article, Source
 from server.core.fetcher.libs.proxy import ProxyManager
 
 from .http_client import HttpClient
+from .telethon_client import TelethonClient
 from .http_proxy import HttpProxyClient
 
 logger = logging.getLogger("parser")
@@ -14,7 +15,11 @@ class ClientFactory:
     @staticmethod
     async def get_client(
         source: Source, article: Optional[Article] = None
-    ) -> Union[HttpClient, HttpProxyClient]:
+    ) -> Union[HttpClient, HttpProxyClient, TelethonClient]:
+        if source.is_tg_hidden:
+            logger.debug(f"Creating client for Telegram hidden source: {source}")
+            return TelethonClient()
+            
         if not source.needs_proxy:
             logger.debug(f"Creating client without proxy for source: {source}")
             return HttpClient()

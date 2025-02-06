@@ -11,7 +11,7 @@ class TgParser(ParserBase):
         return re.match(r"https://t\.me/", source.url)
 
     @classmethod
-    def extract_urls(cls, url: str, document: str) -> Iterable[str]:
+    def extract_urls(cls, source: Source, document: str) -> Iterable[str]:
         document = build_document(document)
         for node in document.css("a.tgme_widget_message_date"):
             yield node.attributes["href"]

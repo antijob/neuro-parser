@@ -1,4 +1,5 @@
 import logging
+from django.utils import timezone
 
 from typing import Optional
 import datetime
@@ -35,12 +36,20 @@ class IncidentPredictor:
         article: Article, incident_type: IncidentType
     ) -> Optional[MediaIncident]:
         try:
+            # Convert publication_date to timezone-aware datetime if it exists
+            if article.publication_date:
+                create_date = timezone.make_aware(
+                    datetime.datetime.combine(article.publication_date, datetime.time())
+                )
+            else:
+                create_date = timezone.now()
+
             media_incident = MediaIncident.objects.create(
                 urls=[article.url],
                 status=MediaIncident.UNPROCESSED,
                 title=article.any_title(),
                 public_title=article.any_title(),
-                create_date=article.publication_date or datetime.date.today(),
+                create_date=create_date,
                 description=article.text,
                 related_article=article,
                 public_description=article.text,

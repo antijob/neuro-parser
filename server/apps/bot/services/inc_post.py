@@ -1,9 +1,9 @@
 import logging
 import sys
 from dataclasses import dataclass
+import re
 
-
-from server.apps.bot.data.messages import NEW_INCIDENT_TEMPLATE
+from server.apps.bot.data.messages import NEW_INCIDENT_TEMPLATE, NEW_TG_INCIDENT_TEMPLATE
 from server.apps.bot.models import Channel, ChannelCountry, ChannelIncidentType
 from server.apps.core.models import MediaIncident
 
@@ -19,18 +19,41 @@ class IncidentPostData:
 
 
 def prepare_message(inc: MediaIncident) -> str:
-    return NEW_INCIDENT_TEMPLATE.format(
-        cat=inc.incident_type.description.replace(" ", "_"),
-        title=inc.title,
-        country=inc.country,
-        region=inc.region,
-        desc=(
-            inc.description
-            if len(inc.description) < 3000
-            else inc.description[:3000] + "..."
-        ),
-        url=" ".join(inc.urls),
-    )
+    # Get source name safely
+    source_name = "Unknown"
+    if inc.source:
+        source_name = inc.source.name or "Unnamed"
+
+    # Check if it's a telegram source
+    is_telegram = inc.source and inc.source.is_tg_hidden
+
+    if is_telegram:
+        return NEW_TG_INCIDENT_TEMPLATE.format(
+            cat=inc.incident_type.description.replace(" ", "_"),
+            title=inc.title,
+            country=inc.country,
+            region=inc.region,
+            source=source_name,
+            desc=(
+                inc.description
+                if len(inc.description) < 3000
+                else inc.description[:3000] + "..."
+            ),
+            url=re.sub(r"https://t\.me/c/(-?\d+)", r"https://web.telegram.org/a/#\1", " ".join(inc.urls))
+        ) 
+    else:
+        return NEW_INCIDENT_TEMPLATE.format(
+            cat=inc.incident_type.description.replace(" ", "_"),
+            title=inc.title,
+            country=inc.country,
+            region=inc.region,
+            desc=(
+                inc.description
+                if len(inc.description) < 3000
+                else inc.description[:3000] + "..."
+            ),
+            url=" ".join(inc.urls),
+        )
 
 
 def process_channel(chn, inc: MediaIncident) -> bool:

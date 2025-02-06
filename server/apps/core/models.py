@@ -125,10 +125,8 @@ class BaseIncident(models.Model):
         blank=True,
         on_delete=models.DO_NOTHING,
     )
-
     country = models.ForeignKey(Country, on_delete=models.CASCADE)
     region = models.ForeignKey(Region, on_delete=models.CASCADE, null=True)
-
     incident_type = models.ForeignKey(
         IncidentType, null=True, on_delete=models.SET_NULL
     )
@@ -142,11 +140,18 @@ class BaseIncident(models.Model):
     public_description = models.TextField(
         "Публичное описание", null=True, blank=True)
 
+    @property
+    def source(self):
+        """Get the source of the related article if it exists."""
+        if hasattr(self, 'related_article') and self.related_article:
+            return self.related_article.source
+        return None
+
     class Meta:
         abstract = True
 
     def __str__(self):
-        return "[{}]".format(self.any_title())
+        return self.any_title()
 
     def any_title(self):
         return self.public_title or self.title or self.any_description()[:200] + "..."
@@ -184,6 +189,9 @@ class MediaIncident(BaseIncident):
 class Source(models.Model):
     url = models.TextField(
         verbose_name="URL списка новостей", null=False, unique=True)
+    name = models.CharField(
+        verbose_name="Название источника", max_length=255, null=True, blank=True
+    )
     is_active = models.BooleanField(verbose_name="Активен", default=True)
     country = models.ForeignKey(
         Country,
@@ -192,6 +200,9 @@ class Source(models.Model):
     )
     region = models.ForeignKey(
         Region, on_delete=models.SET_NULL, default=None, null=True, blank=True
+    )
+    is_tg_hidden = models.BooleanField(
+        verbose_name="Скрытый канал в телеграме", default=False
     )
     needs_proxy = models.BooleanField(
         verbose_name=_("Требуется прокси"), default=False)
@@ -208,7 +219,7 @@ class Article(models.Model):
     source = models.ForeignKey(
         Source,
         verbose_name="Источник",
-        related_name="articles",
+        related_name="article",
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
@@ -274,14 +285,17 @@ class Article(models.Model):
 
     @property
     def region(self):
-        region = self.source.region if self.source else "ALL"
-        return region
+        if self.source and self.source.region:
+            return self.source.region
+        # Get default region with name 'ALL' for the default country
+        default_country = Country.objects.get(name="RUS")
+        return Region.objects.get(name="ALL", country=default_country)
 
     @property
     def country(self):
-        country = self.source.country if self.source else "RUS"
-        return country
-
+        if self.source:
+            return self.source.country
+        return Country.objects.get(name="RUS")  # Get default country instance
 
 class Proxy(models.Model):
     ip = models.GenericIPAddressField(

@@ -8,7 +8,7 @@ This project implements a feature for administrators to send messages to multipl
 
 ### How to Use
 
-Instructions for developers and project configuration for local and production environments can be found in the [DEVELOPERS.md](developers.md) file.
+Instructions for developers and project configuration for local and production environments can be found in the [DEVELOPERS.md](DEVELOPERS.md) file.
 
 #### 1. Channel Selection
 
@@ -44,3 +44,11 @@ To do this, go to the admin panel in `Channel incident types`, find the entry wi
 ## Proxies for Sources
 
 If necessary, you can make requests to sites through a proxy server. To do this, in the source settings, you need to indicate that a proxy is required, and directly in the Proxy section, add one or more proxy servers. At the moment, only HTTPS proxy is supported.
+
+
+## Adding Telegram Channels
+
+The optimal way is to use the Telethon API if it's connected (see [DEVELOPERS.md](DEVELOPERS.md)). To add a new source in Telegram, you need to check the "Hidden Telegram channel" box in the source settings.
+The channel link should be in the format `https://t.me/c/-1001042337298`, where `-1001042337298` is the channel ID. You can find the channel ID in the address bar of the Telegram web version. This works for both public and private channels.
+
+It's important to note that the ID always starts with `-100`. Also, the channel should be accessible in your account linked to the parser through the Telegram API.

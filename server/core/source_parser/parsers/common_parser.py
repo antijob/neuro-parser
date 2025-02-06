@@ -115,7 +115,7 @@ class CommonParser(ParserBase):
         return True  # Default parser
 
     @classmethod
-    def extract_urls(cls, source_url: str, document: str) -> Iterable[str]:
+    def extract_urls(cls, source: Source, document: str) -> Iterable[str]:
         document = build_document(document, clean=True)
         if document is None:
             return []
@@ -132,7 +132,7 @@ class CommonParser(ParserBase):
             if not is_valid_link_text(link_text):
                 continue
             href = link.attrs["href"] if "href" in link.attrs else None
-            url = get_absolute_url(source_url, href)
+            url = get_absolute_url(source.url, href)
             if not is_correct_article_link(url):
                 continue
             if is_path_ignored(url):
