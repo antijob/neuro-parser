@@ -61,7 +61,7 @@ class SourceParser:
             return 0
 
         parser = cls.registry.choose(source)
-        articles = parser.extract_urls(source.url, data)
+        articles = parser.extract_urls(source, data)
         if not articles:
             return 0
 

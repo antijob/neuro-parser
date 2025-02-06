@@ -1,4 +1,5 @@
 from typing import Iterable, Optional
+from django.utils import timezone
 
 from server.apps.core.models import Article
 from .base_parser import ParserBase, Source
@@ -10,10 +11,10 @@ class TgHiddenParser(ParserBase):
         return source.is_tg_hidden
 
     @classmethod
-    def extract_urls(cls, url: str, messages: list[str]) -> Iterable[Article]:
+    def extract_urls(cls, source: Source, messages: list[str]) -> Iterable[Article]:
         res = []
         for url, message in messages.items():
-            article = parse_message_to_article(url, message)
+            article = parse_message_to_article(source, url, message)
             if not article:
                 continue
             res.append(article)
@@ -21,10 +22,11 @@ class TgHiddenParser(ParserBase):
         return res
 
 
-def parse_message_to_article(url: str, message) -> Optional[Article]:
+def parse_message_to_article(source: Source, url: str, message) -> Optional[Article]:
     try:
         text = message.message
-        title = text[:100]
+        title = text[:100] if text else ""
+        # Use the message date, not the source date
         publication_date = message.date
         is_duplicate = text is None or len(text) == 0
 
@@ -33,9 +35,10 @@ def parse_message_to_article(url: str, message) -> Optional[Article]:
             title=title,
             text=text,
             publication_date=publication_date,
-            url=url,
+            url=url,  # Use the message URL instead of source URL
             is_downloaded=True,
             is_duplicate=is_duplicate,
+            source=source,
         )
 
         return article
