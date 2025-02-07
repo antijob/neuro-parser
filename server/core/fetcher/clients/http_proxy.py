@@ -10,6 +10,7 @@ from server.core.fetcher.libs.exceptions import BadCodeException, ProxyException
 from server.core.fetcher.libs.proxy import ProxyData, ProxyManager
 from server.core.fetcher.libs.url_preparer import URLPreparer
 from server.core.fetcher.libs.user_agent import session_random_headers
+from server.core.fetcher.clients.http_client import HttpClient
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -64,9 +65,10 @@ class HttpProxyClient:
         if self._use_proxy and retry_count == 0:
             try:
                 logger.info(f"Attempting direct request without proxy to: {url}")
-                return await self._make_request(url)
-            except (aiohttp.ClientError, ProxyException) as e:
-                logger.info(f"Direct request failed: {str(e)}. Will retry with proxy.")
+                async with HttpClient() as client:
+                    return await client.get(url)
+            except (aiohttp.ClientError, BadCodeException) as e:
+                logger.info(f"Direct request to {url} failed: {str(e)}. Will retry with proxy.")
 
         # If we need to use proxy, ensure we have valid proxy data
         if self._use_proxy:
@@ -79,11 +81,11 @@ class HttpProxyClient:
             return await self._make_request(url)
         except (aiohttp.ClientError, ProxyException) as e:
             if retry_count >= self.MAX_PROXY_RETRIES:
-                logger.error(f"Max proxy retries reached for URL: {url}")
-                raise
+                logger.error(f"Network error occurred while fetching URL {url}")
+                raise ProxyException(f"Failed to fetch {url} after {self.MAX_PROXY_RETRIES} retries") from e
 
             logger.warning(
-                f"Request failed with proxy, retrying... ({retry_count + 1}/{self.MAX_PROXY_RETRIES})"
+                f"Request to {url} failed with proxy {self._proxy_data.url}, retrying... ({retry_count + 1}/{self.MAX_PROXY_RETRIES})"
             )
             if self._use_proxy:
                 self._proxy_data = await ProxyManager.get_proxy()

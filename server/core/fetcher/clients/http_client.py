@@ -36,7 +36,13 @@ class HttpClient(ClientBase):
         logger.debug(f"Creating new session with headers: {headers}")
         return aiohttp.ClientSession(
             trust_env=True,
-            connector=aiohttp.TCPConnector(ssl=False),
+            connector=aiohttp.TCPConnector(
+                ssl=False,
+                force_close=True,
+                enable_cleanup_closed=True,
+                ttl_dns_cache=300,
+            ),
+            timeout=aiohttp.ClientTimeout(total=30, connect=10),
             headers=headers,
         )
 
