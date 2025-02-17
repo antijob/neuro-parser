@@ -44,6 +44,8 @@ class HttpClient(ClientBase):
             ),
             timeout=aiohttp.ClientTimeout(total=30, connect=10),
             headers=headers,
+            # Enable automatic decompression including brotli
+            auto_decompress=True,
         )
 
     async def __aenter__(self):
