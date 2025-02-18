@@ -90,7 +90,22 @@ class HttpClient(ClientBase):
                 logger.debug(f"Final URL: {response.url}")
 
                 if response.ok:
-                    content = await response.text()
+                    # Try to get encoding from response headers
+                    encoding = response.charset or 'utf-8'
+                    try:
+                        content = await response.text(encoding=encoding)
+                    except UnicodeDecodeError:
+                        # If that fails, try common Russian encodings
+                        for enc in ['utf-8', 'windows-1251', 'cp1251', 'koi8-r']:
+                            try:
+                                content = await response.text(encoding=enc)
+                                logger.info(f"Successfully decoded content using {enc} encoding")
+                                break
+                            except UnicodeDecodeError:
+                                continue
+                        else:
+                            raise UnicodeDecodeError(f"Failed to decode content with any common encoding")
+                    
                     logger.debug(f"Response body (first 500 chars): {content[:500]}...")
                     return [content, str(response.url)]
                 else:
