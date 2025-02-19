@@ -19,6 +19,7 @@ from server.apps.core.models import (
     Country,
     IncidentType,
     MediaIncident,
+    Proxy,
     Region,
     Source,
 )
@@ -67,6 +68,7 @@ class MediaIncidentAdmin(admin.ModelAdmin):
 class ArticleAdmin(admin.ModelAdmin):
     list_display = (
         "url",
+        "create_date",
         "publication_date",
         "create_date",
         "title",
@@ -84,15 +86,15 @@ class ArticleAdmin(admin.ModelAdmin):
         for obj in queryset:
             obj.is_parsed = False
             obj.save()
-        self.message_user(request, f"{queryset.count()} articles will be parsed.")
+        self.message_user(
+            request, f"{queryset.count()} articles will be parsed.")
 
     force_parse.short_description = "Force parse"
 
 
 @admin.register(Source)
 class SourceAdmin(admin.ModelAdmin):
-    form = SourceForm
-    list_display = ("url", "country", "region", "is_active")
+    list_display = ("url", "country", "region", "needs_proxy", "is_active")
     actions = [deactivate_source, activate_source]
     search_fields = ["url"]
 
@@ -113,5 +115,12 @@ class SourceAdmin(admin.ModelAdmin):
                     is_active=obj.is_active,
                     country=obj.country,
                     region=obj.region,
+                    needs_proxy=obj.needs_proxy,
                 )
                 new_source.save()
+
+
+@admin.register(Proxy)
+class ProxyAdmin(admin.ModelAdmin):
+    list_display = ("ip", "port", "country", "is_active",
+                    "last_check", "error_type", "error_message")

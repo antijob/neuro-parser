@@ -7,6 +7,7 @@
 1. [Локальный запуск](#локальный-запуск)
 1. [Запуск в продакшене](#запуск-в-продакшене)
 1. [Настройка Telegram-бота](#настройка-telegram-бота)
+1. [Настройка Telethon-клиента](#настройка-telethon-клиента)
 1. [API моделей](#api-моделей)
 1. [REST API интерфейс](#rest-api)
 1. [Инфраструктура](#инфраструктура)
@@ -88,6 +89,33 @@ TELEGRAM_BOT_TOKEN=
 3. Создайте новый чат в Telegram, добавьте бота, он его запомнит и будет присылать туда оповщенеия о новых инцидентах.
 4. Чтобы получать уведомления только по определённым категориям, используйте команду `/categ` в чате.
 5. Вы также можете управлять каналами через админ-панель Django в разделе Bot.
+
+---
+
+## Настройка Telethon-клиента
+
+Для работы с Telegram-каналами через Telethon выполните следующие шаги:
+
+1. Получите ключи API в [my.telegram.org/apps](https://my.telegram.org/apps).
+2. Добавьте ключи в файл окружения `.env`:
+
+```bash
+TELEGRAM_API_ID=
+TELEGRAM_API_HASH=
+```
+
+- `TELEGRAM_API_ID` — ваш API ID.
+- `TELEGRAM_API_HASH` — ваш API Hash.
+
+3. Выполните следующую Django-команду для авторизации в Telegram:
+
+```bash
+python manage.py init_telethon_client
+```
+
+4. После авторизации добавьте Telegram-источник через административную панель Django. Если это закрытый канал, отметьте соответствующую галочку `[v] закрытый телеграм-канал`.
+
+> Примечание: Вы можете использовать Telethon как для работы с закрытыми каналами (требуется авторизация), так и для открытых.
 
 ---
 
@@ -181,6 +209,7 @@ This document provides guidelines for developers contributing to the project, co
 1. [Running Locally](#running-locally)
 1. [Running in Production](#running-in-production)
 1. [Telegram Bot Setup](#telegram-bot-setup)
+1. [Telethon Client Setup](#telethon-client-setup)
 1. [Model API](#model-api)
 1. [REST API Interface](#rest-api-interface)
 1. [Infrastructure](#infrastructure)
@@ -262,6 +291,26 @@ TELEGRAM_BOT_TOKEN=
 3. Create a new Telegram chat, add the bot, and it will remember the group for notifications.
 4. To receive notifications for specific categories, use the `/categ` command in the chat.
 5. You can also manage channels via the Django admin panel under the Bot section.
+
+---
+
+### Telethon Client Setup
+
+The Telethon client is used to interact with the Telegram API. Follow these steps to configure it:
+
+1. Obtain **API ID** and **API Hash**:
+   - Visit [my.telegram.org/apps](https://my.telegram.org/apps).
+   - Register an application and obtain the keys.
+2. Add the following to your `.env` file:
+   ```plaintext
+   TELEGRAM_API_ID=<your API ID>
+   TELEGRAM_API_HASH=<your API Hash>
+   ```
+3. Run the Django command to log in:
+   ```bash
+   python manage.py init_telethon_client
+   ```
+4. After authentication, add a Telegram source in the admin panel and check whether it’s a private channel. Sources can be either public or private.
 
 ---
 

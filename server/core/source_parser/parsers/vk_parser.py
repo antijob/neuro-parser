@@ -10,7 +10,7 @@ class VkParser(ParserBase):
         return re.match(r"https://vk\.com/", source.url)
 
     @classmethod
-    def extract_urls(cls, url: str, document: str) -> Iterable[str]:
+    def extract_urls(cls, source: Source, document: str) -> Iterable[str]:
         document = build_document(document)
         for node in document.css("a.PostHeaderSubtitle__link"):
             news_page_link = "https://vk.com" + node.attributes["href"]

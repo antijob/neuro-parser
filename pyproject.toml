@@ -54,6 +54,8 @@ dependencies = [
     "pytest-django>=4.8.0",
     "aioresponses>=0.7.6",
     "pytest-asyncio==0.24.0",
+    "Telethon==1.36.0",
+    "brotlipy>=0.7.0",
 ]
 name = "neuro-parser"
 version = "0.1.0"

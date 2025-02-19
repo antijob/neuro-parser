@@ -23,18 +23,28 @@ USER_AGENTS = [
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.10031.131 Safari/537.36",
 ]
 
+ACCEPT_LANGUAGES = [
+    "ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7",
+    "ru;q=0.9,en-US;q=0.8,en;q=0.7",
+    "ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3",
+]
 
 def random_headers():
     ua = choice(USER_AGENTS)
+    accept_language = choice(ACCEPT_LANGUAGES)
     head = {
         "User-Agent": ua,
         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
-        "Accept-Language": "ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7",
+        "Accept-Language": accept_language,
+        "Accept-Encoding": "gzip, deflate, br",
+        "Referer": "https://www.google.com/",
+        "DNT": "1",
+        "Upgrade-Insecure-Requests": "1",
     }
     return head
-
 
 def session_random_headers():
     head = random_headers()
     head["Connection"] = "keep-alive"
+    head["Cache-Control"] = "max-age=0"
     return head

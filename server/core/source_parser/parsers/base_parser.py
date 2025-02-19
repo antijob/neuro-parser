@@ -13,5 +13,5 @@ class ParserBase(Handler):
 
     @classmethod
     @abstractmethod
-    def extract_urls(cls, url: str, document: str) -> Iterable[Union[str, Article]]:
+    def extract_urls(cls, source: Source, document: str) -> Iterable[Union[str, Article]]:
         pass
