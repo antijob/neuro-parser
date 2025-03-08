@@ -196,12 +196,6 @@ PASSWORD_HASHERS = [
     "django.contrib.auth.hashers.Argon2PasswordHasher",
 ]
 
-
-REPLICATE_API_TOKEN = c("REPLICATE_API_TOKEN")
-REPLICATE_MODEL_NAME = c("REPLICATE_MODEL_NAME")
-
-CONTACT_FORM_EMAILS = ["agorarights@gmail.com"]
-
 MAX_UPLOAD_SIZE = 20971520
 
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"

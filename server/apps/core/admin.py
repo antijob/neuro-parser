@@ -76,6 +76,7 @@ class ArticleAdmin(admin.ModelAdmin):
         "is_parsed",
         "is_duplicate",
         "is_redirect",
+        "is_incorrect",
         "rate",
     )
     ordering = ("-create_date",)
