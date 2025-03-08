@@ -21,12 +21,14 @@ ENV = c("DJANGO_ENV")
 
 base_settings = [
     "components/common.py",
+    "components/parse.py",
     "components/logging.py",
     "components/caches.py",
     "components/celery.py",
     "components/sentry.py",
     "components/telegram.py",
     "components/telethon.py",
+    "components/predict.py",
     "components/api.py",
     # You can even use glob:
     # 'components/*.py'

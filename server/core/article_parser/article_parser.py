@@ -2,6 +2,7 @@ import logging
 import re
 from typing import Any
 import datetime
+from server.settings.components.predict import INCORRECT_ARTICLE_LENGTH
 
 from .parsers.base_parser import ArticleData, ParserBase
 from .parsers.tg_parser import TgParser
@@ -17,7 +18,6 @@ logger = logging.getLogger(__name__)
 
 
 class ArticleParser:
-    MIN_TEXT_LENGTH = 150
     registry = HandlerRegistry[ParserBase]()
     registry.register(VkParser)
     registry.register(OkParser)
@@ -70,6 +70,6 @@ class ArticleParser:
             bool: True если статья некорректна (слишком короткая), False если корректна
         """
         text = article.text
-        if not text or len(text) < cls.MIN_TEXT_LENGTH:
+        if not text or len(text) < INCORRECT_ARTICLE_LENGTH:
             return True
         return False
