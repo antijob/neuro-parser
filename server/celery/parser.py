@@ -72,7 +72,7 @@ def create_incidents(batch):
         articles_batch = []
         for url in batch:
             try:
-                article = Article.objects.get(url=url)
+                article = Article.objects.get(url=url, is_incorrect=False)
                 articles_batch.append(article)
                 logger.info(f"Retrieved article: {article}")
             except Exception as e:

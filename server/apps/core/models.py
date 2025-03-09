@@ -240,6 +240,7 @@ class Article(models.Model):
         verbose_name="Дубликат чего", max_length=1024, null=True, blank=True
     )
     is_redirect = models.BooleanField(verbose_name="Редирект", default=False)
+    is_incorrect = models.BooleanField(verbose_name="Некорректная статья", default=False)
     redirect_url = models.URLField(
         verbose_name="Редирект куда", max_length=1024, null=True, blank=True
     )
