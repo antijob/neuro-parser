@@ -95,9 +95,9 @@ class ArticleAdmin(admin.ModelAdmin):
 
 @admin.register(Source)
 class SourceAdmin(admin.ModelAdmin):
-    list_display = ("url", "country", "region", "needs_proxy", "is_active")
+    list_display = ("url", "country", "region", "needs_proxy", "is_active", "public_tg_channel_link")
     actions = [deactivate_source, activate_source]
-    search_fields = ["url"]
+    search_fields = ["url", "public_tg_channel_link"]
 
     # TODO: найти лучший вариант для сохранения списка источников
     def save_model(self, request, obj, form, change):

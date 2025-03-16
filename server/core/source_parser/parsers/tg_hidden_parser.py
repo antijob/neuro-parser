@@ -5,10 +5,10 @@ from server.apps.core.models import Article
 from .base_parser import ParserBase, Source
 
 
-class TgHiddenParser(ParserBase):
+class TelethonParser(ParserBase):
     @classmethod
     def can_handle(cls, source: Source) -> bool:
-        return source.is_tg_hidden
+        return source.is_telethon
 
     @classmethod
     def extract_urls(cls, source: Source, messages: list[str]) -> Iterable[Article]:
