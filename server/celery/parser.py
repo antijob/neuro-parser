@@ -76,7 +76,7 @@ def create_incidents(batch):
                 articles_batch.append(article)
                 logger.info(f"Retrieved article: {article}")
             except Exception as e:
-                logger.error(f"Error retrieving article with url {url}: {e}")
+                logger.info(f"Error retrieving article with url {url}: {e}")
 
         logger.info(
             f"Retrieved {len(articles_batch)} articles out of {len(batch)} urls"

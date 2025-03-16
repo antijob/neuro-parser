@@ -109,10 +109,10 @@ class HttpClient(ClientBase):
                     logger.debug(f"Response body (first 500 chars): {content[:500]}...")
                     return [content, str(response.url)]
                 else:
-                    logger.error(f"Request failed with status code: {response.status}")
+                    logger.info(f"Request failed with status code: {response.status}")
                     raise BadCodeException(response.status)
         except Exception as e:
-            logger.exception(f"An error occurred during the request: {str(e)}")
+            logger.info(f"An error occurred during the request: {str(e)}")
             raise
 
     async def get_article(self, article: Article, source: Source) -> Article:
