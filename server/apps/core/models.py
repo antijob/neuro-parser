@@ -189,9 +189,6 @@ class MediaIncident(BaseIncident):
 class Source(models.Model):
     url = models.TextField(
         verbose_name="URL списка новостей", null=False, unique=True)
-    name = models.CharField(
-        verbose_name="Название источника", max_length=255, null=True, blank=True
-    )
     is_active = models.BooleanField(verbose_name="Активен", default=True)
     country = models.ForeignKey(
         Country,
@@ -201,8 +198,11 @@ class Source(models.Model):
     region = models.ForeignKey(
         Region, on_delete=models.SET_NULL, default=None, null=True, blank=True
     )
-    is_tg_hidden = models.BooleanField(
-        verbose_name="Скрытый канал в телеграме", default=False
+    is_telethon = models.BooleanField(
+        verbose_name="Парсинг через телетон", default=False
+    )
+    public_tg_channel_link = models.CharField(
+        verbose_name="Название источника", max_length=255, null=True, blank=True
     )
     needs_proxy = models.BooleanField(
         verbose_name=_("Требуется прокси"), default=False)
@@ -210,6 +210,14 @@ class Source(models.Model):
     class Meta:
         verbose_name = "Источник"
         verbose_name_plural = "Источники"
+
+    def clean(self):
+        super().clean()
+        if self.is_telethon and not self.public_tg_channel_link:
+            from django.core.exceptions import ValidationError
+            raise ValidationError(
+                {'public_tg_channel_link': 'Это поле обязательно, если включен парсинг через телетон.'}
+            )
 
     def __str__(self):
         return "Source [{}]".format(self.url)
