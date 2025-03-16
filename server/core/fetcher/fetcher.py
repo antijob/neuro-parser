@@ -25,15 +25,15 @@ class Fetcher:
             async with await ClientFactory.get_client(source, article) as client:
                 return await client.get_article(article, source)
         except ClientError as e:
-            logger.error(
+            logger.info(
                 f"Network error occurred while fetching source URL {article.url}: {e}"
             )
             return None
         except BadCodeException as e:
-            logger.error(f"Fetching bad code for {article.url}: {e.code}")
+            logger.info(f"Fetching bad code for {article.url}: {e.code}")
             return None
         except Exception as e:
-            logger.error(
+            logger.info(
                 f"Unexpected error occurred while fetching article {article.url}: {e}",
                 exc_info=True,
             )
@@ -45,15 +45,15 @@ class Fetcher:
             async with await ClientFactory.get_client(source) as client:
                 return await client.get_source(source)
         except ClientError as e:
-            logger.error(
+            logger.info(
                 f"Network error occurred while fetching source URL {source.url}: {e}"
             )
             return None
         except BadCodeException as e:
-            logger.error(f"Fetching bad code for {source.url}: {e.code}")
+            logger.info(f"Fetching bad code for {source.url}: {e.code}")
             return None
         except Exception as e:
-            logger.error(
+            logger.info(
                 f"Unexpected error occurred while fetching source URL {source.url}: {e}",
                 exc_info=True,
             )
