@@ -57,8 +57,6 @@ async def left_chat_member(event: ChatMemberUpdated, bot: Bot):
             Channel.objects.filter(channel_id=event.chat.id).delete()
 
         await delete_channel()
+        logger.info("Left chat member event completed.")
     except Exception as e:
         logger.error(f"Can't delete channel for chat ID {event.chat.id}: {e}")
-
-
-logger.info("Left chat member event completed.")
