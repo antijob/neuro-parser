@@ -25,7 +25,7 @@ def update_sources():
     async def crawl_task(source: Source) -> int:
         data = await Fetcher.download_source(source)
         if not data:
-            logger.exception(f"update_sources: Empty fetch from source: {source.url}")
+            logger.info(f"update_sources: Empty fetch from source: {source.url}")
             return 0
         urls_count = await SourceParser.create_new_articles(source, data)
         return urls_count

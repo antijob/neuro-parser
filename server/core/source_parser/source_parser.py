@@ -8,7 +8,7 @@ from .parsers.ok_parser import OkParser
 from .parsers.tg_parser import TgParser
 from .parsers.common_parser import CommonParser
 from .parsers.rss_parser import RssParser
-from .parsers.tg_hidden_parser import TgHiddenParser
+from .parsers.tg_hidden_parser import TelethonParser
 
 
 from server.apps.core.models import Article, Source
@@ -25,29 +25,41 @@ async def add_articles(
     source: Source, articles: list[Union[str, Article]]
 ) -> list[Article]:
     added_articles: list[Article] = []
-    added_urls: set[str] = set()
+    all_urls: list[str] = []
+    url_to_article_map = {}
 
+    # First, collect all URLs and create a mapping
     for article in articles:
         if isinstance(article, Article):
             url = article.url
-            article = article
+            article_obj = article
         else:
             url = article
-            article = Article(url=url, source=source)
+            article_obj = Article(url=url, source=source)
 
-        if url in added_urls:
+        # Skip duplicates in the input list
+        if url in url_to_article_map:
             continue
 
-        if not await sync_to_async(Article.objects.filter(url=url).exists)():
+        all_urls.append(url)
+        url_to_article_map[url] = article_obj
+
+    # Get all existing URLs in a single query
+    existing_urls = set(await sync_to_async(lambda: list(
+        Article.objects.filter(url__in=all_urls).values_list('url', flat=True)
+    ))())
+
+    # Add only articles with URLs that don't exist yet
+    for url, article in url_to_article_map.items():
+        if url not in existing_urls:
             added_articles.append(article)
-            added_urls.add(url)
 
     return added_articles
 
 
 class SourceParser:
     registry = HandlerRegistry[ParserBase]()
-    registry.register(TgHiddenParser)
+    registry.register(TelethonParser)
     registry.register(VkParser)
     registry.register(OkParser)
     registry.register(TgParser)

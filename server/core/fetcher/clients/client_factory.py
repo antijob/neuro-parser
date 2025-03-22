@@ -16,7 +16,7 @@ class ClientFactory:
     async def get_client(
         source: Source, article: Optional[Article] = None
     ) -> Union[HttpClient, HttpProxyClient, TelethonClient]:
-        if source.is_tg_hidden:
+        if source.is_telethon:
             logger.debug(f"Creating client for Telegram hidden source: {source}")
             return TelethonClient()
             

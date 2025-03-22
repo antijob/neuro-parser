@@ -19,27 +19,20 @@ class IncidentPostData:
 
 
 def prepare_message(inc: MediaIncident) -> str:
-    # Get source name safely
-    source_name = "Unknown"
-    if inc.source:
-        source_name = inc.source.name or "Unnamed"
-
-    # Check if it's a telegram source
-    is_telegram = inc.source and inc.source.is_tg_hidden
-
-    if is_telegram:
+    if inc.source.is_telethon:
         return NEW_TG_INCIDENT_TEMPLATE.format(
             cat=inc.incident_type.description.replace(" ", "_"),
             title=inc.title,
             country=inc.country,
             region=inc.region,
-            source=source_name,
+            source=inc.source.public_tg_channel_link,
             desc=(
                 inc.description
                 if len(inc.description) < 3000
                 else inc.description[:3000] + "..."
             ),
-            url=re.sub(r"https://t\.me/c/(-?\d+)", r"https://web.telegram.org/a/#\1", " ".join(inc.urls))
+            # Convert telehon adress to public telegram link
+            url=re.sub(r"https://t\.me/c/(?:-?\d+)(/\d+.*)", lambda m: f"{inc.source.public_tg_channel_link}{m.group(1)}", " ".join(inc.urls))
         ) 
     else:
         return NEW_INCIDENT_TEMPLATE.format(

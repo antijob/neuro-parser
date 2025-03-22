@@ -42,6 +42,8 @@ jobs:
             "FLOWER_HOST"
             "HOST"
             "ACME_EMAIL"
+            "TELEGRAM_API_ID"
+            "TELEGRAM_API_HASH"
           )
           for name in "${REQUIRED_ENVS[@]}"; do
             if [[ -z "${!name}" ]]; then
@@ -72,6 +74,8 @@ jobs:
             -e s,^DEBUG=.*,DEBUG=$DEBUG, \
             -e s,^HOST=.*,HOST=$HOST, \
             -e s,^ACME_EMAIL=.*,ACME_EMAIL=$ACME_EMAIL, \
+            -e s,^TELEGRAM_API_ID=.*,TELEGRAM_API_ID=$TELEGRAM_API_ID, \
+            -e s,^TELEGRAM_API_HASH=.*,TELEGRAM_API_HASH=$TELEGRAM_API_HASH, \
             .env
 
           # Conditionally set DEBUG if it exists
@@ -99,6 +103,8 @@ jobs:
           DEBUG: "${{ vars.DEBUG }}"
           HOST: "${{ vars.HOST }}"
           ACME_EMAIL: "${{ secrets.ACME_EMAIL }}"
+          TELEGRAM_API_ID: "${{ secrets.TELEGRAM_API_ID }}"
+          TELEGRAM_API_HASH: "${{ secrets.TELEGRAM_API_HASH }}"
 
       - name: "Copy the app"
         run: |
