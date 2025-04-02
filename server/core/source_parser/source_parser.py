@@ -78,11 +78,14 @@ class SourceParser:
             return 0
 
         added = await add_articles(source, articles)
-        for article in added:
+        if added:
             try:
-                await sync_to_async(article.save)()
+                # Используем bulk_create вместо индивидуальных сохранений
+                await sync_to_async(Article.objects.bulk_create)(
+                    added, ignore_conflicts=True
+                )
             except Exception as e:
                 logger.exception(
-                    f"When adding articles with {article.url} exception occurred: {e}"
+                    f"Error during bulk_create of articles for source {source.url}: {e}"
                 )
         return len(added)
