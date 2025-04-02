@@ -1,7 +1,6 @@
 import logging
 from typing import Any
 from telethon import TelegramClient
-from asgiref.sync import sync_to_async
 import asyncio
 
 from server.core.fetcher.libs.url_parser import get_telegram_ids
@@ -54,20 +53,25 @@ class TelethonClient(ClientBase):
         logger.exception("TelethonClient: Release lock")
         TELETHON_LOCK = False
 
-    async def get_article(self, article: Article, source: Source) -> Article:
-        ids = get_telegram_ids(article.url)
-        if not ids.message_id:
-            return article
+    async def get_article(self, article: Article, source: Source, articles_to_create: list[Article] = None) -> Article:
+        """Fetch and process article content from Telegram."""
+        logger.info(f"Getting article: {article.url}")
 
-        entity = await self.client.get_entity(PeerChannel(ids.channel_id))
-        message = await self.client.get_messages(entity, ids=ids.message_id)
+        try:
+            ids = get_telegram_ids(article.url)
+            if not ids.message_id:
+                return article
 
-        if message:
-            article.title = f"Message from {source.url}"
-            article.text = message.message
-            article.publication_date = message.date
+            entity = await self.client.get_entity(PeerChannel(ids.channel_id))
+            message = await self.client.get_messages(entity, ids=ids.message_id)
 
-            await sync_to_async(article.save, thread_sensitive=True)()
+            if message:
+                article.title = f"Message from {source.url}"
+                article.text = message.message
+                article.publication_date = message.date
+
+        except Exception as e:
+            logger.error(f"Error fetching Telegram message: {e}")
 
         return article
 
