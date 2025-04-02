@@ -19,7 +19,7 @@ class ClientBase(ABC):
         pass
 
     @abstractmethod
-    async def get_article(self, article: Article, source: Source) -> Article:
+    async def get_article(self, article: Article, source: Source, articles_to_create: list[Article] = None) -> Article:
         """
         Fetches an article and parses it into an Article object.
         May return a new Article object, for example, in case of a redirect

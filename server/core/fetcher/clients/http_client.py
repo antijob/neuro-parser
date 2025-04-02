@@ -1,8 +1,7 @@
 import logging
-from typing import Optional
+from typing import Optional, List
 
 import aiohttp
-from asgiref.sync import sync_to_async
 
 from server.apps.core.models import Article, Source
 from server.core.article_parser import ArticleParser
@@ -115,7 +114,7 @@ class HttpClient(ClientBase):
             logger.info(f"An error occurred during the request: {str(e)}")
             raise
 
-    async def get_article(self, article: Article, source: Source) -> Article:
+    async def get_article(self, article: Article, source: Source, articles_to_create: List[Article] = None) -> Article:
         logger.info(f"Getting article: {article.url}")
         url = URLPreparer.article(article.url)
         content, resolved_url = await self.get(url)
@@ -124,17 +123,15 @@ class HttpClient(ClientBase):
             logger.info(f"Article URL redirected from {url} to {resolved_url}")
             article.redirect_url = resolved_url
             article.is_redirect = True
-            await sync_to_async(article.save, thread_sensitive=True)()
 
-            article, _ = await sync_to_async(
-                Article.objects.get_or_create, thread_sensitive=True
-            )(url=resolved_url)
-            article.source = source
+            new_article = Article(url=resolved_url, source=source)
+            if articles_to_create is not None:
+                articles_to_create.append(new_article)
+            article = new_article
 
         logger.info("Postprocessing article")
         ArticleParser.postprocess_article(article, content)
         article.is_downloaded = True
-        await sync_to_async(article.save, thread_sensitive=True)()
 
         return article
 

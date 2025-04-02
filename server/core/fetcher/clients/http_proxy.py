@@ -1,8 +1,7 @@
 import logging
-from typing import Optional, Tuple
+from typing import Optional, Tuple, List
 
 import aiohttp
-from asgiref.sync import sync_to_async
 
 from server.apps.core.models import Article, Source
 from server.core.article_parser import ArticleParser
@@ -122,7 +121,7 @@ class HttpProxyClient:
         """Make HTTP GET request with automatic proxy management."""
         return await self._get_with_proxy_retry(url)
 
-    async def get_article(self, article: Article, source: Source) -> Article:
+    async def get_article(self, article: Article, source: Source, articles_to_create: List[Article] = None) -> Article:
         """Fetch and process article content."""
         logger.info(f"Getting article: {article.url}")
         url = URLPreparer.article(article.url)
@@ -132,17 +131,15 @@ class HttpProxyClient:
             logger.info(f"Article URL redirected from {url} to {resolved_url}")
             article.redirect_url = resolved_url
             article.is_redirect = True
-            await sync_to_async(article.save, thread_sensitive=True)()
 
-            article, _ = await sync_to_async(
-                Article.objects.get_or_create, thread_sensitive=True
-            )(url=resolved_url)
-            article.source = source
+            new_article = Article(url=resolved_url, source=source)
+            if articles_to_create is not None:
+                articles_to_create.append(new_article)
+            article = new_article
 
         logger.info("Postprocessing article")
         ArticleParser.postprocess_article(article, content)
         article.is_downloaded = True
-        await sync_to_async(article.save, thread_sensitive=True)()
 
         return article
 
