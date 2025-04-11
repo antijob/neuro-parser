@@ -51,7 +51,7 @@ services:
     volumes:
       - /root/models:/code/models
       - "staticfiles-data:/code/public/static"
-      - "thelethon-session:/code/.telethon_session.session"
+      - "thelethon:/code/.telethon"
     labels:
       traefik.enable: "true"
       traefik.http.routers.django.rule: "Host(`${HOST}`)"
@@ -66,7 +66,7 @@ services:
       service: celery
     volumes:
       - /root/models:/code/models
-      - "thelethon-session:/code/.telethon_session.session"
+      - "thelethon:/code/.telethon"
 
   bot:
     image: antijob/neuro-parser:${NEURO_PARSER_VERSION}
@@ -111,7 +111,7 @@ volumes:
   staticfiles-data:
   postgres_data_prod:
   traefik-public-certificates:
-  thelethon-session:
+  thelethon:
 
 networks:
   djangonetwork:

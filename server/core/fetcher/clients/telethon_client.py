@@ -23,7 +23,7 @@ TELETHON_LOCK: bool = False
 
 
 class TelethonClient(ClientBase):
-    session_name = "telethon_session"
+    session_name = ".telethon/telethon_session"
 
     def __init__(
         self, telegram_api_id=TELEGRAM_API_ID, telegram_api_hash=TELEGRAM_API_HASH
