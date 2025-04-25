@@ -74,6 +74,7 @@ class ArticleAdmin(admin.ModelAdmin):
         "title",
         "is_downloaded",
         "is_parsed",
+        "is_incident_created",
         "is_duplicate",
         "is_redirect",
         "is_incorrect",
