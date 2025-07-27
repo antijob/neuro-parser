@@ -6,6 +6,7 @@ import re
 from server.apps.bot.data.messages import NEW_INCIDENT_TEMPLATE, NEW_TG_INCIDENT_TEMPLATE
 from server.apps.bot.models import Channel, ChannelCountry, ChannelIncidentType
 from server.apps.core.models import MediaIncident
+from django.db import models
 
 logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 logger = logging.getLogger(__name__)
@@ -32,8 +33,9 @@ def prepare_message(inc: MediaIncident) -> str:
                 else inc.description[:3000] + "..."
             ),
             # Convert telehon adress to public telegram link
-            url=re.sub(r"https://t\.me/c/(?:-?\d+)(/\d+.*)", lambda m: f"{inc.source.public_tg_channel_link}{m.group(1)}", " ".join(inc.urls))
-        ) 
+            url=re.sub(r"https://t\.me/c/(?:-?\d+)(/\d+.*)",
+                       lambda m: f"{inc.source.public_tg_channel_link}{m.group(1)}", " ".join(inc.urls))
+        )
     else:
         return NEW_INCIDENT_TEMPLATE.format(
             cat=inc.incident_type.description.replace(" ", "_"),
@@ -49,54 +51,39 @@ def prepare_message(inc: MediaIncident) -> str:
         )
 
 
-def process_channel(chn, inc: MediaIncident) -> bool:
-    """
-    checks should we or not send a message to the given channel
-    1. ch_inc and ch_country should exist
-    2. they status field should be True
-    3. if in the given inc exists region field
-          it should be in ch_country enabled_regions list
-    """
-    channel_incident = ChannelIncidentType.objects.get(
-        channel=chn, incident_type=inc.incident_type
-    )
-
-    channel_country = ChannelCountry.objects.get(
-        channel_incident_type=channel_incident, country=inc.country
-    )
-
-    logger.debug(
-        f"Processing chanel for sending msg: {channel_incident}, {channel_country}"
-    )
-
-    if not (channel_incident and channel_country):
-        return False
-
-    if not (channel_incident.status and channel_country.status):
-        return False
-
-    if inc.region:
-        if inc.region.name not in channel_country.enabled_regions:
-            return False
-    return True
-
-
 def get_incident_post_data(inc: MediaIncident) -> IncidentPostData:
     """
     Checks settings for all channels
     Returns dataclass with
-    - incidint id to make downvote kb
+    - incident id to make downvote kb
     - msg to send
     - list of channel ids that pass checks
     """
-    all_channels = list(Channel.objects.all())
-
     msg = prepare_message(inc)
 
-    channels = []
-    for chn in all_channels:
-        if process_channel(chn, inc):
-            channels.append(chn.channel_id)
+    # Базовый запрос для каналов с активными настройками
+    base_query = Channel.objects.filter(
+        incident_types__incident_type=inc.incident_type,
+        incident_types__status=True,
+        incident_types__subscriptions__country=inc.country,
+        incident_types__subscriptions__status=True
+    )
+
+    if inc.region:
+        # Если есть регион, фильтруем по enabled_regions или "все регионы"
+        region_query = base_query.filter(
+            models.Q(
+                incident_types__subscriptions__enabled_regions__icontains=inc.region.name
+            ) | models.Q(
+                incident_types__subscriptions__enabled_regions__icontains="ALL"
+            )
+        )
+        channels = list(region_query.values_list(
+            'channel_id', flat=True).distinct())
+    else:
+        # Если региона нет, берем все подходящие каналы
+        channels = list(base_query.values_list(
+            'channel_id', flat=True).distinct())
 
     logger.debug(f"Created list of chn id's to send msg: {channels}")
 
