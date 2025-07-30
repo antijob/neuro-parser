@@ -10,7 +10,7 @@ from server.core.article_index.query_checker import mark_duplicates
 from server.core.incident_predictor import IncidentPredictor
 from server.settings.components.celery import INCIDENT_BATCH_SIZE
 
-from .bot import send_message_to_channel
+from server.celery.bot import send_message_to_channel
 from .celery_app import app
 
 logger = logging.getLogger("parser")
