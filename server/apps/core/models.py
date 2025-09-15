@@ -248,12 +248,14 @@ class Article(models.Model):
         verbose_name="Дубликат чего", max_length=1024, null=True, blank=True
     )
     is_redirect = models.BooleanField(verbose_name="Редирект", default=False)
-    is_incorrect = models.BooleanField(verbose_name="Некорректная статья", default=False)
+    is_incorrect = models.BooleanField(
+        verbose_name="Некорректная статья", default=False)
     redirect_url = models.URLField(
         verbose_name="Редирект куда", max_length=1024, null=True, blank=True
     )
 
-    rate = models.JSONField(verbose_name="Оценка релевантности", default=dict)
+    rate = models.JSONField(
+        verbose_name="Оценка релевантности", default=dict, blank=True, null=True)
     incident = models.OneToOneField(
         MediaIncident,
         verbose_name="Инцидент",
@@ -306,6 +308,7 @@ class Article(models.Model):
             return self.source.country
         return Country.objects.get(name="RUS")  # Get default country instance
 
+
 class Proxy(models.Model):
     ip = models.GenericIPAddressField(
         _("IP адрес"), protocol="IPv4", validators=[validate_ipv4_address], unique=True
@@ -321,8 +324,10 @@ class Proxy(models.Model):
         Country, on_delete=models.CASCADE, verbose_name=_("Страна")
     )
     is_active = models.BooleanField(_("Активен"), default=True)
-    last_check = models.DateTimeField(_("Последняя проверка"), null=True, blank=True)
-    error_type = models.CharField(_("Тип ошибки"), max_length=50, null=True, blank=True)
+    last_check = models.DateTimeField(
+        _("Последняя проверка"), null=True, blank=True)
+    error_type = models.CharField(
+        _("Тип ошибки"), max_length=50, null=True, blank=True)
     error_message = models.TextField(
         _("Сообщение об ошибке"), blank=True, null=True)
 
