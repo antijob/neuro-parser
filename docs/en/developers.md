@@ -57,6 +57,10 @@ docker-compose -f docker-compose.prod.yaml up -d
 
 ---
 
+## Project diagram
+
+See on [GitDiagram](https://gitdiagram.com/antijob/neuro-parser)
+
 ## Telegram Bot Setup
 
 You can use the Telegram bot to receive notifications about new incidents.
