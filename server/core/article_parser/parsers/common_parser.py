@@ -1,7 +1,5 @@
 from goose3 import Goose
 from goose3.configuration import Configuration
-from urllib.parse import urlparse
-
 
 from .base_parser import ArticleData, ParserBase
 from ..utils import convert_date_format
@@ -16,6 +14,8 @@ class CommonParser(ParserBase):
     def parse_raw_data(cls, data) -> ArticleData:
         config = Configuration()
         config.strict = False
+        config.enable_image_fetching = False       # быстрее и стабильнее
+        config.http_timeout = 10
 
         with Goose(config) as g:
             article = g.extract(raw_html=data)

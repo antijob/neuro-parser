@@ -56,6 +56,9 @@ docker-compose -f docker-compose.prod.yaml up -d
 ```
 
 ---
+## Диаграмма проекта
+
+Смотрите [GitDiagram](https://gitdiagram.com/antijob/neuro-parser)
 
 ## Настройка Telegram-бота
 
