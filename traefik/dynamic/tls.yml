@@ -1,4 +1,0 @@
-tls:
-  certificates:
-    - certFile: /run/secrets/origin_crt
-      keyFile: /run/secrets/origin_key

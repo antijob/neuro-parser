@@ -7,23 +7,18 @@ services:
       - "--api.insecure=false"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
-      - "--providers.docker.network=djangonetwork"
       - "--accesslog.filepath=/data/access.log"
       # entrypoints
       - "--entrypoints.http.address=:80"
       - "--entrypoints.https.address=:443"
       - "--entrypoints.traefik.address=:8888"
-      # certificatesresolvers
-      - "--providers.file.filename=/etc/traefik/dynamic/tls.yml"
-      - "--providers.file.watch=true"
       - "--log.level=DEBUG"
     container_name: "traefik"
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
-      - "traefik-public-certificates:/certificates"
     labels:
       traefik.enable: "true"
-      traefik.http.routers.dashboard.rule: "Host(`${TRAEFIK_HOST}`)"
+      traefik.http.routers.dashboard.rule: "Host(`${HOST}`)"
       traefik.http.routers.dashboard.entrypoints: "traefik"
       traefik.http.routers.dashboard.service: "api@internal"
       traefik.http.routers.dashboard.middlewares: "auth"
@@ -33,12 +28,6 @@ services:
       - "80:80"
       - "443:443"
       - "8888:8888"
-    configs:
-      - source: traefik_config
-        target: /etc/traefik/dynamic/tls.yml
-    secrets:
-      - origin_crt
-      - origin_key
     networks:
       - djangonetwork
 
@@ -120,19 +109,8 @@ services:
 volumes:
   staticfiles-data:
   postgres_data_prod:
-  traefik-public-certificates:
   thelethon:
-
-configs:
-  traefik_config:
-    file: ./traefik/dynamic/tls.yml
 
 networks:
   djangonetwork:
     driver: bridge
-
-secrets:
-  origin_crt:
-    file: ./certs/origin.crt
-  origin_key:
-    file: ./certs/origin.key

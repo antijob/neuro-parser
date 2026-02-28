@@ -103,16 +103,6 @@ jobs:
           TELEGRAM_API_ID: "${{ secrets.TELEGRAM_API_ID }}"
           TELEGRAM_API_HASH: "${{ secrets.TELEGRAM_API_HASH }}"
 
-      - name: Write TLS certificates
-        run: |
-          mkdir -p certs
-          echo "$ORIGIN_TLS_CERT" > certs/origin.crt
-          echo "$ORIGIN_TLS_KEY"  > certs/origin.key
-          chmod 600 certs/origin.crt certs/origin.key
-        env:
-          ORIGIN_TLS_CERT: "${{ secrets.ORIGIN_TLS_CERT }}"
-          ORIGIN_TLS_KEY: "${{ secrets.ORIGIN_TLS_KEY }}"
-
       - name: "Copy the app"
         run: |
           docker run \
