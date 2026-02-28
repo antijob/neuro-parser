@@ -43,8 +43,6 @@ jobs:
             "HOST"
             "TELEGRAM_API_ID"
             "TELEGRAM_API_HASH"
-            "ORIGIN_TLS_CERT"
-            "ORIGIN_TLS_KEY"
           )
           for name in "${REQUIRED_ENVS[@]}"; do
             if [[ -z "${!name}" ]]; then
