@@ -106,8 +106,8 @@ jobs:
       - name: Write TLS certificates
         run: |
           mkdir -p certs
-          echo "$ORIGIN_TLS_CERT" | base64 -d > certs/origin.crt
-          echo "$ORIGIN_TLS_KEY"  | base64 -d > certs/origin.key
+          echo "$ORIGIN_TLS_CERT" > certs/origin.crt
+          echo "$ORIGIN_TLS_KEY"  > certs/origin.key
           chmod 600 certs/origin.crt certs/origin.key
         env:
           ORIGIN_TLS_CERT: "${{ secrets.ORIGIN_TLS_CERT }}"
