@@ -18,7 +18,7 @@
 - Парсер работает с двумя типами моделей обученными русскоязычными bert, а так же с API платных больших языковых моделей.
 - Интерфейс пользователей реализован в виде  telegram бота. Важно, проект хранит только  id чатов куда добавлен бот, но не пользователей в целях безопасности.
 - Нейро-парсер можно развернуть для приватного использования, что позволин более гибко настроить списки источников и доступные модели для различения новостей.
-- REST API интерфейс с [документацией](https://report.antijob.net/swagger-ui/)
+- REST API интерфейс с [документацией](https://report.antijob.news/swagger-ui/)
 
 ## Документация и инструкции по использованию
 
@@ -53,7 +53,7 @@ The parser searches for links to news and posts from these sources, then downloa
 - The parser works with two types of models: trained Russian-language BERT models and APIs of paid large language models.
 - The user interface is implemented as a Telegram bot. Importantly, the project only stores the chat IDs where the bot is added, but not user data, for security purposes.
 - Neuroparser can be deployed for private use, allowing more flexible configuration of source lists and available models for distinguishing news.
-- REST API interface with [documentation](https://report.antijob.net/swagger-ui/)
+- REST API interface with [documentation](https://report.antijob.news/swagger-ui/)
 
 ## Documentation and Usage Instructions
 
