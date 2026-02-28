@@ -40,15 +40,15 @@ jobs:
               - '*.py'
               - 'pyproject.toml'
 
+      - name: Prepare stub .env
+        run: cp .env.template .env
+
       - name: Build python
         id: build
         if: ${{ steps.filter.outputs.web == 'true' || inputs.runType == 'Force build' }}
         run: |
           branch=$(echo "${GITHUB_REF#refs/heads/}" | tr '/' '-')
           echo "Branch name with / substituted for - : $branch"
-
-          # "Preparing" the environment by just copying over stub .env file
-          cp .env.template .env
 
           NEURO_PARSER_VERSION=${branch} \
             docker compose -f docker-compose.prod.yaml build web

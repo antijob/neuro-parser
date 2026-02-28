@@ -28,7 +28,12 @@ on:
 jobs:
   clean:
     name: Clean images
-    runs-on: ["self-hosted", "neuroparser", "${{ github.ref == 'refs/heads/main' && 'production' || 'staging' }}"]
+    runs-on:
+      [
+        "self-hosted",
+        "neuroparser",
+        "${{ github.ref == 'refs/heads/main' && 'production' || 'staging' }}",
+      ]
     steps:
       - name: Clean unused images and network
         run: |
