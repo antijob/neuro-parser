@@ -2,36 +2,38 @@ services:
   traefik:
     image: "traefik:3"
     command:
-      - "--accessLog=true"
-      - "--api.dashboard=false"
-      - "--entrypoints.web.address=:80"
-      - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
-      - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
-      - "--entrypoints.websecure.address=:443"
-      - "--log.level=INFO"
-      - "--providers.docker.exposedByDefault=false"
-      - "--certificatesresolvers.letsencrypt.acme.email=${ACME_EMAIL}"
-      - "--certificatesresolvers.letsencrypt.acme.storage=/certificates/acme.json"
-      - "--certificatesresolvers.letsencrypt.acme.httpchallenge=true"
-      - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
+      - "--ping=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--accesslog.filepath=/data/access.log"
+      # entrypoints
+      - "--entrypoints.http.address=:80"
+      - "--entrypoints.https.address=:443"
+      - "--entrypoints.traefik.address=:8888"
+      # certificatesresolvers
+      - "--providers.file.filename=/etc/traefik/dynamic/tls.yml"
+      - "--providers.file.watch=true"
+      - "--log.level=ERROR"
     container_name: "traefik"
-    ports:
-      - 80:80
-      - 443:443
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
       - "traefik-public-certificates:/certificates"
     labels:
       traefik.enable: "true"
       traefik.http.routers.dashboard.rule: "Host(`${TRAEFIK_HOST}`)"
-      traefik.http.routers.dashboard.entrypoints: "websecure"
+      traefik.http.routers.dashboard.entrypoints: "https"
       traefik.http.routers.dashboard.tls: "true"
-      traefik.http.routers.dashboard.tls.certresolver: "letsencrypt"
       traefik.http.routers.dashboard.service: "api@internal"
       traefik.http.routers.dashboard.middlewares: "auth"
-      traefik.http.middlewares.auth.basicauth.users: "testuser:$$apr1$$jIKW.bdS$$eKXe4Lxjgy/rH65wP1iQe1"
-    environment:
-      ACME_EMAIL: ${ACME_EMAIL}
+    ports:
+      - { target: 80, published: 80, mode: host }
+      - { target: 443, published: 443, mode: host }
+    configs:
+      - source: traefik_config
+        target: /etc/traefik/dynamic/tls.yml
+    secrets:
+      - origin_crt
+      - origin_key
     networks:
       - djangonetwork
 
@@ -57,9 +59,8 @@ services:
     labels:
       traefik.enable: "true"
       traefik.http.routers.django.rule: "Host(`${HOST}`)"
-      traefik.http.routers.django.entrypoints: "websecure"
+      traefik.http.routers.django.entrypoints: "https"
       traefik.http.routers.django.tls: "true"
-      traefik.http.routers.django.tls.certresolver: "letsencrypt"
 
   celery:
     image: antijob/neuro-parser:${NEURO_PARSER_VERSION}
@@ -84,9 +85,8 @@ services:
     labels:
       traefik.enable: "true"
       traefik.http.routers.flower.rule: "Host(`${FLOWER_HOST}`)"
-      traefik.http.routers.flower.entrypoints: "websecure"
+      traefik.http.routers.flower.entrypoints: "https"
       traefik.http.routers.flower.tls: "true"
-      traefik.http.routers.flower.tls.certresolver: "letsencrypt"
   redis:
     extends:
       file: docker-compose.yaml
@@ -104,9 +104,8 @@ services:
     labels:
       traefik.enable: "true"
       traefik.http.routers.staticfiles.rule: "Host(`${HOST}`) && PathPrefix(`/static/`)"
-      traefik.http.routers.staticfiles.entrypoints: "websecure"
+      traefik.http.routers.staticfiles.entrypoints: "https"
       traefik.http.routers.staticfiles.tls: "true"
-      traefik.http.routers.staticfiles.tls.certresolver: "letsencrypt"
 
 volumes:
   staticfiles-data:
@@ -114,6 +113,16 @@ volumes:
   traefik-public-certificates:
   thelethon:
 
+configs:
+  traefik_config:
+    file: ./traefik/dynamic/tls.yml
+
 networks:
   djangonetwork:
     driver: bridge
+
+secrets:
+  origin_crt:
+    file: ./certs/origin.crt
+  origin_key:
+    file: ./certs/origin.key

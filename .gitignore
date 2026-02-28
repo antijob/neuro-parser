@@ -220,6 +220,9 @@ media/
 
 # Configuration file with private data:
 config/.env
+# TLS certificates written by CI — never commit
+certs/
+
 # Ignore all secret env vars
 .env*
 # Do not ignore the template file
