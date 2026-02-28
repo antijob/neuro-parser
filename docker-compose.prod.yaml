@@ -4,10 +4,6 @@ services:
     command:
       - "--accessLog=true"
       - "--api.dashboard=false"
-      - "--certificatesResolvers.letsencrypt.acme.dnsChallenge.delayBeforeCheck=0"
-      - "--certificatesResolvers.letsencrypt.acme.dnsChallenge.provider=cloudflare"
-      - "--certificatesResolvers.letsencrypt.acme.email=${ACME_EMAIL}"
-      - "--certificatesResolvers.letsencrypt.acme.storage=/certificates/acme.json"
       - "--entrypoints.web.http.redirections.entryPoint.scheme=websecure"
       - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
       - "--entrypoints.websecure.address=:443"
@@ -24,7 +20,6 @@ services:
       traefik.enable: "true"
       traefik.http.routers.dashboard.rule: "Host(`${TRAEFIK_HOST}`)"
       traefik.http.routers.dashboard.tls: "true"
-      traefik.http.routers.dashboard.tls.certresolver: "letsencrypt"
       traefik.http.routers.dashboard.service: "api@internal"
       traefik.http.routers.dashboard.middlewares: "auth"
       traefik.http.middlewares.auth.basicauth.users: "testuser:$$apr1$$jIKW.bdS$$eKXe4Lxjgy/rH65wP1iQe1"
@@ -56,8 +51,6 @@ services:
       traefik.enable: "true"
       traefik.http.routers.django.rule: "Host(`${HOST}`)"
       traefik.http.routers.django.entrypoints: "websecure"
-      traefik.http.routers.django.tls: "true"
-      traefik.http.routers.django.tls.certresolver: "letsencrypt"
 
   celery:
     image: antijob/neuro-parser:${NEURO_PARSER_VERSION}
@@ -83,9 +76,6 @@ services:
       traefik.enable: "true"
       traefik.http.routers.flower.rule: "Host(`${FLOWER_HOST}`)"
       traefik.http.routers.flower.entrypoints: "websecure"
-      traefik.http.routers.flower.tls: "true"
-      traefik.http.routers.flower.tls.certresolver: "letsencrypt"
-
   redis:
     extends:
       file: docker-compose.yaml
