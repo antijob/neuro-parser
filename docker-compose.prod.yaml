@@ -94,8 +94,6 @@ services:
       traefik.enable: "true"
       traefik.http.routers.staticfiles.rule: "Host(`${HOST}`) && PathPrefix(`/static/`)"
       traefik.http.routers.staticfiles.entrypoints: "websecure"
-      traefik.http.routers.staticfiles.tls: "true"
-      traefik.http.routers.staticfiles.tls.certresolver: "letsencrypt"
 
 volumes:
   staticfiles-data:
