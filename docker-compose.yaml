@@ -3,7 +3,7 @@ services:
     image: traefik:3
     command:
       - "--accessLog=true"
-      - "--api.dashboard=true"
+      - "--api.dashboard=false"
       - "--entrypoints.web.address=:80"
       - "--log.level=INFO"
       - "--providers.docker.exposedByDefault=false"
@@ -94,8 +94,8 @@ services:
       FLOWER_BASIC_AUTH: ${FLOWER_USER}:${FLOWER_PASSWORD}
     volumes:
       - .:/code
-    ports:
-      - 5555:5555
+    expose:
+      - "5555"
     networks:
       - djangonetwork
     restart: always
