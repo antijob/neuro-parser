@@ -86,7 +86,7 @@ services:
     labels:
       traefik.enable: "true"
       traefik.http.routers.flower.rule: "Host(`${FLOWER_HOST}`)"
-      traefik.http.routers.flower.entrypoints: "http"
+      traefik.http.routers.flower.entrypoints: "https"
       traefik.http.routers.flower.tls: "true"
       traefik.http.services.flower.loadbalancer.server.port: "5555"
     networks:
