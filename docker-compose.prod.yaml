@@ -3,7 +3,7 @@ services:
     image: "traefik:3"
     command:
       - "--ping=true"
-      - "--api.dashboard=true"
+      - "--api.dashboard=false"
       - "--api.insecure=false"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
@@ -11,7 +11,6 @@ services:
       # entrypoints
       - "--entrypoints.http.address=:80"
       - "--entrypoints.https.address=:443"
-      - "--entrypoints.traefik.address=:8888"
       - "--log.level=DEBUG"
     container_name: "traefik"
     volumes:
@@ -37,7 +36,8 @@ services:
       service: db
     volumes:
       - postgres_data_prod:/var/lib/postgresql/data
-
+    networks:
+      - djangonetwork
   web:
     image: antijob/neuro-parser:${NEURO_PARSER_VERSION}
     extends:
@@ -58,7 +58,8 @@ services:
       traefik.http.routers.django.entrypoints: "https"
       traefik.http.routers.django.tls: "true"
       traefik.http.services.django.loadbalancer.server.port: "8000"
-
+    networks:
+      - djangonetwork
   celery:
     image: antijob/neuro-parser:${NEURO_PARSER_VERSION}
     extends:
@@ -67,13 +68,16 @@ services:
     volumes:
       - /root/models:/code/models
       - "thelethon:/code/.telethon"
-
+    networks:
+      - djangonetwork
   bot:
     image: antijob/neuro-parser:${NEURO_PARSER_VERSION}
     extends:
       file: docker-compose.yaml
       service: bot
     volumes: []
+    networks:
+      - djangonetwork
 
   flower:
     extends:
@@ -85,10 +89,14 @@ services:
       traefik.http.routers.flower.entrypoints: "https"
       traefik.http.routers.flower.tls: "true"
       traefik.http.services.flower.loadbalancer.server.port: "5555"
+    networks:
+      - djangonetwork
   redis:
     extends:
       file: docker-compose.yaml
       service: redis
+    networks:
+      - djangonetwork
 
   nginx:
     image: nginx:1.23
