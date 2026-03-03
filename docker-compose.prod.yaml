@@ -84,11 +84,16 @@ services:
       file: docker-compose.yaml
       service: flower
     labels:
-      traefik.enable: "true"
-      traefik.http.routers.flower.rule: "Host(`${FLOWER_HOST}`)"
-      traefik.http.routers.flower.entrypoints: "https"
-      traefik.http.routers.flower.tls: "true"
-      traefik.http.services.flower.loadbalancer.server.port: "5555"
+      - "traefik.enable=true"
+
+      - "traefik.http.routers.flower-http.rule=Host(`${FLOWER_HOST}`)"
+      - "traefik.http.routers.flower-http.entrypoints=http"
+
+      - "traefik.http.routers.flower-https.rule=Host(`${FLOWER_HOST}`)"
+      - "traefik.http.routers.flower-https.entrypoints=https"
+      - "traefik.http.routers.flower-https.tls=true"
+
+      - "traefik.http.services.flower.loadbalancer.server.port=5555"
     networks:
       - djangonetwork
   redis:
@@ -108,16 +113,11 @@ services:
     networks:
       - djangonetwork
     labels:
-      - "traefik.enable=true"
-
-      - "traefik.http.routers.flower-http.rule=Host(`${FLOWER_HOST}`)"
-      - "traefik.http.routers.flower-http.entrypoints=http"
-
-      - "traefik.http.routers.flower-https.rule=Host(`${FLOWER_HOST}`)"
-      - "traefik.http.routers.flower-https.entrypoints=https"
-      - "traefik.http.routers.flower-https.tls=true"
-
-      - "traefik.http.services.flower.loadbalancer.server.port=5555"
+      traefik.enable: "true"
+      traefik.http.routers.staticfiles.rule: "Host(`${HOST}`) && PathPrefix(`/static/`)"
+      traefik.http.routers.staticfiles.entrypoints: "https"
+      traefik.http.routers.staticfiles.tls: "true"
+      traefik.http.services.staticfiles.loadbalancer.server.port: "80"
 
 volumes:
   staticfiles-data:
