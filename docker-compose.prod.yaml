@@ -53,7 +53,7 @@ services:
       - "8000"
     labels:
       traefik.enable: "true"
-      traefik.http.routers.django.rule: "Host(`${HOST}`) && !PathPrefix(`/static/`) && !PathPrefix(`/flower/`)"
+      traefik.http.routers.django.rule: "Host(`${HOST}`) && !PathPrefix(`/static/`) && !PathPrefix(`/flower`)"
       traefik.http.routers.django.entrypoints: "https"
       traefik.http.routers.django.tls: "true"
       traefik.http.services.django.loadbalancer.server.port: "8000"
@@ -84,7 +84,7 @@ services:
       service: flower
     labels:
       traefik.enable: "true"
-      traefik.http.routers.flower.rule: "Host(`${HOST}`) && PathPrefix(`/flower/`)"
+      traefik.http.routers.flower.rule: "Host(`${HOST}`) && PathPrefix(`/flower`)"
       traefik.http.routers.flower.entrypoints: "https"
       traefik.http.routers.flower.tls: "true"
       traefik.http.routers.flower.priority: 1000
