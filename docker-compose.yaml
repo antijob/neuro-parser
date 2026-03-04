@@ -92,7 +92,6 @@ services:
       CELERY_BROKER_URL: redis://redis:6379/0
       CELERY_RESULT_BACKEND: redis://redis:6379/0
       FLOWER_BASIC_AUTH: ${FLOWER_USER}:${FLOWER_PASSWORD}
-      URL_PREFIX: /flower
     volumes:
       - .:/code
     expose:
@@ -102,7 +101,7 @@ services:
     restart: always
     labels:
       traefik.enable: "true"
-      traefik.http.routers.flower.rule: "Host(`${HOST}`) && PathPrefix(`/flower`)"
+      traefik.http.routers.flower.rule: "Host(`${HOST}`) && PathPrefix(`/flower/`)"
       traefik.http.routers.flower.entrypoints: "http"
       traefik.http.services.flower.loadbalancer.server.port: "5555"
     depends_on:
