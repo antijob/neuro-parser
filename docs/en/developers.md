@@ -37,7 +37,6 @@ docker-compose up -d
 
 ```bash
 127.0.0.1 report.local
-127.0.0.1 flower-report.local
 ```
 
 4. Access the admin panel: `http://report.local/s/ecret/admin` or use the API: `http://report.local/api`.

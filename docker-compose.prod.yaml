@@ -84,7 +84,7 @@ services:
       service: flower
     labels:
       traefik.enable: "true"
-      traefik.http.routers.flower.rule: "Host(`${HOST}`) && PathPrefix(`/flower`)"
+      traefik.http.routers.flower.rule: "Host(`${HOST}`) && PathPrefix(`/flower/`)"
       traefik.http.routers.flower.entrypoints: "https"
       traefik.http.routers.flower.tls: "true"
       traefik.http.routers.flower.priority: 1000

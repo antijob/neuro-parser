@@ -50,7 +50,6 @@ docker-compose up -d
 3. Добавьте следующие строки в файл `/etc/hosts` для разрешения локальных доменов Traefik:
 
 ```bash
-127.0.0.1 report.local
 127.0.0.1 flower-report.local
 ```
 
@@ -133,7 +132,7 @@ python manage.py init_telethon_client
 
 ## Инфраструктура
 
-Для работы проекта были созданы две удалённые машины для окружений `stage` и `prod`. 
+Для работы проекта были созданы две удалённые машины для окружений `stage` и `prod`.
 Они настроены одинаково, сервер запускается так же, как и локально:
 
 ```
@@ -144,17 +143,17 @@ docker-compose -f docker-compose.prod.yaml -d
 Более подробный процесс разворачивания можно увидеть в [deploy.yml](.github/workflows/deploy.yml).
 
 > [!NOTE] На заметку
-> Рабочая директория на серверах, где расположена запущенная версия сервера: `/opt/services/neuro-parser`. 
+> Рабочая директория на серверах, где расположена запущенная версия сервера: `/opt/services/neuro-parser`.
 > Актуальная информация о месте запуска сервера находится в `$DEPLOY_LOCATION` в файле [deploy.yml](.github/workflows/deploy.yml).
 
-> [!WARNING] Важно! 
+> [!WARNING] Важно!
 > Рабочая директория `github-actions` (`/home/github-actions/_work/neuro-parser`) используется только для клонирования репозитория.
 > В ней не запускается и не должен запускаться проект.
 
 ### Типовые операции на серверах
 
 - **На окружении (`stage` или `prod`) какая-то ошибка, нужно почитать логи**
-  
+
   ```bash
   # почитать логи с конкретного контейнера
   # web - сервер (админка), bot - TG-бот, celery - задачи в очередях
@@ -165,7 +164,7 @@ docker-compose -f docker-compose.prod.yaml -d
   ```
 
 - **Нужно протестировать скрипт внутри контейнера**
-  
+
   ```bash
   # web - сервер (админка), bot - TG-бот, celery - задачи в очередях
   docker exec -it neuro-parser-web-1 bash
@@ -253,7 +252,6 @@ docker-compose up -d
 
 ```bash
 127.0.0.1 report.local
-127.0.0.1 flower-report.local
 ```
 
 4. Access the admin panel at `http://report.local/s/ecret/admin` or use the API at `http://report.local/api`.
@@ -339,7 +337,7 @@ docker-compose -f docker-compose.prod.yaml -d
 More deployment details in [deploy.yml](.github/workflows/deploy.yml).
 
 > [!NOTE]
-> Working directory for the project is `/opt/services/neuro-parser`. 
+> Working directory for the project is `/opt/services/neuro-parser`.
 > Should the value change, you can look it up in `$DEPLOY_LOCATION` at [deploy.yml](.github/workflows/deploy.yml).
 
 > [!WARNING] Beware!
@@ -349,7 +347,7 @@ More deployment details in [deploy.yml](.github/workflows/deploy.yml).
 ### Типовые операции на серверах
 
 - **An error has occured in the environment, so we need to look at logs**
-  
+
   ```bash
   # a particular container
   # web - server (admin section), bot - TG-bot, celery - tasks in queues
@@ -360,7 +358,7 @@ More deployment details in [deploy.yml](.github/workflows/deploy.yml).
   ```
 
 - **Need to test a script inside the container**
-  
+
   ```bash
   # web - server (admin section), bot - TG-bot, celery - tasks in queues
   docker exec -it neuro-parser-web-1 bash

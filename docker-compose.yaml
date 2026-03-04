@@ -101,7 +101,7 @@ services:
     restart: always
     labels:
       traefik.enable: "true"
-      traefik.http.routers.flower.rule: "Host(`${HOST}`) && PathPrefix(`/flower`)"
+      traefik.http.routers.flower.rule: "Host(`${HOST}`) && PathPrefix(`/flower/`)"
       traefik.http.routers.flower.entrypoints: "http"
       traefik.http.services.flower.loadbalancer.server.port: "5555"
     depends_on:
