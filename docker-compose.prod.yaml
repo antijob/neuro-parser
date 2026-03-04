@@ -26,7 +26,6 @@ services:
     ports:
       - "80:80"
       - "443:443"
-      - "8888:8888"
     networks:
       - djangonetwork
 
@@ -85,14 +84,9 @@ services:
       service: flower
     labels:
       - "traefik.enable=true"
-
-      - "traefik.http.routers.flower-http.rule=Host(`${FLOWER_HOST}`)"
-      - "traefik.http.routers.flower-http.entrypoints=http"
-
-      - "traefik.http.routers.flower-https.rule=Host(`${FLOWER_HOST}`)"
-      - "traefik.http.routers.flower-https.entrypoints=https"
-      - "traefik.http.routers.flower-https.tls=true"
-
+      # роут на /flower
+      - "traefik.http.routers.flower.rule=Host(`${HOST}`) && PathPrefix(`/flower`)"
+      - "traefik.http.routers.flower.entrypoints=https"
       - "traefik.http.services.flower.loadbalancer.server.port=5555"
     networks:
       - djangonetwork
