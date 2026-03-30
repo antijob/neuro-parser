@@ -49,7 +49,7 @@ jobs:
 
       - name: Install dependencies
         env:
-          PDM_IGNORE_SAVED_PYTHON: '1'
+          PDM_IGNORE_SAVED_PYTHON: "1"
         run: |
           timeout 600 pdm install --dev --frozen-lockfile -v --no-self || {
             echo "=== Disk space after timeout ===" && df -h /
