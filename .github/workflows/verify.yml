@@ -1,0 +1,32 @@
+# Made in a reusable way
+# Ref: https://docs.github.com/en/actions/sharing-automations/reusing-workflows
+name: Verify
+
+on:
+  pull_request:
+  push:
+    branches:
+      - stage
+      - main
+  workflow_call:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Run verify
+    runs-on: ["self-hosted", "neuroparser", "staging"]
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+
+      - name: Prepare .env
+        run: cp .env.template .env
+
+      - name: Install dependencies
+        run: VERIFY_INSTALL=1 pdm install --dev 2>&1 || true
+
+      - name: Run verify
+        run: bash scripts/verify.sh

@@ -26,8 +26,19 @@ on:
           - Default
 
 jobs:
+  check-docs:
+    name: Check docs
+    uses: "./.github/workflows/check-docs.yml"
+
+  verify:
+    name: Verify
+    uses: "./.github/workflows/verify.yml"
+
   clean:
     name: Clean images
+    needs:
+      - check-docs
+      - verify
     runs-on:
       [
         "self-hosted",
@@ -61,7 +72,6 @@ jobs:
     name: Start staging
     needs:
       - test
-      - build
     uses: "./.github/workflows/deploy.yml"
     if: success() && github.ref == 'refs/heads/stage'
     secrets: inherit
@@ -72,7 +82,6 @@ jobs:
     name: Start prod
     needs:
       - test
-      - build
     uses: "./.github/workflows/deploy.yml"
     if: success() && github.ref == 'refs/heads/main'
     secrets: inherit

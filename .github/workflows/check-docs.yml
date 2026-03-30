@@ -1,0 +1,33 @@
+# Made in a reusable way
+# Ref: https://docs.github.com/en/actions/sharing-automations/reusing-workflows
+name: Docs check
+
+on:
+  pull_request:
+  push:
+    branches:
+      - stage
+      - main
+  workflow_call:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check-docs:
+    name: Check documentation structure
+    runs-on: ["self-hosted", "neuroparser", "staging"]
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+
+      - name: Run docs check
+        run: bash scripts/check-docs.sh
+
+      - name: Output check result to job summary
+        if: always()
+        run: |
+          echo "## Documentation Check" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          bash scripts/check-docs.sh >> $GITHUB_STEP_SUMMARY 2>&1 || true
