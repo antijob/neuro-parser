@@ -30,13 +30,31 @@ jobs:
       - name: Install pdm
         run: python -m pip install --upgrade pip pdm
 
+      - name: Cache PDM dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cache/pdm
+            .venv
+          key: ${{ runner.os }}-pdm-${{ hashFiles('pdm.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pdm-
+
       - name: Prepare .env
         run: cp .env.template .env
 
+      - name: Check disk space before install
+        run: |
+          echo "=== Disk space ===" && df -h / && echo "" && echo "=== Available memory ===" && free -h
+
       - name: Install dependencies
         env:
-          PDM_IGNORE_SAVED_PYTHON: "1"
-        run: pdm install --dev --frozen-lockfile -v
+          PDM_IGNORE_SAVED_PYTHON: '1'
+        run: |
+          timeout 600 pdm install --dev --frozen-lockfile -v --no-self || {
+            echo "=== Disk space after timeout ===" && df -h /
+            exit 1
+          }
 
       - name: Run verify
         run: bash scripts/verify.sh
