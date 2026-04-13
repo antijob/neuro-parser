@@ -8,18 +8,13 @@ on:
         required: true
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.job }}-${{ github.ref }}
+  group: build-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   build:
-    runs-on:
-      [
-        "self-hosted",
-        "neuroparser",
-        "production",
-      ]
-    environment: 'Prod'
+    runs-on: ["self-hosted", "neuroparser", "production"]
+    environment: "Prod"
     outputs:
       branch_name: ${{ steps.build.outputs.branch_name }}
     steps:
