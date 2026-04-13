@@ -13,13 +13,8 @@ concurrency:
 
 jobs:
   build:
-    runs-on:
-      [
-        "self-hosted",
-        "neuroparser",
-        "production",
-      ]
-    environment: 'Prod'
+    runs-on: ["self-hosted", "neuroparser", "production"]
+    environment: "Prod"
     outputs:
       branch_name: ${{ steps.build.outputs.branch_name }}
     steps:
