@@ -8,8 +8,12 @@ from server.apps.core.models import IncidentType, Article, MediaIncident
 from server.libs.handler import HandlerRegistry
 
 from .predictors.base_predictor import PredictorBase
-from .predictors.bert import BertPredictor
 from .predictors.llama import LlamaPredictor
+
+try:
+    from .predictors.bert import BertPredictor
+except Exception as import_error:
+    BertPredictor = None
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -17,7 +21,13 @@ logger = logging.getLogger(__name__)
 
 class IncidentPredictor:
     registry = HandlerRegistry[PredictorBase]()
-    registry.register(BertPredictor)
+    if BertPredictor is not None:
+        registry.register(BertPredictor)
+    else:
+        logger.warning(
+            "BertPredictor is unavailable because ML dependencies are not installed: %s",
+            import_error,
+        )
     registry.register(LlamaPredictor)
 
     @classmethod
