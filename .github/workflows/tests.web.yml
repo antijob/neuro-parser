@@ -22,7 +22,7 @@ env:
 jobs:
   test:
     name: Run tests
-    runs-on: ["self-hosted", "neuroparser", "staging"]
+    runs-on: ["self-hosted", "neuroparser", "production"]
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
@@ -122,7 +122,7 @@ jobs:
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "</details>" >> $GITHUB_STEP_SUMMARY
           fi
-      
+
       - name: Cleanup tests
         if: inputs.keepTests || success()
         run: |

@@ -17,9 +17,9 @@ jobs:
       [
         "self-hosted",
         "neuroparser",
-        "${{ github.ref == 'refs/heads/main' && 'production' || 'staging' }}",
+        "production",
       ]
-    environment: ${{ github.ref == 'refs/heads/main' && 'Prod' || github.ref == 'refs/heads/stage' && 'Staging' || 'Unknown' }}
+    environment: 'Prod'
     outputs:
       branch_name: ${{ steps.build.outputs.branch_name }}
     steps:

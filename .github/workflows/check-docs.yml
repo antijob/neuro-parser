@@ -17,7 +17,7 @@ concurrency:
 jobs:
   check-docs:
     name: Check documentation structure
-    runs-on: ["self-hosted", "neuroparser", "staging"]
+    runs-on: ["self-hosted", "neuroparser", "production"]
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4

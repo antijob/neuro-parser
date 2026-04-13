@@ -43,7 +43,7 @@ jobs:
       [
         "self-hosted",
         "neuroparser",
-        "${{ github.ref == 'refs/heads/main' && 'production' || 'staging' }}",
+        "production",
       ]
     steps:
       - name: Clean unused images and network
@@ -67,16 +67,6 @@ jobs:
     secrets: inherit
     with:
       keepTests: "${{ github.event.inputs.keepTests == 'Always keep'}}"
-
-  start_staging:
-    name: Start staging
-    needs:
-      - test
-    uses: "./.github/workflows/deploy.yml"
-    if: success() && github.ref == 'refs/heads/stage'
-    secrets: inherit
-    with:
-      environment: staging
 
   start_prod:
     name: Start prod
