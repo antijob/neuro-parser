@@ -56,16 +56,16 @@ dependencies = [
     "brotlipy>=0.7.0",
 ]
 
+name = "neuro-parser"
+version = "0.1.0"
+description = ""
+readme = "README.md"
+
 [project.optional-dependencies]
 ml = [
     "torch==1.13.0",
     "transformers==4.25.1",
 ]
-
-name = "neuro-parser"
-version = "0.1.0"
-description = ""
-readme = "README.md"
 
 [tool.pdm.dev-dependencies]
 lint = [
