@@ -10,13 +10,16 @@ from server.libs.handler import HandlerRegistry
 from .predictors.base_predictor import PredictorBase
 from .predictors.llama import LlamaPredictor
 
-try:
-    from .predictors.bert import BertPredictor
-except Exception as import_error:
-    BertPredictor = None
-
 # Configure logging
 logger = logging.getLogger(__name__)
+
+# Try to import BertPredictor and capture any import errors
+bert_import_error = None
+try:
+    from .predictors.bert import BertPredictor
+except Exception as e:
+    BertPredictor = None
+    bert_import_error = e
 
 
 class IncidentPredictor:
@@ -26,7 +29,7 @@ class IncidentPredictor:
     else:
         logger.warning(
             "BertPredictor is unavailable because ML dependencies are not installed: %s",
-            import_error,
+            bert_import_error,
         )
     registry.register(LlamaPredictor)
 
