@@ -46,7 +46,7 @@ RUN python -m nltk.downloader punkt && \
 COPY pyproject.toml pdm.lock /code/
 
 # Which groups to install in to the container. If none, will not install additional groups.
-# Pass as docker-compose build --build-arg PDM_DEPENDENCY_GROUPS="groupA groupB" or 
+# Pass as docker-compose build --build-arg PDM_DEPENDENCY_GROUPS="groupA groupB" or
 #   docker build ... --build-arg PDM_DEPENDENCY_GROUPS=""
 # By default we install only test tooling group and skip optional ML extras.
 ARG PDM_DEPENDENCY_GROUPS=test

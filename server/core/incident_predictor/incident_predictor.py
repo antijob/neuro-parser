@@ -77,7 +77,7 @@ class IncidentPredictor:
         try:
             result_incidents: list[MediaIncident] = []
             articles_to_update = []
-            
+
             for incident_type in IncidentType.objects.all():
                 if not incident_type.is_active:
                     continue
@@ -98,15 +98,15 @@ class IncidentPredictor:
                             result_incidents.append(incident)
                     if rate:
                         article.rate[incident_type.description] = rate
-                        
+
                     # Добавляем статью в список для пакетного обновления
                     if article not in articles_to_update:
                         articles_to_update.append(article)
-            
+
             # Сохраняем все статьи одним блоком
             for article in articles_to_update:
                 article.save()
-                
+
             return result_incidents
         except Exception as e:
             logger.error(
