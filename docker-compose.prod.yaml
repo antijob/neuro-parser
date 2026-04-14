@@ -88,6 +88,9 @@ services:
       traefik.http.routers.flower.entrypoints: "https"
       traefik.http.routers.flower.tls: "true"
       traefik.http.routers.flower.priority: 1000
+      traefik.http.routers.flower.middlewares: "flower-slash"
+      traefik.http.middlewares.flower-slash.redirectregex.regex: "^(https?://[^/]+/flower)$"
+      traefik.http.middlewares.flower-slash.redirectregex.replacement: "$${1}/"
       traefik.http.services.flower.loadbalancer.server.port: "5555"
     networks:
       - djangonetwork
