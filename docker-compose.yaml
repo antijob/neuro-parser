@@ -103,6 +103,9 @@ services:
       traefik.enable: "true"
       traefik.http.routers.flower.rule: "Host(`${HOST}`) && PathPrefix(`/flower`)"
       traefik.http.routers.flower.entrypoints: "http"
+      traefik.http.routers.flower.middlewares: "flower-slash"
+      traefik.http.middlewares.flower-slash.redirectregex.regex: "^(https?://[^/]+/flower)$"
+      traefik.http.middlewares.flower-slash.redirectregex.replacement: "$${1}/"
       traefik.http.services.flower.loadbalancer.server.port: "5555"
     depends_on:
       - redis
