@@ -30,27 +30,40 @@ services:
       - djangonetwork
 
   db:
-    extends:
-      file: docker-compose.yaml
-      service: db
+    image: postgres:13.4-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_HOST_AUTH_METHOD: md5
+    env_file:
+      - .env
     volumes:
       - postgres_data_prod:/var/lib/postgresql/data
     networks:
       - djangonetwork
+
   web:
     image: antijob/neuro-parser:${NEURO_PARSER_VERSION}
-    extends:
-      file: docker-compose.yaml
-      service: web
     command: /bin/bash -c ./docker/web/entrypoint-prod.sh
+    env_file:
+      - .env
     environment:
       DEBUG: "${DEBUG}"
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      REPLICATE_API_TOKEN: ${REPLICATE_API_TOKEN}
+      API_RPS: ${API_RPS}
     volumes:
       - /root/models:/code/models
       - "staticfiles-data:/code/public/static"
       - "thelethon:/code/.telethon"
     expose:
       - "8000"
+    depends_on:
+      - db
+      - redis
     labels:
       traefik.enable: "true"
       traefik.http.routers.django.rule: "Host(`${HOST}`) && !PathPrefix(`/static/`) && !PathPrefix(`/flower`)"
@@ -59,29 +72,51 @@ services:
       traefik.http.services.django.loadbalancer.server.port: "8000"
     networks:
       - djangonetwork
+
   celery:
     image: antijob/neuro-parser:${NEURO_PARSER_VERSION}
-    extends:
-      file: docker-compose.yaml
-      service: celery
+    command: /bin/bash -c "./docker/celery/entrypoint.sh"
+    env_file:
+      - .env
+    environment:
+      REPLICATE_API_TOKEN: ${REPLICATE_API_TOKEN}
     volumes:
       - /root/models:/code/models
       - "thelethon:/code/.telethon"
+    restart: always
+    depends_on:
+      - db
+      - redis
     networks:
       - djangonetwork
+
   bot:
     image: antijob/neuro-parser:${NEURO_PARSER_VERSION}
-    extends:
-      file: docker-compose.yaml
-      service: bot
-    volumes: []
+    command: /bin/bash -c "./docker/bot/entrypoint.sh"
+    env_file:
+      - .env
+    restart: always
+    depends_on:
+      - db
+      - redis
+      - web
     networks:
       - djangonetwork
 
   flower:
-    extends:
-      file: docker-compose.yaml
-      service: flower
+    image: mher/flower
+    command: celery flower --url_prefix=flower
+    environment:
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/0
+      FLOWER_BASIC_AUTH: ${FLOWER_USER}:${FLOWER_PASSWORD}
+    expose:
+      - "5555"
+    restart: always
+    depends_on:
+      - redis
+      - web
+      - celery
     labels:
       traefik.enable: "true"
       traefik.http.routers.flower.rule: "Host(`${HOST}`) && PathPrefix(`/flower`)"
@@ -94,10 +129,11 @@ services:
       traefik.http.services.flower.loadbalancer.server.port: "5555"
     networks:
       - djangonetwork
+
   redis:
-    extends:
-      file: docker-compose.yaml
-      service: redis
+    image: redis:alpine
+    expose:
+      - "6379"
     networks:
       - djangonetwork
 
