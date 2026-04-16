@@ -76,6 +76,8 @@ services:
   celery:
     image: antijob/neuro-parser:${NEURO_PARSER_VERSION}
     command: /bin/bash -c "./docker/celery/entrypoint.sh"
+    env_file:
+      - .env
     environment:
       REPLICATE_API_TOKEN: ${REPLICATE_API_TOKEN}
     volumes:
@@ -83,6 +85,7 @@ services:
       - "thelethon:/code/.telethon"
     restart: always
     depends_on:
+      - db
       - redis
     networks:
       - djangonetwork
@@ -90,8 +93,11 @@ services:
   bot:
     image: antijob/neuro-parser:${NEURO_PARSER_VERSION}
     command: /bin/bash -c "./docker/bot/entrypoint.sh"
+    env_file:
+      - .env
     restart: always
     depends_on:
+      - db
       - redis
       - web
     networks:
