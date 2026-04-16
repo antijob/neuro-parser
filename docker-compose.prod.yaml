@@ -45,6 +45,11 @@ services:
 
   web:
     image: antijob/neuro-parser:${NEURO_PARSER_VERSION}
+    build:
+      context: .
+      dockerfile: ./docker/web/Dockerfile
+      args:
+        PDM_DEPENDENCY_GROUPS: "test ml"
     command: /bin/bash -c ./docker/web/entrypoint-prod.sh
     env_file:
       - .env
