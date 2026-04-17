@@ -3,11 +3,6 @@
 name: Verify
 
 on:
-  pull_request:
-  push:
-    branches:
-      - stage
-      - main
   workflow_call:
 
 concurrency:
