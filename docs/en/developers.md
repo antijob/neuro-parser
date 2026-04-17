@@ -11,7 +11,7 @@ We use [PDM](https://pdm-project.org/) to manage Python packages:
 pdm install
 
 # resolve all dependencies and lock packages in the lock file
-pdm lock
+pdm lock --group :all
 
 # update all packages
 pdm update

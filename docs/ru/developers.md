@@ -11,7 +11,7 @@
 pdm install
 
 # разрешение всех зависимостей и фиксация пакетов в lock-файл
-pdm lock
+pdm lock --group :all
 
 # обновление всех пакетов
 pdm update
