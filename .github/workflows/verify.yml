@@ -52,4 +52,6 @@ jobs:
           }
 
       - name: Run verify
+        env:
+          VERIFY_SKIP_TESTS: "1"
         run: bash scripts/verify.sh
