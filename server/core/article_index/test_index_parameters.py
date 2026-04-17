@@ -1,10 +1,11 @@
-from .query_checker import RATIO_THRESHOLD, reindex_and_detect_duplicates
-from .article_index import SIMHASH_DIMENSION, SIMHASH_TOLERANCE
-from typing import Tuple
 from datetime import datetime, timedelta
+from typing import Tuple
 
-from server.apps.core.models import Article
 from django.db.models import QuerySet
+from server.apps.core.models import Article
+
+from .article_index import SIMHASH_DIMENSION, SIMHASH_TOLERANCE  # noqa: F401
+from .query_checker import RATIO_THRESHOLD, reindex_and_detect_duplicates  # noqa: F401
 
 
 def test_simhash_parameters(

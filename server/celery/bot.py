@@ -3,7 +3,6 @@ import logging
 
 from aiogram.exceptions import TelegramForbiddenError, TelegramRetryAfter
 from celery.signals import celeryd_init, worker_shutdown
-
 from server.apps.bot.bot_instance import get_bot_instance
 from server.apps.bot.keyboards.downvote_kb import downvote_keyboard
 
@@ -40,7 +39,6 @@ class SendMessageTask(app.Task):
 
 @app.task(base=SendMessageTask)
 def send_message_to_channel(msg: str, chat_id: int, inc_id: int = 0):
-    global bot
     logger.info(
         f"Starting send_message_to_channel for chat_id: {chat_id}, inc_id: {inc_id}"
     )

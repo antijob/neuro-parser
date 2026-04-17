@@ -1,9 +1,10 @@
 from abc import ABC, abstractmethod
-from typing import Union, Any
+from typing import Any, Union
 
-from server.apps.core.models import Source, Article
+from server.apps.core.models import Article, Source
 
-# ClientSourceData may be raw html data, list of urls, list of built Articles, dict of urls and relevant data or None
+# ClientSourceData may be raw html data, list of urls,
+# list of built Articles, dict of urls and relevant data or None
 ClientSourceData = Union[str, list[str], list[Article], dict[str, Any], None]
 
 
@@ -19,7 +20,9 @@ class ClientBase(ABC):
         pass
 
     @abstractmethod
-    async def get_article(self, article: Article, source: Source, articles_to_create: list[Article] = None) -> Article:
+    async def get_article(
+        self, article: Article, source: Source, articles_to_create: list[Article] = None
+    ) -> Article:
         """
         Fetches an article and parses it into an Article object.
         May return a new Article object, for example, in case of a redirect

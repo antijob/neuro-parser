@@ -6,13 +6,15 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0019_auto_20250128_0725'),
+        ("core", "0019_auto_20250128_0725"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='proxy',
-            name='error_message',
-            field=models.TextField(blank=True, null=True, verbose_name='Сообщение об ошибке'),
+            model_name="proxy",
+            name="error_message",
+            field=models.TextField(
+                blank=True, null=True, verbose_name="Сообщение об ошибке"
+            ),
         ),
     ]

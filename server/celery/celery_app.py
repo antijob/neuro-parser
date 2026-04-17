@@ -5,7 +5,7 @@ from celery.schedules import crontab
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "server.settings")
 
-import django
+import django  # noqa: E402
 
 django.setup()
 

@@ -1,8 +1,5 @@
 # -*- coding: utf-8 -*-
-from server.apps.core import views
 
-urlpatterns = [
+urlpatterns = []
 
-]
-
-app_name = 'core'
+app_name = "core"

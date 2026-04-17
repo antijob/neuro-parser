@@ -1,5 +1,3 @@
-import datetime
-
 from django.contrib.postgres.fields import ArrayField
 from django.core.validators import (
     MaxValueValidator,
@@ -10,7 +8,6 @@ from django.db import models
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
-
 from server.apps.core.data.llm import LLM_TEMPLATE_DEFAULT, SYSTEM_LLM_PROMPT_DEFAULT
 from server.apps.core.data.regions import COUNTRIES, REGIONS
 from server.apps.users.models import User
@@ -49,8 +46,7 @@ DEFAULT_COUNTRY_ID: int = 11  # Russia
 
 
 class Country(models.Model):
-    name = models.CharField("Страна", choices=COUNTRIES,
-                            default="RUS", max_length=100)
+    name = models.CharField("Страна", choices=COUNTRIES, default="RUS", max_length=100)
 
     def __str__(self) -> str:
         return self.get_full_country_name()
@@ -64,8 +60,7 @@ class Country(models.Model):
 
 
 class Region(models.Model):
-    name = models.CharField("Регион", choices=REGIONS,
-                            default="ALL", max_length=100)
+    name = models.CharField("Регион", choices=REGIONS, default="ALL", max_length=100)
     country = models.ForeignKey(Country, on_delete=models.CASCADE)
 
     def __str__(self) -> str:
@@ -137,13 +132,12 @@ class BaseIncident(models.Model):
     public_title = models.CharField(
         "Публичное название", max_length=512, null=True, blank=True
     )
-    public_description = models.TextField(
-        "Публичное описание", null=True, blank=True)
+    public_description = models.TextField("Публичное описание", null=True, blank=True)
 
     @property
     def source(self):
         """Get the source of the related article if it exists."""
-        if hasattr(self, 'related_article') and self.related_article:
+        if hasattr(self, "related_article") and self.related_article:
             return self.related_article.source
         return None
 
@@ -187,8 +181,7 @@ class MediaIncident(BaseIncident):
 
 
 class Source(models.Model):
-    url = models.TextField(
-        verbose_name="URL списка новостей", null=False, unique=True)
+    url = models.TextField(verbose_name="URL списка новостей", null=False, unique=True)
     is_active = models.BooleanField(verbose_name="Активен", default=True)
     country = models.ForeignKey(
         Country,
@@ -204,8 +197,7 @@ class Source(models.Model):
     public_tg_channel_link = models.CharField(
         verbose_name="Название источника", max_length=255, null=True, blank=True
     )
-    needs_proxy = models.BooleanField(
-        verbose_name=_("Требуется прокси"), default=False)
+    needs_proxy = models.BooleanField(verbose_name=_("Требуется прокси"), default=False)
 
     class Meta:
         verbose_name = "Источник"
@@ -215,8 +207,11 @@ class Source(models.Model):
         super().clean()
         if self.is_telethon and not self.public_tg_channel_link:
             from django.core.exceptions import ValidationError
+
             raise ValidationError(
-                {'public_tg_channel_link': 'Это поле обязательно, если включен парсинг через телетон.'}
+                {
+                    "public_tg_channel_link": "Это поле обязательно, если включен парсинг через телетон."  # noqa: E501
+                }
             )
 
     def __str__(self):
@@ -236,8 +231,7 @@ class Article(models.Model):
     title = models.TextField(
         verbose_name="Заголовок", default="", blank=True, null=True
     )
-    text = models.TextField(verbose_name="Текст",
-                            default="", blank=True, null=True)
+    text = models.TextField(verbose_name="Текст", default="", blank=True, null=True)
     is_downloaded = models.BooleanField(verbose_name="Скачана", default=False)
     is_parsed = models.BooleanField(verbose_name="Обработана", default=False)
     is_incident_created = models.BooleanField(
@@ -249,13 +243,15 @@ class Article(models.Model):
     )
     is_redirect = models.BooleanField(verbose_name="Редирект", default=False)
     is_incorrect = models.BooleanField(
-        verbose_name="Некорректная статья", default=False)
+        verbose_name="Некорректная статья", default=False
+    )
     redirect_url = models.URLField(
         verbose_name="Редирект куда", max_length=1024, null=True, blank=True
     )
 
     rate = models.JSONField(
-        verbose_name="Оценка релевантности", default=dict, blank=True, null=True)
+        verbose_name="Оценка релевантности", default=dict, blank=True, null=True
+    )
     incident = models.OneToOneField(
         MediaIncident,
         verbose_name="Инцидент",
@@ -265,8 +261,7 @@ class Article(models.Model):
         on_delete=models.SET_NULL,
     )
     create_date = models.DateTimeField("Дата создания", default=timezone.now)
-    publication_date = models.DateField(
-        "Дата публикации", null=True, blank=True)
+    publication_date = models.DateField("Дата публикации", null=True, blank=True)
 
     def save(self, *args, **kwargs):
         self.title = self.any_title()
@@ -318,18 +313,14 @@ class Proxy(models.Model):
         validators=[MinValueValidator(1), MaxValueValidator(65535)],
     )
     login = models.CharField(_("Логин"), max_length=128, null=True, blank=True)
-    password = models.CharField(
-        _("Пароль"), max_length=128, null=True, blank=True)
+    password = models.CharField(_("Пароль"), max_length=128, null=True, blank=True)
     country = models.ForeignKey(
         Country, on_delete=models.CASCADE, verbose_name=_("Страна")
     )
     is_active = models.BooleanField(_("Активен"), default=True)
-    last_check = models.DateTimeField(
-        _("Последняя проверка"), null=True, blank=True)
-    error_type = models.CharField(
-        _("Тип ошибки"), max_length=50, null=True, blank=True)
-    error_message = models.TextField(
-        _("Сообщение об ошибке"), blank=True, null=True)
+    last_check = models.DateTimeField(_("Последняя проверка"), null=True, blank=True)
+    error_type = models.CharField(_("Тип ошибки"), max_length=50, null=True, blank=True)
+    error_message = models.TextField(_("Сообщение об ошибке"), blank=True, null=True)
 
     class Meta:
         verbose_name = _("Прокси")

@@ -4,10 +4,9 @@ from typing import Coroutine, Iterable, Optional
 
 from server.apps.core.models import Article, Source
 
-from .clients import ClientFactory
+from .clients import ClientFactory, ClientSourceData
 from .libs.exceptions import BadCodeException, ClientError
 from .tasks import fetch_source_articles
-from .clients import ClientFactory, ClientSourceData
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -54,7 +53,7 @@ class Fetcher:
             return None
         except Exception as e:
             logger.info(
-                f"Unexpected error occurred while fetching source URL {source.url}: {e}",
+                f"Unexpected error occurred while fetching source URL {source.url}: {e}",  # noqa: E501
                 exc_info=True,
             )
             return None

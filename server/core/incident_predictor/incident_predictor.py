@@ -1,10 +1,9 @@
-import logging
-from django.utils import timezone
-
-from typing import Optional
 import datetime
+import logging
+from typing import Optional
 
-from server.apps.core.models import IncidentType, Article, MediaIncident
+from django.utils import timezone
+from server.apps.core.models import Article, IncidentType, MediaIncident
 from server.libs.handler import HandlerRegistry
 
 from .predictors.base_predictor import PredictorBase
@@ -28,7 +27,7 @@ class IncidentPredictor:
         registry.register(BertPredictor)
     else:
         logger.warning(
-            "BertPredictor is unavailable because ML dependencies are not installed: %s",
+            "BertPredictor is unavailable because ML dependencies are not installed: %s",  # noqa: E501
             bert_import_error,
         )
     registry.register(LlamaPredictor)
@@ -40,7 +39,7 @@ class IncidentPredictor:
             return predictor(incident_type)
         except Exception as e:
             logger.exception(
-                f"Error in setup_incident_type. Incident type: {incident_type}. Exception: {e}",
+                f"Error in setup_incident_type. Incident type: {incident_type}. Exception: {e}",  # noqa: E501
                 exc_info=True,
             )
 
@@ -95,7 +94,8 @@ class IncidentPredictor:
                     if is_incident:
                         incident = cls._create_incident(article, incident_type)
                         if incident is not None:
-                            # Устанавливаем связь со статьей только если инцидент успешно создан
+                            # Устанавливаем связь со статьей только если
+                            # инцидент успешно создан
                             article.is_incident_created = True
                             article.incident = incident
                             result_incidents.append(incident)
@@ -113,7 +113,8 @@ class IncidentPredictor:
             return result_incidents
         except Exception as e:
             logger.error(
-                f"Error in predict_batch: {e} with predictor: {predictor}. Batch: {batch}"
+                f"Error in predict_batch: {e} with predictor: {predictor}. "
+                f"Batch: {batch}"
             )
             raise
 

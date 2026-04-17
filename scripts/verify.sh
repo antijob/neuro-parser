@@ -37,7 +37,10 @@ LINT_FAILED=${LINT_FAILED:-0}
 
 echo ""
 echo "--- [2/3] Running pytest ---"
-if pdm run python -c "import tokenizers" 2>/dev/null; then
+if [[ "${VERIFY_SKIP_TESTS:-0}" == "1" ]]; then
+    echo "⚠ Skipping tests: VERIFY_SKIP_TESTS=1"
+    TESTS_SKIPPED=1
+elif pdm run python -c "import tokenizers" 2>/dev/null; then
     pdm run pytest -v
     echo "✓ Tests passed"
 else

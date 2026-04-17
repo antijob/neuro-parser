@@ -1,4 +1,5 @@
-from aiohttp import ClientError
+
+from aiohttp import ClientError  # noqa: F401
 
 
 class BadCodeException(Exception):

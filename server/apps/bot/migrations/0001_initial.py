@@ -9,29 +9,58 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('core', '0001_incident_types'),
+        ("core", "0001_incident_types"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Channel',
+            name="Channel",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('channel_id', models.CharField(max_length=32, unique=True)),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("channel_id", models.CharField(max_length=32, unique=True)),
             ],
         ),
         migrations.CreateModel(
-            name='TypeStatus',
+            name="TypeStatus",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('status', models.BooleanField(default=True)),
-                ('channel', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='bot.channel')),
-                ('incident_type', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='core.incidenttype')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("status", models.BooleanField(default=True)),
+                (
+                    "channel",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="bot.channel"
+                    ),
+                ),
+                (
+                    "incident_type",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="core.incidenttype",
+                    ),
+                ),
             ],
         ),
         migrations.AddField(
-            model_name='channel',
-            name='type',
-            field=models.ManyToManyField(through='bot.TypeStatus', to='core.IncidentType'),
+            model_name="channel",
+            name="type",
+            field=models.ManyToManyField(
+                through="bot.TypeStatus", to="core.IncidentType"
+            ),
         ),
     ]

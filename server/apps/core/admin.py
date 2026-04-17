@@ -1,9 +1,6 @@
 from django.contrib import admin
-
 from server.apps.core.admins.actions.activate_source_action import activate_source
-from server.apps.core.admins.actions.deactivate_source_action import (
-    deactivate_source,
-)
+from server.apps.core.admins.actions.deactivate_source_action import deactivate_source
 from server.apps.core.admins.actions.disable_models_action import disable_models
 from server.apps.core.admins.actions.downvoted_incident_action import (
     downvoted_incidents,
@@ -13,7 +10,7 @@ from server.apps.core.admins.actions.export_incidents_as_csv_action import (
     export_incidents_as_csv,
 )
 from server.apps.core.admins.filters.downvote_filter import DownvoteFilter
-from server.apps.core.forms import IncidentTypeForm, SourceForm
+from server.apps.core.forms import IncidentTypeForm
 from server.apps.core.models import (
     Article,
     Country,
@@ -88,15 +85,21 @@ class ArticleAdmin(admin.ModelAdmin):
         for obj in queryset:
             obj.is_parsed = False
             obj.save()
-        self.message_user(
-            request, f"{queryset.count()} articles will be parsed.")
+        self.message_user(request, f"{queryset.count()} articles will be parsed.")
 
     force_parse.short_description = "Force parse"
 
 
 @admin.register(Source)
 class SourceAdmin(admin.ModelAdmin):
-    list_display = ("url", "country", "region", "needs_proxy", "is_active", "public_tg_channel_link")
+    list_display = (
+        "url",
+        "country",
+        "region",
+        "needs_proxy",
+        "is_active",
+        "public_tg_channel_link",
+    )
     actions = [deactivate_source, activate_source]
     search_fields = ["url", "public_tg_channel_link"]
 
@@ -124,5 +127,12 @@ class SourceAdmin(admin.ModelAdmin):
 
 @admin.register(Proxy)
 class ProxyAdmin(admin.ModelAdmin):
-    list_display = ("ip", "port", "country", "is_active",
-                    "last_check", "error_type", "error_message")
+    list_display = (
+        "ip",
+        "port",
+        "country",
+        "is_active",
+        "last_check",
+        "error_type",
+        "error_message",
+    )

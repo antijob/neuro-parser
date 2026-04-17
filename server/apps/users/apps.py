@@ -6,4 +6,4 @@ from django.apps import AppConfig
 class UsersAppConfig(AppConfig):
     """Default django-app configuration."""
 
-    name = 'server.apps.users'
+    name = "server.apps.users"

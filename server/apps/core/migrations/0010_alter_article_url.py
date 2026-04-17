@@ -6,13 +6,15 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0009_auto_20240904_2240'),
+        ("core", "0009_auto_20240904_2240"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='article',
-            name='url',
-            field=models.URLField(max_length=1024, primary_key=True, serialize=False, verbose_name='URL'),
+            model_name="article",
+            name="url",
+            field=models.URLField(
+                max_length=1024, primary_key=True, serialize=False, verbose_name="URL"
+            ),
         ),
     ]

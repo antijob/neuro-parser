@@ -6,18 +6,25 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0008_alter_mediaincident_region'),
+        ("core", "0008_alter_mediaincident_region"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='article',
-            name='create_date',
-            field=models.DateTimeField(auto_now_add=True, verbose_name='Дата создания'),
+            model_name="article",
+            name="create_date",
+            field=models.DateTimeField(auto_now_add=True, verbose_name="Дата создания"),
         ),
         migrations.AlterField(
-            model_name='article',
-            name='url',
-            field=models.URLField(blank=True, default='', max_length=1024, primary_key=True, serialize=False, verbose_name='URL'),
+            model_name="article",
+            name="url",
+            field=models.URLField(
+                blank=True,
+                default="",
+                max_length=1024,
+                primary_key=True,
+                serialize=False,
+                verbose_name="URL",
+            ),
         ),
     ]

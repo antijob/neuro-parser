@@ -6,9 +6,8 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0016_is_tg_hidden_flag'),
-        ('core', '0021_auto_20250128_0825'),
+        ("core", "0016_is_tg_hidden_flag"),
+        ("core", "0021_auto_20250128_0825"),
     ]
 
-    operations = [
-    ]
+    operations = []

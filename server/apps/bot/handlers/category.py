@@ -5,7 +5,6 @@ from aiogram.filters import Command
 from aiogram.types import CallbackQuery, Message
 from asgiref.sync import sync_to_async
 from magic_filter import F
-
 from server.apps.bot.data.messages import CATEGORIES_MESSAGE, COUNTRY_MESSAGE
 from server.apps.bot.handlers.utils import check_channel
 from server.apps.bot.keyboards.category_kb import (
@@ -37,8 +36,8 @@ async def categ_command(message: Message, channel: Channel) -> None:
     except Exception as e:
         logger.error(f"Error in categ command: {e}")
         await message.answer(
-            "Ошибка при выполнении комманды для настрйки, попробуйте позже и обратитесь к администратору",
-            show_alert=True,
+            "Ошибка при выполнении комманды для настрйки, "
+            "попробуйте позже и обратитесь к администратору",
         )
 
 
@@ -64,8 +63,8 @@ async def category_status_change_callback(
     except Exception as e:
         logger.error(f"Error in category status change: {e}")
         await callback.answer(
-            "Ошибка при изменении статуса категории, обратитесь пожалуйста к админстартору",
-            show_alert=True,
+            "Ошибка при изменении статуса категории, "
+            "обратитесь пожалуйста к админстартору",
         )
 
 

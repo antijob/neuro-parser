@@ -3,6 +3,7 @@ import django.db.models.deletion
 from server.apps.core.data.regions import COUNTRIES, REGIONS
 from server.apps.core.models import Country, Region
 
+
 def add_country_regions(apps, schema_editor):
     """
     adds initial countries and regions data

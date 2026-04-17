@@ -1,12 +1,15 @@
 import logging
+import re
 import sys
 from dataclasses import dataclass
-import re
 
-from server.apps.bot.data.messages import NEW_INCIDENT_TEMPLATE, NEW_TG_INCIDENT_TEMPLATE
-from server.apps.bot.models import Channel, ChannelCountry, ChannelIncidentType
-from server.apps.core.models import MediaIncident
 from django.db import models
+from server.apps.bot.data.messages import (
+    NEW_INCIDENT_TEMPLATE,
+    NEW_TG_INCIDENT_TEMPLATE,
+)
+from server.apps.bot.models import Channel
+from server.apps.core.models import MediaIncident
 
 logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 logger = logging.getLogger(__name__)
@@ -33,8 +36,11 @@ def prepare_message(inc: MediaIncident) -> str:
                 else inc.description[:3000] + "..."
             ),
             # Convert telehon adress to public telegram link
-            url=re.sub(r"https://t\.me/c/(?:-?\d+)(/\d+.*)",
-                       lambda m: f"{inc.source.public_tg_channel_link}{m.group(1)}", " ".join(inc.urls))
+            url=re.sub(
+                r"https://t\.me/c/(?:-?\d+)(/\d+.*)",
+                lambda m: f"{inc.source.public_tg_channel_link}{m.group(1)}",
+                " ".join(inc.urls),
+            ),
         )
     else:
         return NEW_INCIDENT_TEMPLATE.format(
@@ -66,24 +72,21 @@ def get_incident_post_data(inc: MediaIncident) -> IncidentPostData:
         incident_types__incident_type=inc.incident_type,
         incident_types__status=True,
         incident_types__subscriptions__country=inc.country,
-        incident_types__subscriptions__status=True
+        incident_types__subscriptions__status=True,
     )
 
     if inc.region:
         # Если есть регион, фильтруем по enabled_regions или "все регионы"
         region_query = base_query.filter(
             models.Q(
-                incident_types__subscriptions__enabled_regions__icontains=inc.region.name
-            ) | models.Q(
-                incident_types__subscriptions__enabled_regions__icontains="ALL"
+                incident_types__subscriptions__enabled_regions__icontains=inc.region.name  # noqa: E501
             )
+            | models.Q(incident_types__subscriptions__enabled_regions__icontains="ALL")
         )
-        channels = list(region_query.values_list(
-            'channel_id', flat=True).distinct())
+        channels = list(region_query.values_list("channel_id", flat=True).distinct())
     else:
         # Если региона нет, берем все подходящие каналы
-        channels = list(base_query.values_list(
-            'channel_id', flat=True).distinct())
+        channels = list(base_query.values_list("channel_id", flat=True).distinct())
 
     logger.debug(f"Created list of chn id's to send msg: {channels}")
 

@@ -1,7 +1,6 @@
 from rest_framework import viewsets
 
 
-
 from server.apps.core.models import MediaIncident
 
 

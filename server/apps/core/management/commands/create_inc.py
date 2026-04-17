@@ -3,7 +3,6 @@ import logging
 from datetime import date
 
 from django.core.management.base import BaseCommand
-
 from server.apps.bot.services.inc_post import post_incident
 from server.apps.core.models import (
     Article,
@@ -20,18 +19,20 @@ logger = logging.getLogger(__name__)
 class Command(BaseCommand):
     help = "Creates and saves an instance of MediaIncident"
 
-    def handle(self, *args, **kwargs):
+    def handle(self, *args, **kwargs):  # noqa: C901
         # Проверка и удаление существующего медиа инцидента
         try:
             existing_incident = MediaIncident.objects.get(title="Sample Article Title")
             if existing_incident:
                 logger.info(
-                    f"Media Incident with title 'Sample Article Title' already exists. Deleting the existing incident."
+                    "Media Incident with title 'Sample Article Title' already exists. "
+                    "Deleting the existing incident."
                 )
                 existing_incident.delete()
         except MediaIncident.DoesNotExist:
             logger.info(
-                f"No existing media incident found with title 'Sample Article Title'. Proceeding to create a new one."
+                "No existing media incident found with title 'Sample Article Title'. "
+                "Proceeding to create a new one."
             )
         except Exception as e:
             logger.error(
@@ -46,12 +47,14 @@ class Command(BaseCommand):
             )
             if existing_article:
                 logger.info(
-                    f"Article with URL 'https://example.com/sample-article' already exists. Deleting the existing article."
+                    "Article with URL 'https://example.com/sample-article' "  # noqa: E501
+                    "already exists. Deleting the existing article."
                 )
                 existing_article.delete()
         except Article.DoesNotExist:
             logger.info(
-                f"No existing article found with URL 'https://example.com/sample-article'. Proceeding to create a new one."
+                "No existing article found with URL 'https://example.com/sample-article'. "  # noqa: E501
+                "Proceeding to create a new one."
             )
         except Exception as e:
             logger.error(f"An error occurred while checking for existing articles: {e}")
@@ -91,7 +94,7 @@ class Command(BaseCommand):
                 source=None,  # Или существующий источник
                 url="https://example.com/sample-article",
                 title="Sample Article Title",
-                text="This is a sample article text used for creating a media incident.",
+                text="This is a sample article text used for creating a media incident.",  # noqa: E501
                 is_downloaded=True,
                 is_parsed=True,
                 is_incident_created=False,

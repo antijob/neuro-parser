@@ -34,7 +34,11 @@ class LlamaPredictor(PredictorBase):
         return incident_type.llm_prompt is not None
 
     def is_incident(self, article: Article) -> tuple[bool, Any]:
-        if not self.incident_type.llm_prompt or not article.text or len(article.text) < 200:
+        if (
+            not self.incident_type.llm_prompt
+            or not article.text
+            or len(article.text) < 200
+        ):
             return False, None
 
         title = article.any_title()
@@ -43,8 +47,9 @@ class LlamaPredictor(PredictorBase):
         # Обрезаем текст, оставляя 500 символов до и 500 после
         cut_text = full_text[:500] + full_text[-500:]
 
-        system_prompt = self.incident_type.llm_prompt + \
-            self.incident_type.llm_system_prompt
+        system_prompt = (
+            self.incident_type.llm_prompt + self.incident_type.llm_system_prompt
+        )
         try:
             model_input = {
                 "prompt": cut_text,
@@ -79,23 +84,28 @@ class LlamaPredictor(PredictorBase):
 
         except replicate.exceptions.ReplicateError as e:
             logger.error(
-                "Replicate API error occurred: %s", e,
+                "Replicate API error occurred: %s",
+                e,
             )
         except Exception as e:
             logger.error(
-                "Unexpected error occurred: %s", e,
+                "Unexpected error occurred: %s",
+                e,
             )
 
         return False, None
 
 
 def remove_emoji(string):
-    emoji_pattern = re.compile("["
-                               u"\U0001F600-\U0001F64F"  # emoticons
-                               u"\U0001F300-\U0001F5FF"  # symbols & pictographs
-                               u"\U0001F680-\U0001F6FF"  # transport & map symbols
-                               u"\U0001F1E0-\U0001F1FF"  # flags (iOS)
-                               u"\U00002702-\U000027B0"
-                               u"\U000024C2-\U0001F251"
-                               "]+", flags=re.UNICODE)
-    return emoji_pattern.sub(r'', string)
+    emoji_pattern = re.compile(
+        "["
+        "\U0001f600-\U0001f64f"  # emoticons
+        "\U0001f300-\U0001f5ff"  # symbols & pictographs
+        "\U0001f680-\U0001f6ff"  # transport & map symbols
+        "\U0001f1e0-\U0001f1ff"  # flags (iOS)
+        "\U00002702-\U000027b0"
+        "\U000024c2-\U0001f251"
+        "]+",
+        flags=re.UNICODE,
+    )
+    return emoji_pattern.sub(r"", string)

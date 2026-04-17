@@ -6,28 +6,34 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0005_alter_country_name'),
+        ("core", "0005_alter_country_name"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='article',
-            name='duplicate_url',
-            field=models.URLField(blank=True, null=True, verbose_name='Дубликат чего'),
+            model_name="article",
+            name="duplicate_url",
+            field=models.URLField(blank=True, null=True, verbose_name="Дубликат чего"),
         ),
         migrations.AddField(
-            model_name='article',
-            name='is_redirect',
-            field=models.BooleanField(default=False, verbose_name='Редирект'),
+            model_name="article",
+            name="is_redirect",
+            field=models.BooleanField(default=False, verbose_name="Редирект"),
         ),
         migrations.AddField(
-            model_name='article',
-            name='redirect_url',
-            field=models.URLField(blank=True, null=True, verbose_name='Редирект куда'),
+            model_name="article",
+            name="redirect_url",
+            field=models.URLField(blank=True, null=True, verbose_name="Редирект куда"),
         ),
         migrations.AlterField(
-            model_name='article',
-            name='url',
-            field=models.URLField(blank=True, default='', primary_key=True, serialize=False, verbose_name='URL'),
+            model_name="article",
+            name="url",
+            field=models.URLField(
+                blank=True,
+                default="",
+                primary_key=True,
+                serialize=False,
+                verbose_name="URL",
+            ),
         ),
     ]

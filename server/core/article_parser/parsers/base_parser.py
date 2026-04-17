@@ -1,7 +1,7 @@
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 from collections import namedtuple
-from server.libs.handler import Handler
 
+from server.libs.handler import Handler
 
 ArticleData = namedtuple("ArticleData", "title text date")
 

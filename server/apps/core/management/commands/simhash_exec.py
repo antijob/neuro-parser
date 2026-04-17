@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 
-from django.core.management.base import BaseCommand
-from django.core.management import call_command
-
-from simhash import SimhashIndex, Simhash
-from server.apps.core.models import Article
-import re
-from server.apps.simhash.reposts import get_orig, calc_ratio
 import logging
+import re
+
+from django.core.management.base import BaseCommand
+from server.apps.core.models import Article
+from server.apps.simhash.reposts import calc_ratio, get_orig
+from simhash import Simhash, SimhashIndex
 
 
 class Command(BaseCommand):

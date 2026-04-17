@@ -6,17 +6,17 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0006_auto_20240805_1949'),
+        ("core", "0006_auto_20240805_1949"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='incidenttype',
-            name='chat_gpt_prompt',
+            model_name="incidenttype",
+            name="chat_gpt_prompt",
         ),
         migrations.AddField(
-            model_name='incidenttype',
-            name='llm_prompt',
-            field=models.TextField(blank=True, null=True, verbose_name='LLM промпт'),
+            model_name="incidenttype",
+            name="llm_prompt",
+            field=models.TextField(blank=True, null=True, verbose_name="LLM промпт"),
         ),
     ]

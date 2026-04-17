@@ -7,7 +7,6 @@ from typing import Dict, List, Optional
 import aiohttp
 from asgiref.sync import sync_to_async
 from django.utils import timezone
-
 from server.apps.core.models import Proxy
 
 logger = logging.getLogger(__name__)
@@ -60,7 +59,7 @@ class ProxyValidator:
         for url in cls.TEST_URLS:
             for attempt in range(cls.MAX_RETRIES):
                 try:
-                    result = await cls._test_proxy_url(
+                    await cls._test_proxy_url(
                         proxy_url, proxy_login, proxy_pass, url
                     )
                     results.append(

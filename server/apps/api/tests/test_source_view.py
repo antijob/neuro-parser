@@ -1,5 +1,6 @@
 import pytest
 
+
 @pytest.mark.django_db
 def test_list_sources(api_client, source):
     response = api_client.get("/api/sources/")

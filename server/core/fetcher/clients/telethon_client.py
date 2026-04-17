@@ -1,20 +1,14 @@
+import asyncio
 import logging
 from typing import Any
-from telethon import TelegramClient
-import asyncio
-
-from server.core.fetcher.libs.url_parser import get_telegram_ids
 
 from server.apps.core.models import Article, Source
+from server.core.fetcher.libs.url_parser import get_telegram_ids
+from server.settings.components.telethon import TELEGRAM_API_HASH, TELEGRAM_API_ID
+from telethon import TelegramClient
+from telethon.tl.types import PeerChannel
 
 from .base_client import ClientBase
-from server.settings.components.telethon import (
-    TELEGRAM_API_HASH,
-    TELEGRAM_API_ID,
-)
-
-from telethon.tl.types import PeerUser, PeerChat, PeerChannel
-
 
 logging.basicConfig(level=logging.WARNING)
 logger = logging.getLogger(__name__)
@@ -53,7 +47,9 @@ class TelethonClient(ClientBase):
         logger.exception("TelethonClient: Release lock")
         TELETHON_LOCK = False
 
-    async def get_article(self, article: Article, source: Source, articles_to_create: list[Article] = None) -> Article:
+    async def get_article(
+        self, article: Article, source: Source, articles_to_create: list[Article] = None
+    ) -> Article:
         """Fetch and process article content from Telegram."""
         logger.info(f"Getting article: {article.url}")
 

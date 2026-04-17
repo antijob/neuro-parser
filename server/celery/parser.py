@@ -3,14 +3,13 @@ from datetime import datetime, timedelta
 from itertools import islice
 
 from celery import group
-
 from server.apps.bot.services.inc_post import get_incident_post_data
 from server.apps.core.models import Article
+from server.celery.bot import send_message_to_channel
 from server.core.article_index.query_checker import mark_duplicates
 from server.core.incident_predictor import IncidentPredictor
 from server.settings.components.celery import INCIDENT_BATCH_SIZE
 
-from server.celery.bot import send_message_to_channel
 from .celery_app import app
 
 logger = logging.getLogger("parser")
@@ -108,7 +107,7 @@ def create_incidents(batch):
                     int(incident_post_data.incident_id),
                 )
                 logger.debug(
-                    f"Messsage {incident_post_data.message[:100]} for chat {chn_id} was sent to post task"
+                    f"Messsage {incident_post_data.message[:100]} for chat {chn_id} was sent to post task"  # noqa: E501
                 )
                 results.append(task_result)
 

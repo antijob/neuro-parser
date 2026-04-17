@@ -7,13 +7,15 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0007_auto_20240819_1821'),
+        ("core", "0007_auto_20240819_1821"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='mediaincident',
-            name='region',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='core.region'),
+            model_name="mediaincident",
+            name="region",
+            field=models.ForeignKey(
+                null=True, on_delete=django.db.models.deletion.CASCADE, to="core.region"
+            ),
         ),
     ]

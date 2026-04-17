@@ -1,7 +1,7 @@
 from typing import Iterable, Optional
-from django.utils import timezone
 
 from server.apps.core.models import Article
+
 from .base_parser import ParserBase, Source
 
 

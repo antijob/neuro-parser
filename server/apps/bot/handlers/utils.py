@@ -1,12 +1,12 @@
-from server.apps.bot.models import Channel
-from django.core.exceptions import ObjectDoesNotExist
-from aiogram.types import CallbackQuery, Message
-from typing import Optional, Any, Union, Callable
-from functools import wraps
-
-import logging
 import inspect
+import logging
+from functools import wraps
+from typing import Any, Callable, Optional, Union
+
+from aiogram.types import CallbackQuery, Message
 from asgiref.sync import sync_to_async
+from django.core.exceptions import ObjectDoesNotExist
+from server.apps.bot.models import Channel
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +24,8 @@ async def chat_in_db(message: Message) -> Optional[Channel]:
     except ObjectDoesNotExist:
         await message.answer("Канал не найден в базе данных.", show_alert=True)
         logger.error(
-            f"Can't find channel {message.chat.id}, while executing __{inspect.stack()[1].function}__ function"
+            f"Can't find channel {message.chat.id}, while executing "
+            f"__{inspect.stack()[1].function}__ function"
         )
         return None
 

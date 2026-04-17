@@ -1,16 +1,12 @@
 import datetime
+
 import pytest
-from unittest.mock import patch, MagicMock
-
 from server.apps.core.models import Article
-
 from server.core.article_parser.article_parser import ArticleParser
-from server.core.article_parser.parsers.vk_parser import VkParser
+from server.core.article_parser.parsers.common_parser import CommonParser
 from server.core.article_parser.parsers.ok_parser import OkParser
 from server.core.article_parser.parsers.tg_parser import TgParser
-from server.core.article_parser.parsers.common_parser import CommonParser
-
-
+from server.core.article_parser.parsers.vk_parser import VkParser
 from server.libs.helpers import load_pytest_data
 
 

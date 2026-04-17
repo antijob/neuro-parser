@@ -1,5 +1,5 @@
 from django import forms
-from django.forms import Textarea, widgets
+from django.forms import Textarea
 
 from .models import Channel, ChannelCountry
 

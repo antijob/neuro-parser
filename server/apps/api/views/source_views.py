@@ -1,17 +1,12 @@
-from rest_framework import status, viewsets
-from rest_framework.response import Response
-from rest_framework.decorators import action
-from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
+from rest_framework import status, viewsets
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from server.apps.core.models import Article, MediaIncident, Source
 
-
-from server.apps.core.models import Source, Article, MediaIncident
-from ..serializers import (
-    MediaIncidentSerializer,
-    ArticleSerializer,
-    SourceSerializer,
-)
 from ..permissions import IsAdminOrReadOnly
+from ..serializers import ArticleSerializer, MediaIncidentSerializer, SourceSerializer
 
 
 class SourceViewSet(viewsets.ModelViewSet):
@@ -69,7 +64,7 @@ class SourceViewSet(viewsets.ModelViewSet):
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
     @swagger_auto_schema(
-        operation_description="Retrieve articles by source URL with optional filtering and sorting",
+        operation_description="Retrieve articles by source URL with optional filtering and sorting",  # noqa: E501
         manual_parameters=[
             openapi.Parameter(
                 "url",
@@ -143,7 +138,7 @@ class SourceViewSet(viewsets.ModelViewSet):
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
     @swagger_auto_schema(
-        operation_description="Retrieve media incidents by source with optional filtering and sorting",
+        operation_description="Retrieve media incidents by source with optional filtering and sorting",  # noqa: E501
         manual_parameters=[
             openapi.Parameter(
                 "limit",
@@ -285,7 +280,7 @@ class SourceViewSet(viewsets.ModelViewSet):
     # @swagger_auto_schema(
     #     operation_description="Retrieve source by URL",
     #     manual_parameters=[
-    #         openapi.Parameter('url', openapi.IN_QUERY, description="URL of the source", type=openapi.TYPE_STRING),
+    #         openapi.Parameter('url', openapi.IN_QUERY, description="URL of the source", type=openapi.TYPE_STRING),  # noqa: E501
     #     ],
     #     responses={200: SourceSerializer}
     # )
@@ -295,7 +290,7 @@ class SourceViewSet(viewsets.ModelViewSet):
     #     try:
     #         url = request.query_params.get('url')
     #         if not url:
-    #             return Response({'error': 'URL is required'}, status=status.HTTP_400_BAD_REQUEST)
+    #             return Response({'error': 'URL is required'}, status=status.HTTP_400_BAD_REQUEST)  # noqa: E501
 
     #         source = Source.objects.get(url=url)
     #         serializer = self.get_serializer(source)

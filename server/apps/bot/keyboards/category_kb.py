@@ -4,12 +4,11 @@ from aiogram.filters.callback_data import CallbackData
 from aiogram.types import InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from asgiref.sync import sync_to_async
-
 from server.apps.bot.data.settings import CHECK, CROSS, SETTINGS
 from server.apps.bot.models import Channel, ChannelIncidentType
 
 
-### Dataclases buttons in category keyboard
+# Dataclases buttons in category keyboard
 class Action(str, Enum):
     update = "update"
     config = "config"
@@ -23,7 +22,8 @@ class CategoryCallbackFactory(CallbackData, prefix="cat"):
 @sync_to_async
 def category_keyboard(chn: Channel) -> InlineKeyboardMarkup:
     """
-    Creates inline keyboard for all types of incidents that we have in IncidentType model.
+    Creates inline keyboard for all types of incidents
+    that we have in IncidentType model.
     """
     types = ChannelIncidentType.objects.filter(channel=chn, show=True).order_by("id")
     builder = InlineKeyboardBuilder()

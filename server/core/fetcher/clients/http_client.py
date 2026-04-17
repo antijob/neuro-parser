@@ -1,8 +1,7 @@
 import logging
-from typing import Optional, List
+from typing import List, Optional
 
 import aiohttp
-
 from server.apps.core.models import Article, Source
 from server.core.article_parser import ArticleParser
 from server.core.fetcher.libs.exceptions import BadCodeException
@@ -26,7 +25,7 @@ class HttpClient(ClientBase):
         self.proxy_login = login
         self.proxy_password = password
         logger.info(
-            f"HttpClient initialized with proxy: {proxy}, login: {login}, password: {'*' * len(password) if password else None}"
+            f"HttpClient initialized with proxy: {proxy}, login: {login}, password: {'*' * len(password) if password else None}"  # noqa: E501
         )
 
     @staticmethod
@@ -90,21 +89,25 @@ class HttpClient(ClientBase):
 
                 if response.ok:
                     # Try to get encoding from response headers
-                    encoding = response.charset or 'utf-8'
+                    encoding = response.charset or "utf-8"
                     try:
                         content = await response.text(encoding=encoding)
                     except UnicodeDecodeError:
                         # If that fails, try common Russian encodings
-                        for enc in ['utf-8', 'windows-1251', 'cp1251', 'koi8-r']:
+                        for enc in ["utf-8", "windows-1251", "cp1251", "koi8-r"]:
                             try:
                                 content = await response.text(encoding=enc)
-                                logger.info(f"Successfully decoded content using {enc} encoding")
+                                logger.info(
+                                    f"Successfully decoded content using {enc} encoding"
+                                )
                                 break
                             except UnicodeDecodeError:
                                 continue
                         else:
-                            raise UnicodeDecodeError(f"Failed to decode content with any common encoding")
-                    
+                            raise UnicodeDecodeError(
+                                "Failed to decode content with any common encoding"
+                            )
+
                     logger.debug(f"Response body (first 500 chars): {content[:500]}...")
                     return [content, str(response.url)]
                 else:
@@ -114,7 +117,9 @@ class HttpClient(ClientBase):
             logger.info(f"An error occurred during the request: {str(e)}")
             raise
 
-    async def get_article(self, article: Article, source: Source, articles_to_create: List[Article] = None) -> Article:
+    async def get_article(
+        self, article: Article, source: Source, articles_to_create: List[Article] = None
+    ) -> Article:
         logger.info(f"Getting article: {article.url}")
         url = URLPreparer.article(article.url)
         content, resolved_url = await self.get(url)

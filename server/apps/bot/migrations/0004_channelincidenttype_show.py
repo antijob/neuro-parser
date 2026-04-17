@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('bot', '0003_auto_20240710_1036'),
+        ("bot", "0003_auto_20240710_1036"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='channelincidenttype',
-            name='show',
+            model_name="channelincidenttype",
+            name="show",
             field=models.BooleanField(default=True),
         ),
     ]

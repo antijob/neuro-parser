@@ -1,17 +1,18 @@
 from rest_framework import serializers
-from ..core.models import BaseIncident, MediaIncident, IncidentType, Article, Source
+
+from ..core.models import Article, IncidentType, MediaIncident, Source
 
 
 class IncidentTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = IncidentType
         fields = [
-            'id',
-            'description',
-            'treshold',
-            'llm_prompt',
-            'is_active',
-            'should_sent_to_bot',
+            "id",
+            "description",
+            "treshold",
+            "llm_prompt",
+            "is_active",
+            "should_sent_to_bot",
         ]
 
 
@@ -36,33 +37,34 @@ class IncidentTypeSerializer(serializers.ModelSerializer):
 #             'public_description'
 #         ]
 
+
 class MediaIncidentSerializer(serializers.ModelSerializer):
     class Meta:
         model = MediaIncident
         # fields = BaseIncidentSerializer.Meta.fields
         fields = [
-            'title',
-            'description',
-            'status',
-            'create_date',
-            'update_date',
+            "title",
+            "description",
+            "status",
+            "create_date",
+            "update_date",
             # 'assigned_to', # exclude
-            'region',
-            'incident_type',
-            'count',
-            'urls',
-            'public_title',
-            'public_description'
+            "region",
+            "incident_type",
+            "count",
+            "urls",
+            "public_title",
+            "public_description",
         ]
 
 
 class ArticleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Article
-        fields = '__all__'
+        fields = "__all__"
 
 
 class SourceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Source
-        fields = '__all__'
+        fields = "__all__"

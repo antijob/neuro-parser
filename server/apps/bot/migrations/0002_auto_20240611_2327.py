@@ -7,41 +7,79 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('bot', '0001_initial'),
-        ('core', '0005_alter_country_name'),
+        ("bot", "0001_initial"),
+        ("core", "0005_alter_country_name"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='channel',
-            options={'verbose_name': 'Чат', 'verbose_name_plural': 'Чаты'},
+            name="channel",
+            options={"verbose_name": "Чат", "verbose_name_plural": "Чаты"},
         ),
         migrations.CreateModel(
-            name='RegionStatus',
+            name="RegionStatus",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('status', models.BooleanField(default=True)),
-                ('channel', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='bot.channel')),
-                ('region', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='core.region')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("status", models.BooleanField(default=True)),
+                (
+                    "channel",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="bot.channel"
+                    ),
+                ),
+                (
+                    "region",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="core.region"
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='CountryStatus',
+            name="CountryStatus",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('status', models.BooleanField(default=True)),
-                ('channel', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='bot.channel')),
-                ('country', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='core.country')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("status", models.BooleanField(default=True)),
+                (
+                    "channel",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="bot.channel"
+                    ),
+                ),
+                (
+                    "country",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="core.country"
+                    ),
+                ),
             ],
         ),
         migrations.AddField(
-            model_name='channel',
-            name='country',
-            field=models.ManyToManyField(through='bot.CountryStatus', to='core.Country'),
+            model_name="channel",
+            name="country",
+            field=models.ManyToManyField(
+                through="bot.CountryStatus", to="core.Country"
+            ),
         ),
         migrations.AddField(
-            model_name='channel',
-            name='region',
-            field=models.ManyToManyField(through='bot.RegionStatus', to='core.Region'),
+            model_name="channel",
+            name="region",
+            field=models.ManyToManyField(through="bot.RegionStatus", to="core.Region"),
         ),
     ]
