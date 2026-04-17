@@ -1,10 +1,9 @@
-import logging
-from django.utils import timezone
-
-from typing import Optional
 import datetime
+import logging
+from typing import Optional
 
-from server.apps.core.models import IncidentType, Article, MediaIncident
+from django.utils import timezone
+from server.apps.core.models import Article, IncidentType, MediaIncident
 from server.libs.handler import HandlerRegistry
 
 from .predictors.base_predictor import PredictorBase

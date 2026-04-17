@@ -1,20 +1,14 @@
+import asyncio
 import logging
 from typing import Any
-from telethon import TelegramClient
-import asyncio
-
-from server.core.fetcher.libs.url_parser import get_telegram_ids
 
 from server.apps.core.models import Article, Source
-
-from .base_client import ClientBase
-from server.settings.components.telethon import (
-    TELEGRAM_API_HASH,
-    TELEGRAM_API_ID,
-)
-
+from server.core.fetcher.libs.url_parser import get_telegram_ids
+from server.settings.components.telethon import TELEGRAM_API_HASH, TELEGRAM_API_ID
+from telethon import TelegramClient
 from telethon.tl.types import PeerChannel
 
+from .base_client import ClientBase
 
 logging.basicConfig(level=logging.WARNING)
 logger = logging.getLogger(__name__)

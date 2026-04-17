@@ -1,7 +1,6 @@
 import os
 
 from django import forms
-
 from server.settings.components.common import MODELS_DIR
 
 from .models import IncidentType, Source

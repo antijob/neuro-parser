@@ -3,7 +3,6 @@ import logging
 from datetime import date
 
 from django.core.management.base import BaseCommand
-
 from server.apps.bot.services.inc_post import post_incident
 from server.apps.core.models import (
     Article,

@@ -1,16 +1,16 @@
+import datetime
 import logging
 from typing import Any
-import datetime
+
+from server.apps.core.models import Article
+from server.libs.handler import HandlerRegistry
 from server.settings.components.predict import INCORRECT_ARTICLE_LENGTH
 
 from .parsers.base_parser import ArticleData, ParserBase
+from .parsers.common_parser import CommonParser
+from .parsers.ok_parser import OkParser
 from .parsers.tg_parser import TgParser
 from .parsers.vk_parser import VkParser
-from .parsers.ok_parser import OkParser
-from .parsers.common_parser import CommonParser
-from server.apps.core.models import Article
-from server.libs.handler import HandlerRegistry
-
 
 # Configure logging
 logger = logging.getLogger(__name__)

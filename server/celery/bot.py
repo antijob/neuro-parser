@@ -3,7 +3,6 @@ import logging
 
 from aiogram.exceptions import TelegramForbiddenError, TelegramRetryAfter
 from celery.signals import celeryd_init, worker_shutdown
-
 from server.apps.bot.bot_instance import get_bot_instance
 from server.apps.bot.keyboards.downvote_kb import downvote_keyboard
 

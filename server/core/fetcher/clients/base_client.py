@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
-from typing import Union, Any
+from typing import Any, Union
 
-from server.apps.core.models import Source, Article
+from server.apps.core.models import Article, Source
 
 # ClientSourceData may be raw html data, list of urls,
 # list of built Articles, dict of urls and relevant data or None

@@ -1,13 +1,11 @@
 import pytest
-
 from server.apps.core.models import Source
-
-from server.core.source_parser.source_parser import SourceParser
-from server.core.source_parser.parsers.vk_parser import VkParser
-from server.core.source_parser.parsers.ok_parser import OkParser
-from server.core.source_parser.parsers.tg_parser import TgParser
-from server.core.source_parser.parsers.rss_parser import RssParser
 from server.core.source_parser.parsers.common_parser import CommonParser
+from server.core.source_parser.parsers.ok_parser import OkParser
+from server.core.source_parser.parsers.rss_parser import RssParser
+from server.core.source_parser.parsers.tg_parser import TgParser
+from server.core.source_parser.parsers.vk_parser import VkParser
+from server.core.source_parser.source_parser import SourceParser
 
 
 @pytest.mark.parametrize(

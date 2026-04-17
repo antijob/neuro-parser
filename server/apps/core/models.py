@@ -8,7 +8,6 @@ from django.db import models
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
-
 from server.apps.core.data.llm import LLM_TEMPLATE_DEFAULT, SYSTEM_LLM_PROMPT_DEFAULT
 from server.apps.core.data.regions import COUNTRIES, REGIONS
 from server.apps.users.models import User

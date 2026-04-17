@@ -1,6 +1,7 @@
 from typing import Iterable, Optional
 
 from server.apps.core.models import Article
+
 from .base_parser import ParserBase, Source
 
 

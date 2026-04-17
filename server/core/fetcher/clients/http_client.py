@@ -1,8 +1,7 @@
 import logging
-from typing import Optional, List
+from typing import List, Optional
 
 import aiohttp
-
 from server.apps.core.models import Article, Source
 from server.core.article_parser import ArticleParser
 from server.core.fetcher.libs.exceptions import BadCodeException

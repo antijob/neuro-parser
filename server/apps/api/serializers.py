@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from ..core.models import MediaIncident, IncidentType, Article, Source
+
+from ..core.models import Article, IncidentType, MediaIncident, Source
 
 
 class IncidentTypeSerializer(serializers.ModelSerializer):

@@ -8,7 +8,6 @@ from aiogram.filters.chat_member_updated import (
 )
 from aiogram.types import ChatMemberUpdated
 from asgiref.sync import sync_to_async
-
 from server.apps.bot.data.messages import ADD_MESSAGE
 from server.apps.bot.models import Channel
 from server.apps.bot.services.country import create_settings

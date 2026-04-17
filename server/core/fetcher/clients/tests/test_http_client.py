@@ -1,8 +1,8 @@
 import pytest
-from server.core.fetcher.clients import HttpClient
-from server.core.fetcher.libs.exceptions import BadCodeException
 from server.apps.core.models import Article
 from server.core.article_parser import ArticleParser
+from server.core.fetcher.clients import HttpClient
+from server.core.fetcher.libs.exceptions import BadCodeException
 
 
 @pytest.mark.django_db(transaction=True)

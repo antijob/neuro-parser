@@ -7,7 +7,6 @@ from typing import Dict, List, Optional
 import aiohttp
 from asgiref.sync import sync_to_async
 from django.utils import timezone
-
 from server.apps.core.models import Proxy
 
 logger = logging.getLogger(__name__)

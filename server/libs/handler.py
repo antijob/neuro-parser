@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import TypeVar, Type, Generic
+from typing import Generic, Type, TypeVar
 
 # Define a type variable constrained to Handler subclasses
 

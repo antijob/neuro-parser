@@ -1,15 +1,14 @@
 import logging
-from typing import Optional, Tuple, List
+from typing import List, Optional, Tuple
 
 import aiohttp
-
 from server.apps.core.models import Article, Source
 from server.core.article_parser import ArticleParser
+from server.core.fetcher.clients.http_client import HttpClient
 from server.core.fetcher.libs.exceptions import BadCodeException, ProxyException
 from server.core.fetcher.libs.proxy import ProxyData, ProxyManager
 from server.core.fetcher.libs.url_preparer import URLPreparer
 from server.core.fetcher.libs.user_agent import session_random_headers
-from server.core.fetcher.clients.http_client import HttpClient
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)

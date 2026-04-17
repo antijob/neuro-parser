@@ -5,8 +5,8 @@ from server.apps.core.models import Article, Source
 from server.core.fetcher.libs.proxy import ProxyManager
 
 from .http_client import HttpClient
-from .telethon_client import TelethonClient
 from .http_proxy import HttpProxyClient
+from .telethon_client import TelethonClient
 
 logger = logging.getLogger("parser")
 

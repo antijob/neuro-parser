@@ -4,13 +4,8 @@ from asgiref.sync import async_to_sync
 from django.contrib import admin, messages
 from django.shortcuts import render
 from django.utils.translation import gettext_lazy as _
-
 from server.apps.bot.bot_instance import get_bot
-from server.apps.bot.models import (
-    Channel,
-    ChannelCountry,
-    ChannelIncidentType,
-)
+from server.apps.bot.models import Channel, ChannelCountry, ChannelIncidentType
 
 from .forms import BroadcastForm, ChannelCountryForm
 

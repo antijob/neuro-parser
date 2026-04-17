@@ -1,7 +1,7 @@
 from abc import abstractmethod
 from typing import Any
 
-from server.apps.core.models import IncidentType, Article
+from server.apps.core.models import Article, IncidentType
 from server.libs.handler import Handler
 
 

@@ -4,7 +4,6 @@ from aiogram.filters.callback_data import CallbackData
 from aiogram.types import InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from asgiref.sync import sync_to_async
-
 from server.apps.bot.data.settings import CHECK, CROSS, SETTINGS
 from server.apps.bot.models import Channel, ChannelIncidentType
 

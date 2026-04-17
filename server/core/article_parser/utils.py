@@ -1,7 +1,8 @@
 # Some functions that used across different modules
-import dateparser
-from datetime import datetime
 import re
+from datetime import datetime
+
+import dateparser
 
 
 def get_first_sentence(text: str) -> str:

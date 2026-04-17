@@ -1,17 +1,12 @@
-from rest_framework import status, viewsets
-from rest_framework.response import Response
-from rest_framework.decorators import action
-from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
+from rest_framework import status, viewsets
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from server.apps.core.models import Article, MediaIncident, Source
 
-
-from server.apps.core.models import Source, Article, MediaIncident
-from ..serializers import (
-    MediaIncidentSerializer,
-    ArticleSerializer,
-    SourceSerializer,
-)
 from ..permissions import IsAdminOrReadOnly
+from ..serializers import ArticleSerializer, MediaIncidentSerializer, SourceSerializer
 
 
 class SourceViewSet(viewsets.ModelViewSet):

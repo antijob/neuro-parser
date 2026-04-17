@@ -1,9 +1,6 @@
 from django.contrib import admin
-
 from server.apps.core.admins.actions.activate_source_action import activate_source
-from server.apps.core.admins.actions.deactivate_source_action import (
-    deactivate_source,
-)
+from server.apps.core.admins.actions.deactivate_source_action import deactivate_source
 from server.apps.core.admins.actions.disable_models_action import disable_models
 from server.apps.core.admins.actions.downvoted_incident_action import (
     downvoted_incidents,

@@ -3,7 +3,6 @@ import sys
 
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-
 from server.apps.bot.models import Channel
 from server.apps.bot.services.country import create_settings
 
@@ -26,6 +25,6 @@ def incidenttype_post_save(sender, instance, created, **kwargs):
                 create_settings(chn)
             except Exception as e:
                 logger.error(
-                  f"An error in signal on creation TypeStatus: {e} "
-                  f"\nInstance: {instance.id}"
+                    f"An error in signal on creation TypeStatus: {e} "
+                    f"\nInstance: {instance.id}"
                 )

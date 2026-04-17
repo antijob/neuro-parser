@@ -1,15 +1,15 @@
 import logging
+import re
 import sys
 from dataclasses import dataclass
-import re
 
+from django.db import models
 from server.apps.bot.data.messages import (
     NEW_INCIDENT_TEMPLATE,
     NEW_TG_INCIDENT_TEMPLATE,
 )
 from server.apps.bot.models import Channel
 from server.apps.core.models import MediaIncident
-from django.db import models
 
 logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 logger = logging.getLogger(__name__)
