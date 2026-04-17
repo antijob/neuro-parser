@@ -1,4 +1,7 @@
 
+from aiohttp import ClientError  # noqa: F401
+
+
 class BadCodeException(Exception):
     def __init__(self, code):
         super().__init__("Bad code")
