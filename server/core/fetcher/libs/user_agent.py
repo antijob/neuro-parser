@@ -29,6 +29,7 @@ ACCEPT_LANGUAGES = [
     "ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3",
 ]
 
+
 def random_headers():
     ua = choice(USER_AGENTS)
     accept_language = choice(ACCEPT_LANGUAGES)
@@ -42,6 +43,7 @@ def random_headers():
         "Upgrade-Insecure-Requests": "1",
     }
     return head
+
 
 def session_random_headers():
     head = random_headers()

@@ -26,5 +26,6 @@ def incidenttype_post_save(sender, instance, created, **kwargs):
                 create_settings(chn)
             except Exception as e:
                 logger.error(
-                    f"An error in signal on creation TypeStatus: {e} \nInstance: {instance.id}"
+                  f"An error in signal on creation TypeStatus: {e} "
+                  f"\nInstance: {instance.id}"
                 )

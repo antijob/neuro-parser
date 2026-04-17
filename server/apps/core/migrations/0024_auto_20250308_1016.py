@@ -7,18 +7,27 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0023_source_name'),
+        ("core", "0023_source_name"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='article',
-            name='is_incorrect',
-            field=models.BooleanField(default=False, verbose_name='Некорректная статья'),
+            model_name="article",
+            name="is_incorrect",
+            field=models.BooleanField(
+                default=False, verbose_name="Некорректная статья"
+            ),
         ),
         migrations.AlterField(
-            model_name='article',
-            name='source',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='article', to='core.source', verbose_name='Источник'),
+            model_name="article",
+            name="source",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="article",
+                to="core.source",
+                verbose_name="Источник",
+            ),
         ),
     ]

@@ -65,7 +65,8 @@ class ChannelAdmin(admin.ModelAdmin):
                 success_count = async_to_sync(send_messages)()
                 self.message_user(
                     request,
-                    f"Сообщение отправлено в {success_count} каналов из {len(channels)}",
+                    f"Сообщение отправлено в {success_count} каналов "
+                    f"из {len(channels)}",
                     level=messages.INFO,
                 )
                 return None

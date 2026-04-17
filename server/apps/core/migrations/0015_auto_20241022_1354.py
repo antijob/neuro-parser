@@ -7,23 +7,30 @@ import django.utils.timezone
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0014_article_url_fields_length'),
+        ("core", "0014_article_url_fields_length"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='incidenttype',
-            name='llm_template',
-            field=models.TextField(blank=True, default='<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\n{system_prompt}<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n{prompt}<|eot_id|><|start_header_id|>assistant<|end_header_id|>', null=True, verbose_name='LLM шаблон'),
+            model_name="incidenttype",
+            name="llm_template",
+            field=models.TextField(
+                blank=True,
+                default="<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\n{system_prompt}<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n{prompt}<|eot_id|><|start_header_id|>assistant<|end_header_id|>",
+                null=True,
+                verbose_name="LLM шаблон",
+            ),
         ),
         migrations.AlterField(
-            model_name='mediaincident',
-            name='create_date',
-            field=models.DateTimeField(default=django.utils.timezone.now, verbose_name='Дата создания'),
+            model_name="mediaincident",
+            name="create_date",
+            field=models.DateTimeField(
+                default=django.utils.timezone.now, verbose_name="Дата создания"
+            ),
         ),
         migrations.AlterField(
-            model_name='mediaincident',
-            name='update_date',
-            field=models.DateTimeField(auto_now=True, verbose_name='Дата обновления'),
+            model_name="mediaincident",
+            name="update_date",
+            field=models.DateTimeField(auto_now=True, verbose_name="Дата обновления"),
         ),
     ]

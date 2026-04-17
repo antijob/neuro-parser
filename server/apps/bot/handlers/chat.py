@@ -32,7 +32,8 @@ async def new_chat_member(event: ChatMemberUpdated, bot: Bot):
         await sync_to_async(create_settings)(channel)
     except Exception as e:
         logger.error(
-            f"Error in add bot in chat {event.chat.title} with id: {event.chat.id} exception happend: {e}"
+            f"Error in add bot in chat {event.chat.title} "
+            f"with id: {event.chat.id} exception happend: {e}"
         )
 
     await event.answer(f"Бот добавлен в чат - {event.chat.title}. {ADD_MESSAGE}")
@@ -45,7 +46,8 @@ async def left_chat_member(event: ChatMemberUpdated, bot: Bot):
     """
 
     logger.info(
-        f"Left chat member event triggered. Bot ID: {bot.id}, Left member ID: {event.old_chat_member.user.id}"
+        f"Left chat member event triggered. Bot ID: {bot.id}, "
+        f"Left member ID: {event.old_chat_member.user.id}"
     )
 
     if event.old_chat_member.user.id != bot.id:

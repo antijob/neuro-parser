@@ -9,12 +9,12 @@ from sentry_sdk.integrations.django import DjangoIntegration
 
 from decouple import config as c
 
-c.path = '../../../.env'
-SENTRY_DSN = c('SENTRY_DSN')
+c.path = "../../../.env"
+SENTRY_DSN = c("SENTRY_DSN")
 
 
 def before_send(event, hint):
-    if event.get('level') == 'warning':
+    if event.get("level") == "warning":
         return None
     return event
 

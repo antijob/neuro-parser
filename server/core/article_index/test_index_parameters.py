@@ -1,5 +1,5 @@
-from .query_checker import RATIO_THRESHOLD, reindex_and_detect_duplicates
-from .article_index import SIMHASH_DIMENSION, SIMHASH_TOLERANCE
+from .query_checker import RATIO_THRESHOLD, reindex_and_detect_duplicates  # noqa: F401
+from .article_index import SIMHASH_DIMENSION, SIMHASH_TOLERANCE  # noqa: F401
 from typing import Tuple
 from datetime import datetime, timedelta
 

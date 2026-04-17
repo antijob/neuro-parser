@@ -13,7 +13,7 @@ from server.settings.components.telethon import (
     TELEGRAM_API_ID,
 )
 
-from telethon.tl.types import PeerUser, PeerChat, PeerChannel
+from telethon.tl.types import PeerChannel
 
 
 logging.basicConfig(level=logging.WARNING)
@@ -53,7 +53,9 @@ class TelethonClient(ClientBase):
         logger.exception("TelethonClient: Release lock")
         TELETHON_LOCK = False
 
-    async def get_article(self, article: Article, source: Source, articles_to_create: list[Article] = None) -> Article:
+    async def get_article(
+        self, article: Article, source: Source, articles_to_create: list[Article] = None
+    ) -> Article:
         """Fetch and process article content from Telegram."""
         logger.info(f"Getting article: {article.url}")
 

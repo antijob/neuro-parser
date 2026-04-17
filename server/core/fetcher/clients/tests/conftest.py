@@ -1,4 +1,3 @@
-from itertools import count
 import pytest
 from server.apps.core.models import Article, Source, Country
 from aioresponses import aioresponses

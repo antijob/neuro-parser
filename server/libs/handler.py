@@ -26,7 +26,8 @@ T = TypeVar("T", bound=Handler)
 class HandlerRegistry(Generic[T]):
     """
     A registry for managing and selecting handlers based on their 'can_handle' method.
-    This version uses generics to enforce that registered classes are subclasses of Handler.
+    This version uses generics to enforce that registered classes
+    are subclasses of Handler.
     """
 
     def __init__(self):
@@ -39,12 +40,13 @@ class HandlerRegistry(Generic[T]):
         if issubclass(handler_class, Handler):
             self._handlers.append(handler_class)
         else:
-            raise TypeError(f"{handler_class.__name__} must be a subclass of 'Handler'")
+            raise TypeError(f"{handler_class.__name__} must be a subclass of 'Handler'")  # noqa: E501
 
     def choose(self, *args, **kwargs) -> T:
         """
         Chooses the appropriate handler by checking their 'can_handle' method.
-        Returns an instance of the first handler class that can handle the given arguments.
+        Returns an instance of the first handler class that can handle
+        the given arguments.
         """
         for handler_class in self._handlers:
             if handler_class.can_handle(*args, **kwargs):

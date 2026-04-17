@@ -6,23 +6,23 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0017_auto_20250119_2344'),
+        ("core", "0017_auto_20250119_2344"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='proxy',
-            name='error_message',
+            model_name="proxy",
+            name="error_message",
             field=models.TextField(blank=True, null=True),
         ),
         migrations.AlterField(
-            model_name='proxy',
-            name='error_type',
+            model_name="proxy",
+            name="error_type",
             field=models.CharField(blank=True, max_length=50, null=True),
         ),
         migrations.AlterField(
-            model_name='proxy',
-            name='last_check',
+            model_name="proxy",
+            name="last_check",
             field=models.DateTimeField(blank=True, null=True),
         ),
     ]

@@ -7,28 +7,30 @@ import django.utils.timezone
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0016_auto_20241101_0026'),
+        ("core", "0016_auto_20241101_0026"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='proxy',
-            name='error_message',
+            model_name="proxy",
+            name="error_message",
             field=models.TextField(null=True),
         ),
         migrations.AddField(
-            model_name='proxy',
-            name='error_type',
+            model_name="proxy",
+            name="error_type",
             field=models.CharField(max_length=50, null=True),
         ),
         migrations.AddField(
-            model_name='proxy',
-            name='last_check',
+            model_name="proxy",
+            name="last_check",
             field=models.DateTimeField(null=True),
         ),
         migrations.AlterField(
-            model_name='article',
-            name='create_date',
-            field=models.DateTimeField(default=django.utils.timezone.now, verbose_name='Дата создания'),
+            model_name="article",
+            name="create_date",
+            field=models.DateTimeField(
+                default=django.utils.timezone.now, verbose_name="Дата создания"
+            ),
         ),
     ]

@@ -6,22 +6,24 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0024_auto_20250308_1016'),
+        ("core", "0024_auto_20250308_1016"),
     ]
 
     operations = [
         migrations.RenameField(
-            model_name='source',
-            old_name='name',
-            new_name='public_tg_channel_link',
+            model_name="source",
+            old_name="name",
+            new_name="public_tg_channel_link",
         ),
         migrations.RemoveField(
-            model_name='source',
-            name='is_tg_hidden',
+            model_name="source",
+            name="is_tg_hidden",
         ),
         migrations.AddField(
-            model_name='source',
-            name='is_telethon',
-            field=models.BooleanField(default=False, verbose_name='Парсинг через телетон'),
+            model_name="source",
+            name="is_telethon",
+            field=models.BooleanField(
+                default=False, verbose_name="Парсинг через телетон"
+            ),
         ),
     ]

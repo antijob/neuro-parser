@@ -6,13 +6,35 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0004_changes_region_country'),
+        ("core", "0004_changes_region_country"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='country',
-            name='name',
-            field=models.CharField(choices=[('ARM', 'Армения'), ('AZE', 'Азербайджан'), ('BLR', 'Беларусь'), ('EST', 'Эстония'), ('GEO', 'Грузия'), ('KAZ', 'Казахстан'), ('KGZ', 'Киргизия'), ('LVA', 'Латвия'), ('LTU', 'Литва'), ('MDA', 'Молдова'), ('RUS', 'Россия'), ('TJK', 'Таджикистан'), ('TKM', 'Туркменистан'), ('UKR', 'Украина'), ('UZB', 'Узбекистан'), ('DEU', 'Германия')], default='RUS', max_length=100, verbose_name='Страна'),
+            model_name="country",
+            name="name",
+            field=models.CharField(
+                choices=[
+                    ("ARM", "Армения"),
+                    ("AZE", "Азербайджан"),
+                    ("BLR", "Беларусь"),
+                    ("EST", "Эстония"),
+                    ("GEO", "Грузия"),
+                    ("KAZ", "Казахстан"),
+                    ("KGZ", "Киргизия"),
+                    ("LVA", "Латвия"),
+                    ("LTU", "Литва"),
+                    ("MDA", "Молдова"),
+                    ("RUS", "Россия"),
+                    ("TJK", "Таджикистан"),
+                    ("TKM", "Туркменистан"),
+                    ("UKR", "Украина"),
+                    ("UZB", "Узбекистан"),
+                    ("DEU", "Германия"),
+                ],
+                default="RUS",
+                max_length=100,
+                verbose_name="Страна",
+            ),
         ),
     ]

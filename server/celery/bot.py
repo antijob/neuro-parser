@@ -40,7 +40,6 @@ class SendMessageTask(app.Task):
 
 @app.task(base=SendMessageTask)
 def send_message_to_channel(msg: str, chat_id: int, inc_id: int = 0):
-    global bot
     logger.info(
         f"Starting send_message_to_channel for chat_id: {chat_id}, inc_id: {inc_id}"
     )

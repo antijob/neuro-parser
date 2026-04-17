@@ -45,9 +45,13 @@ async def add_articles(
         url_to_article_map[url] = article_obj
 
     # Get all existing URLs in a single query
-    existing_urls = set(await sync_to_async(lambda: list(
-        Article.objects.filter(url__in=all_urls).values_list('url', flat=True)
-    ))())
+    existing_urls = set(
+        await sync_to_async(
+            lambda: list(
+                Article.objects.filter(url__in=all_urls).values_list("url", flat=True)
+            )
+        )()
+    )
 
     # Add only articles with URLs that don't exist yet
     for url, article in url_to_article_map.items():

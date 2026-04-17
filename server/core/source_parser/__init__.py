@@ -1,1 +1,1 @@
-from .source_parser import SourceParser
+from .source_parser import SourceParser  # noqa: F401

@@ -6,17 +6,22 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0011_auto_20240918_1824'),
+        ("core", "0011_auto_20240918_1824"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='incidenttype',
-            name='llm_system_promt',
+            model_name="incidenttype",
+            name="llm_system_promt",
         ),
         migrations.AddField(
-            model_name='incidenttype',
-            name='llm_system_prompt',
-            field=models.TextField(blank=True, default='Ты - модель, которая отвечает на вопросы только символами `+` или `-`. Если вопрос подразумевает утвердительный ответ, ответь `+`. Если вопрос подразумевает отрицательный ответ, ответь `-`. Ответ должен состоять только из одного символа `+` или `-`, без дополнительного текста. Отвечать по пунктам не нужно, отвечай на общий контекст текста.', null=True, verbose_name='LLM системный промпт'),
+            model_name="incidenttype",
+            name="llm_system_prompt",
+            field=models.TextField(
+                blank=True,
+                default="Ты - модель, которая отвечает на вопросы только символами `+` или `-`. Если вопрос подразумевает утвердительный ответ, ответь `+`. Если вопрос подразумевает отрицательный ответ, ответь `-`. Ответ должен состоять только из одного символа `+` или `-`, без дополнительного текста. Отвечать по пунктам не нужно, отвечай на общий контекст текста.",
+                null=True,
+                verbose_name="LLM системный промпт",
+            ),
         ),
     ]

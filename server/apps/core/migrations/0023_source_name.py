@@ -6,13 +6,15 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0022_merge_0016_is_tg_hidden_flag_0021_auto_20250128_0825'),
+        ("core", "0022_merge_0016_is_tg_hidden_flag_0021_auto_20250128_0825"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='source',
-            name='name',
-            field=models.CharField(blank=True, max_length=255, null=True, verbose_name='Название источника'),
+            model_name="source",
+            name="name",
+            field=models.CharField(
+                blank=True, max_length=255, null=True, verbose_name="Название источника"
+            ),
         ),
     ]

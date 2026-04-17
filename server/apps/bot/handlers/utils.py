@@ -24,7 +24,8 @@ async def chat_in_db(message: Message) -> Optional[Channel]:
     except ObjectDoesNotExist:
         await message.answer("Канал не найден в базе данных.", show_alert=True)
         logger.error(
-            f"Can't find channel {message.chat.id}, while executing __{inspect.stack()[1].function}__ function"
+              f"Can't find channel {message.chat.id}, while executing "
+              f"__{inspect.stack()[1].function}__ function"
         )
         return None
 

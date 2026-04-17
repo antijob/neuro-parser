@@ -19,7 +19,7 @@ class ClientFactory:
         if source.is_telethon:
             logger.debug(f"Creating client for Telegram hidden source: {source}")
             return TelethonClient()
-            
+
         if not source.needs_proxy:
             logger.debug(f"Creating client without proxy for source: {source}")
             return HttpClient()
@@ -28,7 +28,7 @@ class ClientFactory:
             proxy_data = await ProxyManager.get_proxy()
             logger.info(
                 f"Got proxy for source {source}: valid={proxy_data.is_valid}"
-                f"{f', error={proxy_data.error_msg}' if not proxy_data.is_valid else ''}"
+                f"{f', error={proxy_data.error_msg}' if not proxy_data.is_valid else ''}"  # noqa: E501
             )
         except Exception as e:
             logger.error(f"Error getting proxy for source {source}: {str(e)}")

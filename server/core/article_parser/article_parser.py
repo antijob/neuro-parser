@@ -1,5 +1,4 @@
 import logging
-import re
 from typing import Any
 import datetime
 from server.settings.components.predict import INCORRECT_ARTICLE_LENGTH
@@ -45,10 +44,10 @@ class ArticleParser:
                     article.publication_date = publication_date
                 else:
                     article.publication_date = datetime.date.today()
-                    
+
                 # Теперь проверяем корректность текста
                 article.is_incorrect = cls.article_is_incorrect(article)
-                
+
         except ValueError as e:
             logger.warning(
                 f"Value error during postprocessing of article {article.url}: {e}"
@@ -62,10 +61,10 @@ class ArticleParser:
     def article_is_incorrect(cls, article: Article) -> bool:
         """
         Проверяет статью на корректность по длине текста.
-        
+
         Args:
             article: статья для проверки
-            
+
         Returns:
             bool: True если статья некорректна (слишком короткая), False если корректна
         """

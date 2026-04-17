@@ -60,7 +60,7 @@ class ProxyValidator:
         for url in cls.TEST_URLS:
             for attempt in range(cls.MAX_RETRIES):
                 try:
-                    result = await cls._test_proxy_url(
+                    await cls._test_proxy_url(
                         proxy_url, proxy_login, proxy_pass, url
                     )
                     results.append(

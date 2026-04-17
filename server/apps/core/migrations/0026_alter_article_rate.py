@@ -6,13 +6,15 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0025_auto_20250316_0831'),
+        ("core", "0025_auto_20250316_0831"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='article',
-            name='rate',
-            field=models.JSONField(blank=True, default=dict, null=True, verbose_name='Оценка релевантности'),
+            model_name="article",
+            name="rate",
+            field=models.JSONField(
+                blank=True, default=dict, null=True, verbose_name="Оценка релевантности"
+            ),
         ),
     ]

@@ -1,6 +1,5 @@
 import datetime
 import pytest
-from unittest.mock import patch, MagicMock
 
 from server.apps.core.models import Article
 

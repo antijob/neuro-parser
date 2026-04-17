@@ -28,6 +28,6 @@ class CoroutineStatistics:
                 codes_str += f'"{code}": {count}, '
         return (
             f"Coroutine finished. Source: {self.source}\n"
-            f"Task articles: {self.len}. Fetched: {self._fetch}. Bad Codes: {self._bad_code}. Exceptions: {self._exception}"
+            f"Task articles: {self.len}. Fetched: {self._fetch}. Bad Codes: {self._bad_code}. Exceptions: {self._exception}"  # noqa: E501
             f"{codes_str}"
         )

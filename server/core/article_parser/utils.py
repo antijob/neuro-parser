@@ -1,8 +1,6 @@
 # Some functions that used across different modules
 import dateparser
 from datetime import datetime
-from typing import Union
-from urllib.parse import urlparse, urljoin, unquote
 import re
 
 

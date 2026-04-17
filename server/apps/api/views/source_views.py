@@ -69,7 +69,7 @@ class SourceViewSet(viewsets.ModelViewSet):
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
     @swagger_auto_schema(
-        operation_description="Retrieve articles by source URL with optional filtering and sorting",
+        operation_description="Retrieve articles by source URL with optional filtering and sorting",  # noqa: E501
         manual_parameters=[
             openapi.Parameter(
                 "url",
@@ -143,7 +143,7 @@ class SourceViewSet(viewsets.ModelViewSet):
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
     @swagger_auto_schema(
-        operation_description="Retrieve media incidents by source with optional filtering and sorting",
+        operation_description="Retrieve media incidents by source with optional filtering and sorting",  # noqa: E501
         manual_parameters=[
             openapi.Parameter(
                 "limit",
@@ -285,7 +285,7 @@ class SourceViewSet(viewsets.ModelViewSet):
     # @swagger_auto_schema(
     #     operation_description="Retrieve source by URL",
     #     manual_parameters=[
-    #         openapi.Parameter('url', openapi.IN_QUERY, description="URL of the source", type=openapi.TYPE_STRING),
+    #         openapi.Parameter('url', openapi.IN_QUERY, description="URL of the source", type=openapi.TYPE_STRING),  # noqa: E501
     #     ],
     #     responses={200: SourceSerializer}
     # )
@@ -295,7 +295,7 @@ class SourceViewSet(viewsets.ModelViewSet):
     #     try:
     #         url = request.query_params.get('url')
     #         if not url:
-    #             return Response({'error': 'URL is required'}, status=status.HTTP_400_BAD_REQUEST)
+    #             return Response({'error': 'URL is required'}, status=status.HTTP_400_BAD_REQUEST)  # noqa: E501
 
     #         source = Source.objects.get(url=url)
     #         serializer = self.get_serializer(source)

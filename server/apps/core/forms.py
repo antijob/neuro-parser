@@ -25,7 +25,7 @@ class IncidentTypeForm(forms.ModelForm):
                 for folder in os.listdir(MODELS_DIR)
                 if os.path.isdir(os.path.join(MODELS_DIR, folder))
             ]
-        except Exception as _:
+        except Exception:
             folders = []
 
         folders.insert(0, ("", "Без модели"))
@@ -45,9 +45,12 @@ class SourceForm(forms.ModelForm):
             return
         elif country != region.country:
             self.add_error("region", "Регион и страна не соответствуют друг другу")
-        
+
         # Validate that public_tg_channel_link is provided when is_telethon is True
         is_telethon = cleaned_data.get("is_telethon")
         public_tg_channel_link = cleaned_data.get("public_tg_channel_link")
         if is_telethon and not public_tg_channel_link:
-            self.add_error("public_tg_channel_link", "Это поле обязательно, если включен парсинг через телетон.")
+            self.add_error(
+                "public_tg_channel_link",
+                "Это поле обязательно, если включен парсинг через телетон.",
+            )

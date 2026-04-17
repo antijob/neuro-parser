@@ -1,4 +1,3 @@
-import string
 import logging
 
 import nltk
@@ -12,7 +11,7 @@ _cached_stop_words = {}
 
 
 def initialize_nltk_resources():
-    global _nltk_initialized, _cached_stop_words
+    global _nltk_initialized
     if not _nltk_initialized:
         try:
             nltk.download("punkt")

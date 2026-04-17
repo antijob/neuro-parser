@@ -1,4 +1,4 @@
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 from typing import Iterable, Union
 from server.libs.handler import Handler
 
@@ -13,5 +13,7 @@ class ParserBase(Handler):
 
     @classmethod
     @abstractmethod
-    def extract_urls(cls, source: Source, document: str) -> Iterable[Union[str, Article]]:
+    def extract_urls(
+        cls, source: Source, document: str
+    ) -> Iterable[Union[str, Article]]:
         pass

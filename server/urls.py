@@ -11,9 +11,8 @@ This examples uses Django's default media
 files serving technique in development.
 """
 
-from django.conf import settings
 from django.contrib import admin
-from django.urls import include, path
+from django.urls import include, path, re_path
 from django.views.generic import TemplateView
 
 from server.apps.api import urls as api_urls
@@ -22,10 +21,6 @@ from server.apps.api.swagger import schema_view
 from server.apps.core import urls as main_urls
 from server.apps.users import urls as users_urls
 from server.apps.bot import urls as bot_urls
-
-
-from django.views.generic import TemplateView
-from django.urls import re_path
 
 
 admin.autodiscover()

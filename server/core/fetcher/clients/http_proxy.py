@@ -45,7 +45,8 @@ class HttpProxyClient:
         if self._use_proxy and not self._proxy_data:
             self._proxy_data = await ProxyManager.get_proxy()
         logger.info(
-            f"Entered HttpClient context with proxy: {self._proxy_data and self._proxy_data.url}"
+            f"Entered HttpClient context with proxy: "
+            f"{self._proxy_data and self._proxy_data.url}"
         )
         return self
 
@@ -67,7 +68,9 @@ class HttpProxyClient:
                 async with HttpClient() as client:
                     return await client.get(url)
             except (aiohttp.ClientError, BadCodeException) as e:
-                logger.info(f"Direct request to {url} failed: {str(e)}. Will retry with proxy.")
+                logger.info(
+                    f"Direct request to {url} failed: {str(e)}. Will retry with proxy."
+                )
 
         # If we need to use proxy, ensure we have valid proxy data
         if self._use_proxy:
@@ -81,10 +84,12 @@ class HttpProxyClient:
         except (aiohttp.ClientError, ProxyException) as e:
             if retry_count >= self.MAX_PROXY_RETRIES:
                 logger.error(f"Network error occurred while fetching URL {url}")
-                raise ProxyException(f"Failed to fetch {url} after {self.MAX_PROXY_RETRIES} retries") from e
+                raise ProxyException(
+                    f"Failed to fetch {url} after {self.MAX_PROXY_RETRIES} retries"
+                ) from e
 
             logger.warning(
-                f"Request to {url} failed with proxy {self._proxy_data.url}, retrying... ({retry_count + 1}/{self.MAX_PROXY_RETRIES})"
+                f"Request to {url} failed with proxy {self._proxy_data.url}, retrying... ({retry_count + 1}/{self.MAX_PROXY_RETRIES})"  # noqa: E501
             )
             if self._use_proxy:
                 self._proxy_data = await ProxyManager.get_proxy()
@@ -121,7 +126,9 @@ class HttpProxyClient:
         """Make HTTP GET request with automatic proxy management."""
         return await self._get_with_proxy_retry(url)
 
-    async def get_article(self, article: Article, source: Source, articles_to_create: List[Article] = None) -> Article:
+    async def get_article(
+        self, article: Article, source: Source, articles_to_create: List[Article] = None
+    ) -> Article:
         """Fetch and process article content."""
         logger.info(f"Getting article: {article.url}")
         url = URLPreparer.article(article.url)

@@ -1,5 +1,3 @@
-from aiohttp import ClientError
-
 
 class BadCodeException(Exception):
     def __init__(self, code):

@@ -14,7 +14,7 @@ class CommonParser(ParserBase):
     def parse_raw_data(cls, data) -> ArticleData:
         config = Configuration()
         config.strict = False
-        config.enable_image_fetching = False       # быстрее и стабильнее
+        config.enable_image_fetching = False  # быстрее и стабильнее
         config.http_timeout = 10
 
         with Goose(config) as g:
