@@ -23,6 +23,18 @@ def api_client(regular_user):
 
 
 @pytest.fixture
+def staff_client(staff_user):
+    client = APIClient()
+    client.force_authenticate(user=staff_user)
+    return client
+
+
+@pytest.fixture
+def anon_client():
+    return APIClient()
+
+
+@pytest.fixture
 def source():
     return Source.objects.create(url="http://example.com/test-source")
 

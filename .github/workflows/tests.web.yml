@@ -22,7 +22,7 @@ env:
 jobs:
   test:
     name: Run tests
-    runs-on: ["self-hosted", "neuroparser", "production"]
+    runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
@@ -95,6 +95,8 @@ jobs:
       # https://github.com/romeovs/lcov-reporter-action
       - name: Coverage comment
         uses: romeovs/lcov-reporter-action@v0.4.0
+        # The token is read-only for pull requests from forks.
+        continue-on-error: true
         if: always() && github.event_name == 'pull_request'
         with:
           title: "coverage-report"
@@ -105,6 +107,7 @@ jobs:
       # https://github.com/thombashi/pytest-md-report
       - name: Render the report to the PR
         uses: marocchino/sticky-pull-request-comment@v2
+        continue-on-error: true
         if: always()
         with:
           header: test-report

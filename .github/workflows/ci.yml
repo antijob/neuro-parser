@@ -34,8 +34,11 @@ jobs:
     name: Verify
     uses: "./.github/workflows/verify.yml"
 
+  # Jobs below run on the production host. They never run for pull requests,
+  # because pull request code is untrusted.
   clean:
     name: Clean images
+    if: github.event_name != 'pull_request'
     needs:
       - check-docs
       - verify
@@ -52,6 +55,7 @@ jobs:
 
   build:
     name: Build
+    if: github.event_name != 'pull_request'
     needs:
       - clean
     uses: "./.github/workflows/build.yml"
@@ -62,18 +66,19 @@ jobs:
   test:
     name: Run tests
     needs:
-      - build
+      - check-docs
+      - verify
     uses: "./.github/workflows/tests.web.yml"
-    secrets: inherit
     with:
       keepTests: "${{ github.event.inputs.keepTests == 'Always keep'}}"
 
   start_prod:
     name: Start prod
     needs:
+      - build
       - test
     uses: "./.github/workflows/deploy.yml"
-    if: success() && github.ref == 'refs/heads/main'
+    if: success() && github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     secrets: inherit
     with:
       environment: production

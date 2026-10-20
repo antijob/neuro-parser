@@ -91,6 +91,11 @@ External models are called using [Replicate.com](https://replicate.com/), which 
 
 Built on `django-rest-api-framework`, documentation is automatically generated via Swagger and available at the `/swagger-ui` path.
 
+- All endpoints except Swagger require an API token (`Authorization: Token <key>`); anonymous requests get 401.
+- Reading is open to any token holder; create, update and delete require a staff user.
+- Lists are paginated with `limit` (default 50, max 100) and `offset`, and sortable with an allow-listed `order_by`. Details: `docs/API.md`.
+- `predict` and `fetch` for articles are staff-only `POST` requests with `{"url": "..."}` in the body.
+
 ---
 
 ## Infrastructure

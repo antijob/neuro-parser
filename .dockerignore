@@ -254,3 +254,11 @@ models
 
 # PDM
 .pdm-python
+
+# Secrets and runtime state that must never end up in an image
+.telethon/
+certs/
+*.session
+tmp/
+app.log
+.git/

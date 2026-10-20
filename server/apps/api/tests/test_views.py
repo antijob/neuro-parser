@@ -11,14 +11,14 @@ def test_get_sources(api_client):
     assert response_get.status_code == 200
 
     # Проверяем, что данные, возвращаемые API, совпадают с данными в базе
-    assert response_get.json() == []
+    assert response_get.json()["results"] == []
 
 
 @pytest.mark.django_db
-def test_get_article_by_url(api_client, article):
+def test_get_article_by_url(api_client, staff_client, article):
     # Формируем URL запроса с параметром `url`
 
-    response_post = api_client.post(
+    response_post = staff_client.post(
         "/api/articles/",
         {
             "url": "http://example.com/test-article3",

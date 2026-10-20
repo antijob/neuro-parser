@@ -7,13 +7,13 @@ SECURITY WARNING: don't run with debug turned on in production!
 """
 
 from server.settings.components.common import BASE_DIR
-from decouple import config as c
+from decouple import Csv, config as c
 
 c.path = "../../../.env"
 
-DEBUG = c("DEBUG", False)
+DEBUG = c("DEBUG", default=False, cast=bool)
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = c("ALLOWED_HOSTS", default=c("HOST", default=""), cast=Csv())
 
 # Static files:
 # https://docs.djangoproject.com/en/1.11/ref/settings/#std:setting-STATICFILES_DIRS

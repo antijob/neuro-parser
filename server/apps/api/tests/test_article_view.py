@@ -10,9 +10,9 @@ def test_get_article_by_url(api_client, article):
 
 
 @pytest.mark.django_db
-def test_update_article_by_url(api_client, article):
+def test_update_article_by_url(staff_client, article):
     new_title = "Updated Test Article"
-    response = api_client.patch(
+    response = staff_client.patch(
         "/api/articles/by_url/", {"url": article.url, "title": new_title}
     )
 
@@ -30,9 +30,9 @@ def test_get_article_by_url_not_found(api_client):
 
 
 @pytest.mark.django_db
-def test_delete_article_by_url(api_client, article):
+def test_delete_article_by_url(staff_client, article):
     assert article.url == "http://example.com/test-article"
-    response = api_client.delete(
+    response = staff_client.delete(
         "/api/articles/by_url/", {"url": "http://example.com/test-article"}
     )
 

@@ -19,6 +19,10 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",
     ],
+    "DEFAULT_PAGINATION_CLASS": "server.apps.api.pagination.DefaultLimitOffsetPagination",  # noqa: E501
+    "DEFAULT_FILTER_BACKENDS": [
+        "server.apps.api.filters.StrictOrderingFilter",
+    ],
     "DEFAULT_THROTTLE_CLASSES": [
         "server.apps.api.throttling.StaffUserRateThrottle",
         "server.apps.api.throttling.RegularUserRateThrottle",

@@ -3,11 +3,6 @@
 name: Docs check
 
 on:
-  pull_request:
-  push:
-    branches:
-      - stage
-      - main
   workflow_call:
 
 concurrency:
@@ -17,7 +12,7 @@ concurrency:
 jobs:
   check-docs:
     name: Check documentation structure
-    runs-on: ["self-hosted", "neuroparser", "production"]
+    runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
