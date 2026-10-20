@@ -1,0 +1,98 @@
+schema: spec-driven
+
+context: |
+  Language:
+  - Discuss and draft proposals, designs, specs and tasks with the user in Russian.
+  - Before writing or finalizing any artifact file, translate it to English.
+  - All artifacts stored in the repository are written in English.
+
+  Source of truth:
+  - System behavior (requirements and scenarios): openspec/specs/.
+  - Architecture, domain, conventions, security, processes: AGENTS.md and docs/
+    (ARCHITECTURE, DOMAIN, CONVENTIONS, API, BOT, ML, SECURITY, design-docs).
+  - Change plans live only in openspec/changes/. docs/exec-plans/ holds only
+    tech-debt-tracker.md.
+  - Read only the docs relevant to the change. When docs conflict with code,
+    code wins, and the mismatch becomes a task to update specs or docs.
+
+  Stack constraints (pinned versions, upgrades only as a separate change):
+  - Python >=3.9: no 3.10+ syntax (match, X | Y in annotations without
+    from __future__ import annotations).
+  - Django 3.2, DRF 3.13, Celery 5 + Redis, PostgreSQL, aiogram 3.
+  - Dependencies only through PDM (pyproject.toml + pdm.lock), never pip install.
+
+  Architectural invariants:
+  - Source crawling, article parsing, prediction and notification remain
+    separate responsibilities.
+  - Long-running and scheduled work runs in Celery, not in web requests.
+  - Article deduplication happens before incident planning.
+  - Integrations (Telegram, LLM and ML providers, external sources) live at the
+    boundaries; the core does not depend on a provider.
+  - MediaIncident lifecycle statuses change only explicitly; new statuses are
+    added additively.
+
+  Code reuse (strict):
+  - Before writing new code, find existing functions, classes, services,
+    Celery tasks, serializers, utilities in server/libs and test fixtures that
+    already solve the task or part of it, and use them.
+  - New code is allowed only when nothing suitable exists; record the reason in design.
+  - Do not duplicate logic: when similar code is needed a second time, extract
+    the shared part first, then use it in both places.
+  - Extend existing modules and extension points (predictor registry, bot
+    routers, viewsets) instead of creating parallel implementations.
+  - Add new dependencies only when the task cannot be solved with existing ones.
+
+  Security and data:
+  - Secrets only through environment variables (python-decouple); code, docs and
+    artifacts contain variable names only, never values.
+  - Artifacts must not contain real tokens, subscriber texts, Telegram user IDs
+    or any other personal data.
+
+  Testing:
+  - pytest + pytest-django; external HTTP, Telegram and LLM calls are mocked
+    (aioresponses, unittest.mock). Tests require no network and no real models.
+
+rules:
+  proposal:
+    - Stored artifact is written in English
+    - List affected domains (api, core, bot, users) and subsystems (Celery, ML, admin)
+    - State explicitly what is out of scope
+    - If classification behavior changes, describe the impact on incident acceptance and rejection
+  specs:
+    - Stored artifact is written in English
+    - Requirements describe observable behavior, without implementation details
+    - For the API, specify response shape, filtering, pagination and error codes
+    - For the bot, specify commands, callbacks, keyboards and subscription changes
+    - Cover error, retry and status transition scenarios
+  design:
+    - Stored artifact is written in English
+    - Describe DB migrations, backward compatibility and the rollback plan
+    - For Celery tasks, describe idempotency, retries and beat schedule changes
+    - For external integrations, describe timeouts, rate limits and failure behavior
+    - List new environment variables (names only)
+    - Promote cross-cutting architectural decisions that outlive the change to docs/design-docs/
+    - "Include a Reuse section: which existing modules, functions and utilities are used, and a justification for every new component"
+  tasks:
+    - Stored artifact is written in English
+    - Tests go in the same task as the code they cover
+    - DB migrations are a separate task
+    - Each task names the existing code to reuse or extend
+    - Updating affected docs/*.md is a separate task
+    - User documentation in docs/ru/ and docs/en/ is updated in pairs
+    - "The final task runs `bash scripts/verify.sh` and checks its output, not just the exit code: no new flake8 errors, and tests actually ran (not skipped)"
+
+operations:
+  apply:
+    guidance:
+      - Follow docs/CONVENTIONS.md (black 88, isort, flake8)
+      - Do not touch modules outside the scope of the change
+      - Before implementing each task, search for existing code to reuse; do not create duplicates
+      - Do not add new flake8 errors; existing ones in server/ are tolerated
+      - While working, run only targeted pytest for affected modules; run the full `bash scripts/verify.sh` once, after all tasks
+      - Do not commit without an explicit request from the user
+  archive:
+    guidance:
+      - Before archiving, `bash scripts/verify.sh` must pass with no new flake8 errors and no skipped tests
+      - Check that affected docs/*.md are updated
+      - Check that the change does not duplicate existing logic
+      - Briefly summarize the change before finishing

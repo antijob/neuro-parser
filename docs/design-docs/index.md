@@ -8,6 +8,8 @@ Use this index for architecture-level decisions and design rationale.
 - Architecture principles: [architecture-principles.md](architecture-principles.md)
 - Documentation gardening: [doc-gardening.md](doc-gardening.md)
 
+Per-change design lives in `openspec/changes/<change>/design.md`. Promote a decision here only when it outlives the change.
+
 ## Adding a New Design Doc
 
 1. Create a short problem statement.

@@ -33,9 +33,6 @@ REQUIRED_FILES=(
     "docs/design-docs/architecture-principles.md"
     "docs/design-docs/doc-gardening.md"
     "docs/exec-plans/tech-debt-tracker.md"
-    "docs/exec-plans/active/_template.md"
-    "docs/product-specs/index.md"
-    "docs/product-specs/user-flows.md"
     "docs/generated/db-schema.md"
     "docs/references/llm-references.md"
 )
@@ -57,8 +54,6 @@ REQUIRED_DIRS=(
     "docs/agents"
     "docs/design-docs"
     "docs/exec-plans"
-    "docs/exec-plans/active"
-    "docs/product-specs"
     "docs/generated"
     "docs/references"
     "scripts"

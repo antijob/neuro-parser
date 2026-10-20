@@ -24,7 +24,7 @@ This project processes articles from media sources, predicts incident relevance,
 2. Candidate links are fetched and article content is extracted.
 3. Parsed articles are normalized and deduplicated.
 4. Predictors evaluate article text against active incident types.
-5. Accepted incidents are persisted and routed to subscribed Telegram channels.
+5. Incidents above the prediction threshold are persisted as unprocessed and immediately routed to subscribed Telegram channels; analyst review happens afterwards.
 
 ## Architectural Intent
 

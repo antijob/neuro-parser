@@ -9,6 +9,8 @@ Read [AGENTS.md](../AGENTS.md) first. Use it as a short map and follow links to 
 
 Primary workflow reference: [docs/agents/development-workflow.md](../docs/agents/development-workflow.md)
 
+If the task has an OpenSpec change in `openspec/changes/`, implement it by following that change's `tasks.md`. Behavior specs live in `openspec/specs/`.
+
 When asked to implement a feature:
 
 1. **Implement** — make all necessary code changes for the task

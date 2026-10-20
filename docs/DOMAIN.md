@@ -23,7 +23,8 @@ Typical status progression:
 
 - Incident types are active/inactive and shape prediction scope.
 - Predictions output confidence/rate used for acceptance decisions.
-- Accepted incidents are used for notifications and API consumers.
+- Incidents created by prediction are sent to matching subscribers right away, before analyst review.
+- Analyst status changes (accept, reject) do not trigger notifications.
 
 ## Domain Rules
 

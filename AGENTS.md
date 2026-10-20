@@ -36,6 +36,8 @@ Start here, then read only what is needed for the current task:
 - Feature workflow for this repository: [docs/agents/development-workflow.md](docs/agents/development-workflow.md)
 - Capability-oriented repository navigation: [docs/agents/repository-map.md](docs/agents/repository-map.md)
 - Documentation maintenance rules: [docs/agents/documentation-maintenance.md](docs/agents/documentation-maintenance.md)
+- Spec-driven changes (OpenSpec): [openspec/config.yaml](openspec/config.yaml), start with `/opsx:propose`
+- Behavior specs: [openspec/specs/](openspec/specs/)
 
 ## Notes
 
